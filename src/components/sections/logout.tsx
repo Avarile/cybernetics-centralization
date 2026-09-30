@@ -47,6 +47,11 @@ export function Logout() {
                   mcp integration
                 </a>
               </li>
+              <li>
+                <a href="/exocortex" className="underline decoration-line underline-offset-4 hover:text-accent">
+                  exocortex — the big idea
+                </a>
+              </li>
               <li className="text-dim">
                 press <kbd className="text-accent">:</kbd> anywhere for the command palette
               </li>

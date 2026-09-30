@@ -24,6 +24,7 @@ const ITEMS: Item[] = [
   { cmd: "crt on", hint: "scanlines + glow", run: () => toggleCrt("on") },
   { cmd: "crt off", hint: "plain screen", run: () => toggleCrt("off") },
   { cmd: "blog", hint: host(SITE_URL), run: () => window.open(SITE_URL, "_blank", "noopener,noreferrer") },
+  { cmd: "exocortex", hint: "what's the big idea?", run: () => { window.location.href = "/exocortex"; } },
 ];
 
 function isTyping(el: EventTarget | null) {
