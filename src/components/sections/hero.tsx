@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { SITE_URL, type ModuleId } from "@/lib/content";
+import type { ModuleId } from "@/lib/content";
 import { ScrambleText } from "../tui/scramble-text";
 import { Topology } from "../tui/topology";
 import { TuiButton } from "../tui/tui-button";
@@ -58,7 +58,7 @@ export function Hero({ logoWide, logoNarrow }: { logoWide: string; logoNarrow: s
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
-              <TuiButton href={SITE_URL} label="Get started" primary external />
+              <TuiButton href="/register" label="Register for early access" primary />
               <TuiButton href="#shell" label="Try the shell" />
               <TuiButton href="#know" label="How it works" />
             </div>

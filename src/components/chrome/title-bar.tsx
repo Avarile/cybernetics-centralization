@@ -27,6 +27,12 @@ export function TitleBar() {
           <span className="text-dim">: </span>
           <span className="text-data">{path}</span>
         </p>
+        <a
+          href="/register"
+          className="bg-accent px-1.5 font-semibold text-accent-fg transition-colors hover:bg-fg hover:text-bg"
+        >
+          [register<span className="hidden sm:inline"> — early access</span>]
+        </a>
         <button
           type="button"
           onClick={() => toggleTheme()}

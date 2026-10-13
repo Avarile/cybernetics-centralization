@@ -12,7 +12,7 @@ export function Logout() {
           else plugs in when you&apos;re ready.
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
-          <TuiButton href={SITE_URL} label="Get started" primary external />
+          <TuiButton href="/register" label="Register for early access" primary />
           <TuiButton href={SITE_URL} label="Read the blog" external />
         </div>
       </div>

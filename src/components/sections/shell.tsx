@@ -30,6 +30,7 @@ const COMMANDS: Record<string, string> = {
   goto: "goto <section> on this page",
   theme: "theme [phosphor|paper]",
   crt: "crt [on|off]",
+  register: "get early access",
   blog: "read the blog",
   clear: "clear the screen",
 };
@@ -50,7 +51,7 @@ const ALIASES: Record<string, Module["id"]> = {
 
 const OPEN_TARGETS = ["data", "projects", "crm", "agents"];
 
-const SUGGESTIONS = ["help", "cyborgize", "goto modules", "theme", "open projects"];
+const SUGGESTIONS = ["help", "cyborgize", "register", "goto modules", "open projects"];
 
 let nextId = 0;
 
@@ -147,6 +148,10 @@ export function InteractiveShell({ logo, logoNarrow }: { logo: string; logoNarro
         toggleCrt(arg === "on" || arg === "off" ? arg : undefined);
         return print(line, <p>crt: {document.documentElement.dataset.crt === "off" ? "off" : "on"}</p>);
       }
+      case "register":
+      case "signup":
+        window.location.assign("/register");
+        return print(line, <p>opening /register …</p>);
       case "blog":
         window.open(SITE_URL, "_blank", "noopener,noreferrer");
         return print(line, <p>opening {host(SITE_URL)} …</p>);
