@@ -2,7 +2,8 @@ import type { ReactNode } from "react";
 
 /**
  * Small Markdown renderer for our own blog posts (trusted content, no raw HTML).
- * Blocks: ## / ### headings, paragraphs, - and 1. lists, > quotes, | tables |, ---, and `:::cta` lines.
+ * Blocks: ## / ### headings, paragraphs, - and 1. lists (`- [ ] ` items are checkboxes), > quotes, | tables |,
+ * ---, and `:::cta` lines.
  * Inline: **bold**, *italic*, `code`, [text](url).
  */
 export type Slots = { cta: (text: string, key: number) => ReactNode };
@@ -88,9 +89,15 @@ export function renderMarkdown(src: string, slots: Slots): ReactNode[] {
       const List = ordered ? "ol" : "ul";
       out.push(
         <List key={key}>
-          {items.map((t, j) => (
-            <li key={j}>{inline(t)}</li>
-          ))}
+          {items.map((t, j) =>
+            t.startsWith("[ ] ") ? (
+              <li key={j} className="task">
+                {inline(t.slice(4))}
+              </li>
+            ) : (
+              <li key={j}>{inline(t)}</li>
+            ),
+          )}
         </List>,
       );
     } else {

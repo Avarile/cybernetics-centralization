@@ -2,8 +2,9 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { FigureStage } from "./cyborg-figure";
 
-/** Posts are Markdown files in `content/blog/`, read at build time (static export). */
+/** Posts are Markdown files in `content/blog/`, standalone pages in `content/pages/`; read at build time. */
 const DIR = join(process.cwd(), "content", "blog");
+const PAGES_DIR = join(process.cwd(), "content", "pages");
 
 export type Post = {
   slug: string;
@@ -53,6 +54,9 @@ export function getAllPosts(): Post[] {
 }
 
 export const getPost = (slug: string) => getAllPosts().find((p) => p.slug === slug);
+
+/** A standalone page (same front matter as posts), e.g. `getPage("start")`. */
+export const getPage = (name: string) => parse(name, readFileSync(join(PAGES_DIR, `${name}.md`), "utf8"));
 
 /** Signup link for a post; first-touch UTM is stored by the register form. */
 export const registerHref = (post: Post) =>

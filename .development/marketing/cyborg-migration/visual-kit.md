@@ -1,4 +1,4 @@
-# Cyborg Migration: Visual Kit (draft v1, for review)
+# Cyborg Migration: Visual Kit (v1, approved)
 
 Work item: MARKETINGP-2. It keeps the blogs, ads and thumbnails in the same visual language as the video series (`docs/presentation-personal/design.md` §4, `youtube/animations/00-shared-spec.md`).
 
@@ -89,8 +89,9 @@ The blog uses the site's shell, theme tokens and font, so it reads as part of av
 - Diagrams show structure only. Never show values from `data-centre`, amounts, payees, contacts or credentials.
 - No logos, product names, robots, stock people or invented numbers on any visual.
 
-## For avarile to decide
+## Decisions (approved by avarile, 2026-10-14)
 
-1. Are the figure proportions OK? The samples are in `templates/samples/`.
-2. Is the split OK: Inter for creatives, Geist Mono for the blog on the site?
-3. Should the thumbnail plate add the bolder 5 px stroke from `thumbnails.md`? The current plate uses the standard 3 px stroke.
+1. The figure proportions stay as drafted.
+2. Inter for creatives and video; Geist Mono for the blog on the site.
+3. Thumbnails use the standard 3 px stroke.
+4. Video end cards: `size=end` (1080×1920) and `size=endwide` (1920×1080) in the template.
