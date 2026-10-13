@@ -1,5 +1,8 @@
 export const SITE_URL = "https://blog.avarile.com";
 
+/** Where this site is served; absolute URLs for canonical links and OG images. */
+export const BASE_URL = "https://avarile.com";
+
 /** "https://crm.avarile.com" → "crm.avarile.com" */
 export const host = (url: string) => url.replace(/^https?:\/\//, "");
 
