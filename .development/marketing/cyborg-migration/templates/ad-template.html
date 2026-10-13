@@ -1,0 +1,83 @@
+<!doctype html>
+<!--
+  Cyborg Migration ad / OG / thumbnail template (MARKETINGP-2).
+  Render one creative per URL, then screenshot at the canvas size, e.g.:
+    google-chrome --headless=new --allow-file-access-from-files --hide-scrollbars \
+      --window-size=1080,1080 --screenshot=ad-gap-1080sq.png \
+      "file://$PWD/ad-template.html?size=sq&stage=0&hook=The%20gap%20compounds.&sub=AI%20makes%20output%20cheap.%20Your%20record%20can't%20be%20copied."
+  Params: size = og (1200x630) | sq (1080x1080) | story (1080x1920) | thumb (1280x720)
+          stage = 0..3 (figure + migration bar), hook, sub (optional), label (optional, small caps line),
+          cta (default "Start your 4-week migration"), url (default "avarile.com"), bar = 0 to hide the bar
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Cyborg Migration template</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root { --white:#FFFFFF; --g1:#CCCCCC; --g2:#888888; --g3:#444444; --g4:#1A1A1A; --black:#000000; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { background: var(--black); }
+  body { font-family: Inter, "Helvetica Neue", Arial, sans-serif; color: var(--white); overflow: hidden; }
+  .canvas { position: relative; background: var(--black); overflow: hidden; display: grid; }
+  .label { font-size: var(--label); letter-spacing: .22em; text-transform: uppercase; color: var(--g2); font-weight: 600; }
+  .hook { font-size: var(--hook); line-height: 1.02; font-weight: 800; letter-spacing: -.02em; text-wrap: balance; }
+  .sub { font-size: var(--sub); line-height: 1.3; color: var(--g1); font-weight: 400; text-wrap: balance; }
+  .cta { display: inline-flex; align-items: center; gap: .6em; font-size: var(--cta); font-weight: 600; }
+  .cta b { background: var(--white); color: var(--black); padding: .35em .7em; font-weight: 800; }
+  .cta span { color: var(--g2); letter-spacing: .08em; }
+  .figure img { width: 100%; height: auto; display: block; }
+  .bar { display: block; margin: 0 auto; }
+  .stack { display: flex; flex-direction: column; gap: var(--gap); }
+
+  /* 1200x630: text left, figure right */
+  .og { width:1200px; height:630px; grid-template-columns: 1fr 470px; align-items:center; padding: 64px 72px;
+        --label:20px; --hook:76px; --sub:28px; --cta:24px; --gap:26px; }
+  .og .figure { width: 430px; justify-self: end; }
+  /* 1080x1080: figure top, text bottom */
+  .sq { width:1080px; height:1080px; grid-template-rows: 500px 1fr; align-content: space-between; padding: 64px 80px 72px;
+        --label:24px; --hook:92px; --sub:34px; --cta:30px; --gap:28px; }
+  .sq .figure { width: 400px; align-self: center; }
+  /* 1080x1920: bottom 12% (230px) stays clear for platform captions */
+  .story { width:1080px; height:1920px; grid-template-rows: auto auto; align-content: space-between; padding: 150px 80px 290px;
+        --label:28px; --hook:112px; --sub:40px; --cta:34px; --gap:36px; }
+  .story .figure { width: 700px; align-self: center; }
+  /* 1280x720 thumbnail: presenter photo goes in the left 45%, plate in the right 55% */
+  .thumb { width:1280px; height:720px; grid-template-columns: 45% 55%; align-items:center;
+        --label:24px; --hook:150px; --sub:0px; --cta:0px; --gap:12px; }
+  .thumb .photo { height:100%; border-right: 1px dashed var(--g3); display:grid; place-items:center; color: var(--g3); font-size: 22px; letter-spacing:.2em; }
+  .thumb .plate { position: relative; height: 100%; display:grid; place-items:center; }
+  .thumb .figure { width: 520px; opacity: .95; }
+  .thumb .hook { position:absolute; left:-140px; bottom: 60px; font-size: var(--hook); text-transform: uppercase; -webkit-text-stroke: 3px #000; paint-order: stroke fill; }
+  .thumb .sub, .thumb .cta, .thumb .label { display:none; }
+  .print-guides .safe { position:absolute; inset:auto 0 0 0; height:12%; background: repeating-linear-gradient(45deg, #ff000022 0 10px, transparent 10px 20px); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  const q = new URLSearchParams(location.search);
+  const size = q.get("size") || "og";
+  const stage = Math.max(0, Math.min(3, Number(q.get("stage") ?? 3)));
+  const esc = (s) => s.replace(/[&<>"']/g, (c) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[c]);
+  const hook = esc(q.get("hook") || "My memory. Any mind. Closed loops.");
+  const sub = q.get("sub") ? `<p class="sub">${esc(q.get("sub"))}</p>` : "";
+  const label = `<p class="label">${esc(q.get("label") || "Cyborg Migration")}</p>`;
+  const cta = `<p class="cta"><b>${esc(q.get("cta") || "Start your 4-week migration")}</b><span>${esc(q.get("url") || "avarile.com")}</span></p>`;
+  const brand = "../../../../public/brand";
+  const fig = `<div class="figure"><img src="${brand}/cyborg-figure-${stage}of3.svg" alt=""></div>`;
+  const bar = q.get("bar") === "0" ? "" : `<img class="bar" src="${brand}/migration-bar-${stage}of3.svg" width="240" alt="">`;
+  const text = `<div class="stack">${label}<h1 class="hook">${hook}</h1>${sub}${cta}</div>`;
+  const layouts = {
+    og: `${text}<div class="stack">${fig}${bar}</div>`,
+    sq: `<div class="stack" style="justify-items:center">${fig}${bar}</div>${text}`,
+    story: `<div class="stack">${fig}${bar}</div>${text}`,
+    thumb: `<div class="photo">PRESENTER PHOTO</div><div class="plate">${fig}<h1 class="hook">${hook}</h1></div>`,
+  };
+  const guides = q.get("guides") === "1" && size === "story" ? `<div class="safe"></div>` : "";
+  document.getElementById("root").innerHTML =
+    `<div class="canvas ${size} ${guides ? "print-guides" : ""}">${layouts[size] ?? layouts.og}${guides}</div>`;
+</script>
+</body>
+</html>

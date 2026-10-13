@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist_Mono } from "next/font/google";
+import { BASE_URL } from "@/lib/content";
 import "./globals.css";
 
 const geistMono = Geist_Mono({
@@ -8,6 +9,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(BASE_URL),
   title: "Cybernetics — Cyborgize yourself, agentically",
   description:
     "Cybernetics turns what you know and what you do into structured data you own — ready for any AI agent over MCP.",
