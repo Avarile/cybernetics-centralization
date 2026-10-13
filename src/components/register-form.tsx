@@ -223,7 +223,15 @@ export function RegisterForm() {
             <span className="text-accent">3.</span> connect your agent over MCP and start cyborgizing.
           </li>
         </ol>
+        <p className="mt-4 text-dim"># while you wait</p>
+        <p className="mt-1">
+          your 4-week migration checklist and starter template are ready:{" "}
+          <a href="/start" className="text-accent underline decoration-line underline-offset-4 hover:decoration-accent">
+            /start
+          </a>
+        </p>
         <div className="mt-6 flex flex-wrap gap-3">
+          <TuiButton href="/start" label="open the checklist" primary />
           <TuiButton href="/" label="← back home" />
           <TuiButton href="/exocortex" label="the big idea" />
         </div>

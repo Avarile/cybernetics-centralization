@@ -1,4 +1,4 @@
-# Cyborg Migration: Messaging Kit (draft v1, for review)
+# Cyborg Migration: Messaging Kit (v1, approved)
 
 Work item: MARKETINGP-1. Every blog post, ad and social post in the campaign draws from this page. If a line isn't here, check it against the tone guards before using it.
 
@@ -86,7 +86,7 @@ Every blog post carries the CTA twice: one inline block after the "why it matter
 
 ## 7. UTM convention
 
-Base: `https://avarile.com/register` (domain pending avarile's confirmation: the site config says `blog.avarile.com`)
+Base: `https://avarile.com/register`
 
 ```
 ?utm_source=<platform>&utm_medium=<medium>&utm_campaign=cyborg-migration&utm_content=<piece-id>
@@ -132,8 +132,8 @@ Don't:
 
 **Bio line:** Turning myself into a cyborg, one system at a time. My memory. Any mind. Closed loops.
 
-## 10. Open questions for avarile
+## 10. Decisions (approved by avarile, 2026-10-14)
 
-1. Canonical domain for the CTA: `avarile.com/register` or `blog.avarile.com/register`?
-2. Should "Cybernetics" (the product) appear in the campaign copy, or stay on the /register page only? Draft assumption: the campaign is about the method, and /register introduces the product.
-3. Any [YOU] lines you're happy to have quoted in ads (e.g. "I couldn't tell you where my money went last quarter")?
+1. Canonical CTA domain: `https://avarile.com/register`.
+2. "Cybernetics" (the product) is named on `/register` only. Campaign copy is about the method.
+3. No [YOU] lines are quoted in ads. First-person stories stay in blog posts and videos.

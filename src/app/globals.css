@@ -258,6 +258,17 @@ body {
   color: var(--accent);
 }
 
+.prose-tui ul > li.task::before {
+  content: "[ ]";
+  margin-left: -2.2em;
+  margin-right: 0.6em;
+  color: var(--dim);
+}
+
+.prose-tui ul:has(> li.task) {
+  padding-left: 2.2em;
+}
+
 .prose-tui ol {
   list-style: decimal;
 }
@@ -334,4 +345,36 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-size: 11px;
+}
+
+/* ---------- Print (the /start checklist PDF) ---------- */
+
+@media print {
+  :root,
+  [data-theme="dark"],
+  .term {
+    --bg: #ffffff;
+    --bg-alt: #f4f4f4;
+    --fg: #111111;
+    --dim: #555555;
+    --line: #cccccc;
+    --accent: #111111;
+    --accent-fg: #ffffff;
+    --glow: 0;
+  }
+
+  .no-print,
+  .crt-layer {
+    display: none !important;
+  }
+
+  .prose-tui h2 {
+    break-after: avoid;
+  }
+
+  .prose-tui li,
+  .prose-tui tr,
+  .prose-tui blockquote {
+    break-inside: avoid;
+  }
 }
