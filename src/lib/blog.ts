@@ -47,10 +47,13 @@ function parse(slug: string, raw: string): Post {
 }
 
 export function getAllPosts(): Post[] {
-  return readdirSync(DIR)
+  const posts = readdirSync(DIR)
     .filter((f) => f.endsWith(".md"))
-    .map((f) => parse(f.replace(/\.md$/, ""), readFileSync(join(DIR, f), "utf8")))
-    .sort((a, b) => b.date.localeCompare(a.date));
+    .map((f) => parse(f.replace(/\.md$/, ""), readFileSync(join(DIR, f), "utf8")));
+  // `[YOU: …]` marks facts only the author can fill in; never publish one unfilled.
+  const unfilled = posts.find((p) => !p.draft && p.body.includes("[YOU"));
+  if (unfilled) throw new Error(`content/blog/${unfilled.slug}.md is published but still has a [YOU: …] placeholder`);
+  return posts.sort((a, b) => b.date.localeCompare(a.date));
 }
 
 export const getPost = (slug: string) => getAllPosts().find((p) => p.slug === slug);
