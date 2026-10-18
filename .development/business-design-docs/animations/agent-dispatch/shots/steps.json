@@ -1,0 +1,5 @@
+[["wait",800],["eval","window.__figure.draw(0.2)"],["shot","shots/t00.png"],
+["eval","window.__figure.draw(14.6)"],["shot","shots/t14.png"],
+["eval","window.__figure.draw(18.3)"],["shot","shots/t18.png"],
+["eval","window.__figure.draw(22.4)"],["shot","shots/t22.png"],
+["eval","window.__figure.draw(28.2)"],["shot","shots/t28.png"]]

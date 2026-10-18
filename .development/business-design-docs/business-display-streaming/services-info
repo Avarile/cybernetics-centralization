@@ -1,0 +1,21 @@
+### Cybernetics Data Centre Services Info
+Code repo: /home/avarile/Documents/codeRepo/TypeScript/cybernetics-group/cybernetics-data-centre
+K3s deployment: `ssh K3s-Server` in k3s cluster: cybernetics
+
+### Cybernetics Project Management Services Info
+Code repo: /home/avarile/Documents/codeRepo/TypeScript/cybernetics-group/cybernetics-projects
+K3s deployment: `ssh K3s-Server` in k3s cluster: all plane NameSpace
+
+### Cybernetics CRM Services Info
+Code repo: /home/avarile/Documents/codeRepo/TypeScript/cybernetics-group/cybernetics-crm
+K3s deployment: `ssh K3s-Server` in k3s cluster: all twenty NameSpace
+
+### Cybernetics AI Agentic Services Info
+Code repo: /home/avarile/Documents/codeRepo/TypeScript/cybernetics-group/cybernetics-agents
+K3s deployment: None, due to resource constraints, but can be deployed in the future if needed.
+Local deployment: localhost:3080 and running.
+
+### Cybernetics Centralization Services Info
+Code repo: /home/avarile/Documents/codeRepo/TypeScript/cybernetics-group/cybernetics-centralization
+A static page deployed on the K3s server, accessible from `https://avarile.com`
+This is the homepage 

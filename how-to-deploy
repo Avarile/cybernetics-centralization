@@ -1,0 +1,3 @@
+run `pnpm run build`
+
+Then scp the `out` folder to the server `ssh K3s-server`, path `/home/avarile/projects/cybernetics-centralization`
