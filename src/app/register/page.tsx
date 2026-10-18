@@ -6,6 +6,11 @@ import { modules, tone } from "@/lib/content";
 export const metadata: Metadata = {
   title: "Register — Cybernetics",
   description: "Register for early access to Cybernetics: your knowledge, projects and relationships, ready for any AI agent over MCP.",
+  openGraph: {
+    title: "Start your 4-week Cyborg Migration",
+    description: "One memory you own, any AI plugged into it, and a weekly loop that learns. No tech skills needed.",
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 const steps = [
