@@ -68,7 +68,7 @@ export const modules: Module[] = [
     name: "CRM",
     repo: "cybernetics-crm",
     url: "https://crm.avarile.com",
-    role: "Who you work with",
+    role: "Who your clients are",
     tagline: "Your relationships, remembered.",
     description:
       "For anyone running a private business: people, companies, deals, notes and follow-ups — the social graph around your work.",
@@ -171,19 +171,7 @@ export type TranscriptLine =
   | { kind: "tool"; module: ModuleId; server: string; tool: string; detail: string }
   | { kind: "reply"; text: string };
 
-export const transcript: TranscriptLine[] = [
-  { kind: "prompt", text: "Plan my Q4 product launch using how I shipped the last one." },
-  { kind: "tool", module: "data", server: "data", tool: "query_records", detail: "how-to: “launch checklist” · 1 match" },
-  { kind: "tool", module: "data", server: "data", tool: "get_record_neighbors", detail: "3 linked references" },
-  { kind: "tool", module: "crm", server: "crm", tool: "find_many_people", detail: "tag: beta-tester · 12 people" },
-  { kind: "tool", module: "proj", server: "projects", tool: "create_work_items", detail: "project “Q4 Launch” · 7 tasks" },
-  {
-    kind: "reply",
-    text: "Created “Q4 Launch” with 7 tasks from your launch checklist. Each task links its reference docs, and the beta outreach task lists your 12 testers.",
-  },
-];
-
-/** Modules that expose an MCP server for agents to connect to (Agents is the client). */
+/** Modules that expose an MCP server for agents to connect to. */
 const mcpServers = (["data", "proj", "crm"] as const).map((id) => {
   const m = modules.find((mod) => mod.id === id)!;
   return { name: m.repo.replace("-centre", ""), endpoint: `${m.url}/mcp` };
@@ -192,31 +180,188 @@ const mcpServers = (["data", "proj", "crm"] as const).map((id) => {
 const pad = (s: string, n: number) => s + " ".repeat(Math.max(0, n - s.length));
 const width = Math.max(...mcpServers.map((s) => s.name.length));
 
-export const mcpSnippets = [
+/** Claude and ChatGPT add remote MCP servers through the same settings form. */
+const connectorForm = (path: string) =>
+  `# ${path}\n\n` +
+  mcpServers.map((s) => `name: ${s.name}\nurl:  ${s.endpoint}`).join("\n\n");
+
+export type Consumer = {
+  id: string;
+  /** tmux tab label */
+  tab: string;
+  name: string;
+  /** A brand mark from `BrandIcon`, or `agent` for our own Agentic Platform. */
+  icon: "claude" | "claudeCode" | "codex" | "openai" | "mcp" | "agent";
+  /** What kind of client it is, e.g. "terminal · coding agent". */
+  kind: string;
+  headline: string;
+  line: string;
+  uses: string[];
+  /** Highlighted chips under the uses, e.g. skills. */
+  chips?: string[];
+  session: TranscriptLine[];
+  connect: { file: string; code: string };
+};
+
+/**
+ * Section 4: the LLM platforms that consume the Data Base, Project Management and
+ * CRM over MCP. The Agentic Platform is one of them, not the only one.
+ */
+export const consumers: Consumer[] = [
   {
-    id: "claude",
-    label: "Claude Code",
-    file: "terminal",
-    code: mcpServers
-      .map((s) => `claude mcp add --transport http ${s.name} \\\n  ${s.endpoint}`)
-      .join("\n\n"),
+    id: "claude-code",
+    tab: "claude-code",
+    name: "Claude Code",
+    icon: "claudeCode",
+    kind: "terminal · coding agent",
+    headline: "Pick up a task, ship it, close the loop.",
+    line: "Claude Code claims work from Project Management, follows the how-to in your Data Base, and records what it did when it's done.",
+    uses: [
+      "Claims work items assigned to it",
+      "Follows your how-tos and runbooks",
+      "Comments on the work item and closes it",
+    ],
+    session: [
+      { kind: "prompt", text: "Pick up my next task and ship it the way we always deploy." },
+      { kind: "tool", module: "proj", server: "projects", tool: "list_work_items", detail: "assignee: claude · WEB-12 “ship v2 api”" },
+      { kind: "tool", module: "data", server: "data", tool: "query_records", detail: "how-to: “deploy to production” · 1 match" },
+      { kind: "tool", module: "proj", server: "projects", tool: "add_work_item_comment", detail: "WEB-12 · checklist 6/6 ✓" },
+      { kind: "tool", module: "proj", server: "projects", tool: "update_work_item", detail: "WEB-12 → done" },
+      { kind: "reply", text: "Shipped WEB-12 by your deploy how-to: all 6 checklist steps passed. The run log is on the work item, now marked done." },
+    ],
+    connect: {
+      file: "setup.sh",
+      code: mcpServers
+        .map((s) => `claude mcp add --transport http ${s.name} \\\n  ${s.endpoint}`)
+        .join("\n\n"),
+    },
   },
   {
-    id: "cursor",
-    label: "Cursor",
-    file: ".cursor/mcp.json",
-    code: `{
+    id: "codex",
+    tab: "codex",
+    name: "Codex",
+    icon: "codex",
+    kind: "terminal · coding agent",
+    headline: "Fix the bug. Keep the lesson.",
+    line: "Codex reads the bug report from Project Management, checks what you already know about it, and files the fix back as knowledge for next time.",
+    uses: [
+      "Reads bug reports and their linked references",
+      "Searches past fixes before writing new code",
+      "Saves new lessons to the Data Base",
+    ],
+    session: [
+      { kind: "prompt", text: "Fix WEB-42 and write down what caused it." },
+      { kind: "tool", module: "proj", server: "projects", tool: "get_work_item", detail: "WEB-42 “webhook retries duplicate invoices”" },
+      { kind: "tool", module: "data", server: "data", tool: "query_records", detail: "ref: “stripe webhooks” · 2 matches" },
+      { kind: "tool", module: "data", server: "data", tool: "create_records", detail: "how-to: “idempotent webhook handlers”" },
+      { kind: "tool", module: "proj", server: "projects", tool: "update_work_item", detail: "WEB-42 → in review" },
+      { kind: "reply", text: "Fixed: the handler now keys on the Stripe event id. I saved the cause and the pattern as a how-to and moved WEB-42 to review." },
+    ],
+    connect: {
+      file: "~/.codex/config.toml",
+      code: mcpServers.map((s) => `[mcp_servers.${s.name}]\nurl = "${s.endpoint}"`).join("\n\n"),
+    },
+  },
+  {
+    id: "chatgpt",
+    tab: "chatgpt",
+    name: "ChatGPT",
+    icon: "openai",
+    kind: "chat · web and mobile",
+    headline: "Ask about your week, from anywhere.",
+    line: "From your phone, ChatGPT can see your contacts, deals and open tasks, and leave notes where they belong.",
+    uses: [
+      "Answers questions across all three platforms",
+      "Finds people and deals in the CRM",
+      "Leaves notes on CRM records",
+    ],
+    session: [
+      { kind: "prompt", text: "Who should I follow up with this week?" },
+      { kind: "tool", module: "crm", server: "crm", tool: "find_many_people", detail: "last contact > 14 days · 5 people" },
+      { kind: "tool", module: "proj", server: "projects", tool: "search_work_items", detail: "“follow up” · 3 open" },
+      { kind: "tool", module: "crm", server: "crm", tool: "create_one_note", detail: "person#88 · “check in on renewal”" },
+      { kind: "reply", text: "Five people are overdue a follow-up, and three of them have open tasks. Start with Dana, whose renewal is in nine days. I left a note on that record." },
+    ],
+    connect: { file: "chatgpt-connectors", code: connectorForm("Settings → Apps & Connectors → Create") },
+  },
+  {
+    id: "claude-cowork",
+    tab: "claude-cowork",
+    name: "Claude Cowork",
+    icon: "claude",
+    kind: "desktop · knowledge work",
+    headline: "Hand off the busywork.",
+    line: "Claude Cowork works through longer jobs on your desktop: it reads the cycle, the notes and the people involved, and writes the report.",
+    uses: [
+      "Runs multi-step jobs on your desktop",
+      "Turns finished work into reports",
+      "Stores reports with the rest of your records",
+    ],
+    session: [
+      { kind: "prompt", text: "Write this week's report and file it." },
+      { kind: "tool", module: "proj", server: "projects", tool: "list_cycle_work_items", detail: "cycle 42 · 14 done · 3 carried over" },
+      { kind: "tool", module: "data", server: "data", tool: "query_records", detail: "notes this week · 9 records" },
+      { kind: "tool", module: "crm", server: "crm", tool: "find_many_people", detail: "touched this week · 6 people" },
+      { kind: "tool", module: "data", server: "data", tool: "create_records", detail: "report: “week 42”" },
+      { kind: "reply", text: "Filed “Week 42”: 14 items shipped, 3 carried over with reasons, and 6 conversations summarised. It's linked to the cycle it covers." },
+    ],
+    connect: { file: "claude-connectors", code: connectorForm("Settings → Connectors → Add custom connector") },
+  },
+  {
+    id: "agents",
+    tab: "cybernetics-agents",
+    name: "Agentic Platform",
+    icon: "agent",
+    kind: "cybernetics · custom agents",
+    headline: "Your own agents, on any model.",
+    line: "Our own platform: build custom agents for your jobs, give them skills for the harder ones, and run them on whichever model you choose.",
+    uses: [
+      "Custom agents that consume all three platforms over MCP",
+      "Skills for complex, repeatable tasks",
+      "Any model, any provider: your data stays yours",
+    ],
+    chips: ["weekly-report", "launch-planner", "pdca-retro", "statement-sorter"],
+    session: [
+      { kind: "prompt", text: "Plan my Q4 product launch using how I shipped the last one." },
+      { kind: "tool", module: "data", server: "data", tool: "query_records", detail: "how-to: “launch checklist” · 1 match" },
+      { kind: "tool", module: "data", server: "data", tool: "get_record_neighbors", detail: "3 linked references" },
+      { kind: "tool", module: "crm", server: "crm", tool: "find_many_people", detail: "tag: beta-tester · 12 people" },
+      { kind: "tool", module: "proj", server: "projects", tool: "create_work_items", detail: "project “Q4 Launch” · 7 tasks" },
+      { kind: "reply", text: "Created “Q4 Launch” with 7 tasks from your launch checklist. Each task links its reference docs, and the beta outreach task lists your 12 testers." },
+    ],
+    connect: {
+      file: "agents.yaml",
+      code: `mcpServers:
+${mcpServers.map((s) => `  ${s.name}:\n    type: streamable-http\n    url: ${s.endpoint}`).join("\n")}`,
+    },
+  },
+  {
+    id: "any",
+    tab: "any-mcp-client",
+    name: "Any MCP client",
+    icon: "mcp",
+    kind: "cursor · gemini · vs code · …",
+    headline: "Bring whatever comes next.",
+    line: "Every platform speaks MCP, so any client that supports it gets the same memory. Switch tools without switching data.",
+    uses: [
+      "One standard protocol, no lock-in",
+      "Per-user tokens decide what each client sees",
+      "The same records, whichever model reads them",
+    ],
+    session: [
+      { kind: "prompt", text: "What do I already know about rate limiting?" },
+      { kind: "tool", module: "data", server: "data", tool: "query_records", detail: "“rate limit” · 4 records" },
+      { kind: "tool", module: "data", server: "data", tool: "get_record_neighbors", detail: "2 projects · 1 incident" },
+      { kind: "reply", text: "You have four notes on it, including a token-bucket how-to used by two projects, and a retro from the March incident that changed your defaults." },
+    ],
+    connect: {
+      file: ".cursor/mcp.json",
+      code: `{
   "mcpServers": {
 ${mcpServers.map((s) => `    ${pad(`"${s.name}":`, width + 3)} { "url": "${s.endpoint}" }`).join(",\n")}
   }
 }`,
-  },
-  {
-    id: "agents",
-    label: "Cybernetics Agents",
-    file: "agents.yaml",
-    code: `mcpServers:
-${mcpServers.map((s) => `  ${s.name}:\n    type: streamable-http\n    url: ${s.endpoint}`).join("\n")}`,
+    },
   },
 ];
 
@@ -231,10 +376,10 @@ export const sections = [
   { id: "know", win: "know", path: "~/know-do" },
   { id: "modules", win: "platforms", path: "/opt/cybernetics" },
   { id: "mcp", win: "agentic", path: "~/.config/mcp" },
-  { id: "log", win: "log", path: "/var/log" },
-  { id: "who", win: "who", path: "/home" },
-  { id: "compose", win: "compose", path: "~/stack" },
-  { id: "shell", win: "shell", path: "~" },
+  // { id: "log", win: "log", path: "/var/log" },
+  // { id: "who", win: "who", path: "/home" },
+  // { id: "compose", win: "compose", path: "~/stack" },
+  // { id: "shell", win: "shell", path: "~" },
   { id: "logout", win: "logout", path: "~" },
 ] as const;
 

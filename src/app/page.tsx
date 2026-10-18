@@ -31,10 +31,10 @@ export default function Home() {
         <KnowDo />
         <Modules />
         <Mcp />
-        <Log />
-        <Who />
-        <Compose />
-        <InteractiveShell logo={LOGO_SMALL} logoNarrow={LOGO_NARROW} />
+        {/* <Log /> */}
+        {/* <Who /> */}
+        {/* <Compose /> */}
+        {/* <InteractiveShell logo={LOGO_SMALL} logoNarrow={LOGO_NARROW} /> */}
         <Logout />
       </main>
       <StatusBar />
