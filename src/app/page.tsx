@@ -16,6 +16,7 @@ import { Who } from "@/components/sections/who";
 import { figletText } from "@/lib/figlet";
 
 // ASCII art is rendered once at build time.
+const LOGO_WIDE = figletText("CYBERNETICS", "ANSI Shadow");
 const LOGO_NARROW = figletText("CYBERNETICS", "Calvin S");
 const LOGO_SMALL = figletText("cybernetics", "Small");
 
@@ -25,7 +26,7 @@ export default function Home() {
       <BootScreen />
       <TitleBar />
       <main className="pt-9 pb-7">
-        <Hero logo={LOGO_SMALL} />
+        <Hero logo={LOGO_WIDE} />
         {/* <Diff /> */}
         <Principles />
         <KnowDo />

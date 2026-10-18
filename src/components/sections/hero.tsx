@@ -4,6 +4,7 @@ import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState, type KeyboardEvent } from "react";
 import { figures, tone, type Figure } from "@/lib/content";
+import { AsciiLogo } from "../tui/ascii-logo";
 import { FigureEmbed } from "../tui/figure-embed";
 import { TuiButton } from "../tui/tui-button";
 
@@ -93,12 +94,7 @@ export function Hero({ logo }: { logo: string }) {
         <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] lg:gap-14">
           {/* Left: the pitch */}
           <div className="min-w-0">
-            <pre
-              aria-hidden
-              className="glow text-[10px] leading-tight text-accent sm:text-[12px]"
-            >
-              {logo}
-            </pre>
+            <AsciiLogo art={logo} />
             <h1 id="top-title" className="sr-only">
               Cyborgize yourself, agentically.
             </h1>

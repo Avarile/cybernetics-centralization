@@ -366,24 +366,31 @@ ${mcpServers.map((s) => `    ${pad(`"${s.name}":`, width + 3)} { "url": "${s.end
 ];
 
 /**
- * Every section of the page, in order. Drives the tmux status bar, the title-bar
- * path and the command palette.
+ * Every section component, in page order. `hidden` parks a section that is not
+ * rendered in `page.tsx` while keeping its id valid for `SectionId`.
  */
-export const sections = [
+const allSections = [
   { id: "top", win: "boot", path: "~" },
-  // { id: "diff", win: "diff", path: "~/problem" },
+  { id: "diff", win: "diff", path: "~/problem", hidden: true },
   { id: "principles", win: "principles", path: "~/principles" },
   { id: "know", win: "know", path: "~/know-do" },
   { id: "modules", win: "platforms", path: "/opt/cybernetics" },
   { id: "mcp", win: "agentic", path: "~/.config/mcp" },
-  // { id: "log", win: "log", path: "/var/log" },
-  // { id: "who", win: "who", path: "/home" },
-  // { id: "compose", win: "compose", path: "~/stack" },
-  // { id: "shell", win: "shell", path: "~" },
+  { id: "log", win: "log", path: "/var/log", hidden: true },
+  { id: "who", win: "who", path: "/home", hidden: true },
+  { id: "compose", win: "compose", path: "~/stack", hidden: true },
+  { id: "shell", win: "shell", path: "~", hidden: true },
   { id: "logout", win: "logout", path: "~" },
 ] as const;
 
-export type SectionId = (typeof sections)[number]["id"];
+export type SectionId = (typeof allSections)[number]["id"];
+
+/**
+ * The visible sections of the page, in order. Drives the tmux status bar, the
+ * title-bar path and the command palette.
+ */
+export const sections: readonly { id: SectionId; win: string; path: string }[] =
+  allSections.filter((s) => !("hidden" in s && s.hidden));
 
 /** The `cyborgize` boot script: one line per module, linked in this order. */
 export const bootSequence: { id: ModuleId; label: string; detail: string }[] = [

@@ -85,6 +85,22 @@ body {
   text-shadow: none;
 }
 
+/* ---------- Hero logo: a light band sweeping across the glyphs ---------- */
+
+.logo-glint {
+  background: linear-gradient(100deg, var(--accent) 42%, var(--line) 50%, var(--accent) 58%) 0 0 / 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: logo-glint 7s ease-in-out 1.5s infinite;
+}
+
+/* 100% → 0% moves the band left to right; it rests off-screen most of the cycle. */
+@keyframes logo-glint {
+  0%, 75% { background-position: 100% 0; }
+  100% { background-position: 0 0; }
+}
+
 /* ---------- CRT overlay ---------- */
 
 .crt-scanlines {
@@ -179,6 +195,7 @@ body {
     transition-duration: 0.001ms !important;
   }
   .crt-roll::after { display: none; }
+  .logo-glint { animation: none; }
 }
 
 /* ---------- Blog post body (Markdown from content/blog) ---------- */
@@ -332,6 +349,11 @@ body {
     --accent: #111111;
     --accent-fg: #ffffff;
     --glow: 0;
+  }
+
+  .logo-glint {
+    background: none;
+    color: var(--accent);
   }
 
   .no-print,
