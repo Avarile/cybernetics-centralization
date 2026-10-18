@@ -26,7 +26,7 @@ export default function Home() {
       <TitleBar />
       <main className="pt-9 pb-7">
         <Hero logo={LOGO_SMALL} />
-        <Diff />
+        {/* <Diff /> */}
         <Principles />
         <KnowDo />
         <Modules />

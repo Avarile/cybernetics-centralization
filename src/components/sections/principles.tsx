@@ -34,7 +34,7 @@ export function Principles() {
       <ul className="mt-12 max-w-[72ch] space-y-3 text-[13px]">
         <li className="text-fg">Lean by design.</li>
         <li className="text-dim">
-          - Only an LLM and your database. No repos, apps or governance layers
+          - Only an LLM and your database. No extra repos, apps or governance layers
           to run.
         </li>
         <li className="text-dim">

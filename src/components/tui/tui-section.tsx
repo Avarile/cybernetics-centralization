@@ -105,7 +105,7 @@ export function TuiSection({
           </span>
           <ScrambleText text={title} replayKey={phase === "typing" ? 1 : undefined} />
         </h2>
-        {intro && <p className="mt-4 max-w-[72ch] text-dim text-pretty">{intro}</p>}
+        {intro && <p className="mt-4 text-dim text-pretty">{intro}</p>}
 
         <p className="glow mt-8 flex flex-wrap gap-x-2 text-sm">
           <Prompt path={path} />

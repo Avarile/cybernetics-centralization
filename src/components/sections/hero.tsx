@@ -5,7 +5,6 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState, type KeyboardEvent } from "react";
 import { figures, tone, type Figure } from "@/lib/content";
 import { FigureEmbed } from "../tui/figure-embed";
-import { ScrambleText } from "../tui/scramble-text";
 import { TuiButton } from "../tui/tui-button";
 
 type Slide = {
@@ -24,7 +23,7 @@ const SLIDES: Slide[] = [
     tab: "digitalize",
     stage: "01 · capture",
     color: "var(--accent)",
-    headline: "Turn yourself into data.",
+    headline: "Turn every aspect of yourself into data.",
     line: "What you know and do is persisted, day after day, until a complete, readable version of you exists.",
   },
   {
@@ -67,7 +66,6 @@ export function Hero({ logo }: { logo: string }) {
   const reduce = useReducedMotion();
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [cyborg, setCyborg] = useState(false);
   const slide = SLIDES[index];
 
   // Auto-advance until the visitor touches the carousel; hover or focus pauses it.
@@ -79,12 +77,6 @@ export function Hero({ logo }: { logo: string }) {
     );
     return () => clearTimeout(t);
   }, [index, paused, reduce]);
-
-  // The headline's first word flips once, as the page "boots".
-  useEffect(() => {
-    const t = setTimeout(() => setCyborg(true), 2600);
-    return () => clearTimeout(t);
-  }, []);
 
   const go = (i: number) => setIndex((i + SLIDES.length) % SLIDES.length);
 
@@ -107,46 +99,30 @@ export function Hero({ logo }: { logo: string }) {
             >
               {logo}
             </pre>
-            <p className="mt-2 text-xs text-dim">
-              personal operating layer for the agent era
-            </p>
-
-            <h1
-              id="top-title"
-              className="mt-8 text-4xl font-semibold tracking-tight sm:text-5xl"
-            >
-              <span className="sr-only">Cyborgize yourself, agentically.</span>
-              <span aria-hidden>
-                <span className="block">
-                  <span className="text-dim">$ </span>
-                  <ScrambleText
-                    text={cyborg ? "Cyborgize" : "Digitalize"}
-                    className={`transition-colors duration-700 ${cyborg ? "text-accent" : ""}`}
-                  />
-                </span>
-                <span className="block pl-[2ch]">yourself,</span>
-                <span className="block pl-[2ch] text-accent">agentically.</span>
-              </span>
+            <h1 id="top-title" className="sr-only">
+              Cyborgize yourself, agentically.
             </h1>
 
-            <p className="mt-6 max-w-[52ch] text-pretty text-dim">
-              <span className="text-dim"># </span>
-              Four platforms — <span className="text-data">
-                Data Base
-              </span>, <span className="text-proj">Project Management</span>,{" "}
-              <span className="text-crm">CRM</span> and the{" "}
-              <span className="text-agent">Agentic Platform</span> — turn what
-              you know and what you do into data you own, ready for any AI agent
-              over MCP.
-            </p>
-            <p className="mt-3 text-sm">
-              <span className="text-dim"># </span>
-              <span className="text-data">My memory.</span>{" "}
-              <span className="text-agent">Any mind.</span>{" "}
-              <span className="text-proj">Closed loops.</span>
-            </p>
+            <div className="mt-10 lg:min-h-[17rem]" aria-live="polite">
+              <p
+                className="text-sm uppercase tracking-widest"
+                style={{ color: slide.color }}
+              >
+                {slide.stage}
+              </p>
+              <h2
+                className="mt-3 text-3xl font-semibold tracking-tight text-balance sm:text-3xl xl:text-4xl"
+                style={{ color: slide.color }}
+              >
+                <span className="text-dim"># </span>
+                {slide.headline}
+              </h2>
+              <p className="mt-5 max-w-[48ch] text-base text-dim text-pretty">
+                {slide.line}
+              </p>
+            </div>
 
-            <div className="mt-7 flex flex-wrap gap-3">
+            <div className="mt-8 flex flex-wrap gap-3">
               <TuiButton
                 href="/register"
                 label="Register for early access"
@@ -190,25 +166,6 @@ export function Hero({ logo }: { logo: string }) {
                   {i === index ? "*" : ""}
                 </button>
               ))}
-            </div>
-
-            <div className="pt-5" aria-live="polite">
-              <p
-                className="text-xs uppercase tracking-widest"
-                style={{ color: slide.color }}
-              >
-                {slide.stage}
-              </p>
-              <h2
-                className="mt-1 text-xl font-semibold sm:text-2xl"
-                style={{ color: slide.color }}
-              >
-                <span className="text-dim"># </span>
-                {slide.headline}
-              </h2>
-              <p className="mt-2 max-w-[64ch] text-[13px] text-dim text-pretty">
-                {slide.line}
-              </p>
             </div>
 
             <div className="mt-5" key={slide.figure.id}>

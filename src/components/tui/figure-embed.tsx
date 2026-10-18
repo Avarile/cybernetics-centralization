@@ -55,7 +55,7 @@ export function FigureEmbed({
   /**
    * Fixed-size stage (height ÷ width): every figure is laid out at a common width and
    * scaled to fit it, so all figures take exactly the same space. Capped so the stage fits
-   * the viewport below the hero text.
+   * the viewport below the carousel tabs.
    */
   stage?: number;
 }) {
@@ -80,7 +80,7 @@ export function FigureEmbed({
       setBox({
         w,
         h: Math.round(
-          Math.min(w * stage, Math.max(460, window.innerHeight - 340)),
+          Math.min(w * stage, Math.max(460, window.innerHeight - 200)),
         ),
       });
     };

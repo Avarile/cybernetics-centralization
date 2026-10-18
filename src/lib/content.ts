@@ -38,7 +38,7 @@ export const modules: Module[] = [
     role: "What you know",
     tagline: "The foundation. Your knowledge, structured.",
     description:
-      "The foundation of everything else. One database you own for knowledge, how-tos, references and finances — tables, views and a record graph that you and your agents can query.",
+      "The foundation of everything else. One database you own for knowledge, how-tos, references, finances and anyother things you can define — tables, views and a record graph that you and your agents can query.",
     capabilities: [
       "Knowledge, how-tos and references as linked records",
       "Custom tables, fields and views — no schema lock-in",
@@ -226,7 +226,7 @@ ${mcpServers.map((s) => `  ${s.name}:\n    type: streamable-http\n    url: ${s.e
  */
 export const sections = [
   { id: "top", win: "boot", path: "~" },
-  { id: "diff", win: "diff", path: "~/problem" },
+  // { id: "diff", win: "diff", path: "~/problem" },
   { id: "principles", win: "principles", path: "~/principles" },
   { id: "know", win: "know", path: "~/know-do" },
   { id: "modules", win: "platforms", path: "/opt/cybernetics" },
@@ -265,7 +265,7 @@ export const principles = [
     tone: "agent" as ModuleId,
     name: "AI agnostic",
     line: "Your data does not live on any LLM platform.",
-    body: "Persistence is separate from the model. Swap Claude for another provider, or use several at once: the same records can write code, draw images or draft ads.",
+    body: "Persistence is separate from the LLM providers. Swap Claude for another provider, or use several at once: the same records can write code, draw images or draft ads.",
   },
   {
     n: "03",
