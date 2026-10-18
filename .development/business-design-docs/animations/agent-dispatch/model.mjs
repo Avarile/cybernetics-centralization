@@ -68,6 +68,7 @@ export function createBoard({ stops, lanes, rows: rowMax = 7, seed = 11 }) {
     board.tasks.push({ kind: "write", lane });
     return true;
   };
+  board.outbound = outbound;
   board.inbox = () => board.items.filter((i) => i.phase === "wait" && !board.tasks.some((t) => t.item === i) && board.task?.item !== i).sort((a, b) => a.bell - b.bell);
   board.waiting = (lane) => board.inbox().find((i) => i.lane === lane);
   board.canNote = (item) => !!item && item.note === undefined && item.rowLens.length + 3 <= rowMax;

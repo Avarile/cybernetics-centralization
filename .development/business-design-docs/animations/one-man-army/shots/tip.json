@@ -1,0 +1,4 @@
+[["wait",800],["eval","window.__figure.jump(30,false)"],["wait",150],
+ ["move",".iso-stage svg",0.36,0.42],["wait",300],["shot","shots/tip-robot.png"],
+ ["move",".iso-stage svg",0.5,0.53],["wait",300],["shot","shots/tip-person.png"],
+ ["eval","window.__figure.jump(30,true)"],["sheet","shots/sheet-run.png",250,12,null,0.6]]

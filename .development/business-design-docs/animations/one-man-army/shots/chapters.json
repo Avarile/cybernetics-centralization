@@ -1,0 +1,7 @@
+[["wait",800],
+ ["eval","window.__figure.jump(1,false)"],["wait",150],["shot","shots/c-empty.png"],
+ ["eval","window.__figure.jump(4.4,false)"],["wait",150],["shot","shots/c-scan.png"],
+ ["eval","window.__figure.jump(7.2,false)"],["wait",150],["shot","shots/c-persona.png"],
+ ["eval","window.__figure.jump(8.6,false)"],["wait",150],["shot","shots/c-print.png"],
+ ["eval","window.__figure.jump(10.0,false)"],["wait",150],["shot","shots/c-crate.png"],
+ ["eval","window.__figure.jump(65.5,false)"],["wait",150],["shot","shots/c-dismiss.png"]]

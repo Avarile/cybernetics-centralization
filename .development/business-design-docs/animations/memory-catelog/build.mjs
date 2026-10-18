@@ -379,18 +379,18 @@ const svg = k.figureSvg({
   label:
     "A card catalog on a bench, read and filed by a gantry. Four open trays hold one card per memory file, sorted by type: user, feedback, reference and project, far to near, 1, 2, 4 and 32 cards. A hopper of blank cards and a desk holding MEMORY.md, one ruled line per card, sit in front. Threads join cards that link to each other. A gripper on the gantry takes a blank card, files it in its tray, updates a card in place, adds its index line, reads a card back and follows its threads. The reader can send it to any card, or have it write and file new ones.",
   body: [
-    base(),
-    ruler(),
-    plate(),
-    rails(),
-    `<g data-part="bridge-far" transform="${bridgeAt(START.hx, START.hy)}">${bridgeFar()}</g>`,
+    `<g data-module="bench">${base()}</g>`,
+    `<g data-module="rails">${ruler()}</g>`,
+    `<g data-module="plate">${plate()}</g>`,
+    `<g data-module="rails">${rails()}</g>`,
+    `<g data-part="bridge-far" data-module="gantry" transform="${bridgeAt(START.hx, START.hy)}">${bridgeFar()}</g>`,
     catalogSvg,
     `<g data-slot="threads"></g>`,
     `<g data-hopper>${hopper()}</g>`,
     `<g data-desk>${desk()}</g>`,
     `<g data-slot="carried"></g>`,
-    `<g data-part="bridge-near" transform="${bridgeAt(START.hx, START.hy)}">${bridgeNear()}</g>`,
-    `<g data-part="head" transform="${k.translateAlong(P, [START.hx, START.hy - HEAD_DY, 0])}">${head()}</g>`,
+    `<g data-part="bridge-near" data-module="gantry" transform="${bridgeAt(START.hx, START.hy)}">${bridgeNear()}</g>`,
+    `<g data-part="head" data-module="gantry" transform="${k.translateAlong(P, [START.hx, START.hy - HEAD_DY, 0])}">${head()}</g>`,
     `<template data-new>${NEW_CARD}</template>`,
   ],
 });
@@ -417,6 +417,11 @@ const DATA = {
   TOPS: Object.fromEntries(CARDS.map((card) => [card.id, [...at([card.x + 0.4, card.yc - CARD_D / 2, CARD_TOP]), ...at([card.x + 0.4, card.yc + CARD_D / 2, CARD_TOP])].map((v) => +v.toFixed(1))])),
   LINKS: M.LINKS.length,
   FILES: M.MEMORIES.length,
+  DESC: M.MEMORIES.map((memory) => memory.desc),
+  FOLDERS: M.FOLDERS,
+  SNAPSHOT: M.SNAPSHOT,
+  // Each thread between trays as drawn at rest, in viewBox px, so the pointer can find it.
+  THREADS: PAIRS.filter(([a, b]) => M.MEMORIES[a].type !== M.MEMORIES[b].type).map(([a, b]) => [a, b, threadPoints(cardOf(a), cardOf(b)).map(at).map(([x, y]) => [+x.toFixed(1), +y.toFixed(1)])]),
   C: { HEAD_DY, CARD_TOP, WALL_H, PICK_X, HOPPER_MID, PITCH, FIRST, ROW0, ROW, LINE_Y, DESK_TOP: DESK_H + 0.5, SHEET_Y1: SHEET.y + SHEET.d - 4, REST: REST_TIP, LIFT: LIFT_TIP, DESK_Y: 98, DESK_TIP: 26, HOME_X: START.hx, INDEX: M.INDEX.length, MAX_NEW, MANAGED: M.MANAGED, RECALLED: M.RECALLED, NEW_TYPE: M.NEW_TYPE },
 };
 
@@ -798,6 +803,7 @@ function draw(dt) {
   const text = readoutText();
   if (text !== lastText) { readout.textContent = text; lastText = text; }
   if (say !== lastSay) { announcer.textContent = say; lastSay = say; }
+  if (tipFound) tipFill();
   return moving;
 }
 
@@ -829,14 +835,40 @@ function toSegment(p, [x1, y1, x2, y2]) {
   const dx = x2 - x1, dy = y2 - y1, t = clamp(((p.x - x1) * dx + (p.y - y1) * dy) / (dx * dx + dy * dy), 0, 1);
   return Math.hypot(p.x - x1 - dx * t, p.y - y1 - dy * t);
 }
+function toView(event) { pt.x = event.clientX; pt.y = event.clientY; return pt.matrixTransform(svg.getScreenCTM().inverse()); }
+// A thread is a hairline, so the pointer finds it by distance, and only while it hangs at rest.
+function threadAt(p) {
+  let best = null, reach = 1.4;
+  for (const [a, b, pts] of D.THREADS) {
+    const g = statics[a + "-" + b];
+    if (!g || g[0].style.display === "none") continue;
+    for (let j = 1; j < pts.length; j++) {
+      const d = toSegment(p, [pts[j - 1][0], pts[j - 1][1], pts[j][0], pts[j][1]]);
+      if (d < reach) { reach = d; best = [a, b]; }
+    }
+  }
+  return best;
+}
 function pick(event) {
   const target = event.target.closest ? event.target : event.target.parentElement;
+  if (target.closest('[data-module="gantry"]')) return { module: "gantry" };
+  // A new card answers for itself once it leaves the hopper; a card in the gripper wins over
+  // the rest edges it has risen away from.
+  const blank = target.closest('[data-card="new"]');
+  if (blank && blank !== hopperCard) {
+    const extra = extras.find((e) => e.el === blank);
+    if (extra) return { extra, tray: extra.type };
+    if (blank === heldEl) return { blank: true };
+  }
+  const lifted = target.closest("[data-card]");
+  if (lifted && held !== null && held !== "new" && Number(lifted.dataset.card) === held) return { card: held };
+  const p = toView(event);
+  const thread = threadAt(p);
+  if (thread) return { thread };
   const tray = target.closest("[data-tray]");
   if (tray) {
     // Cards stand 3 apart and show only a sliver of face, so the top edge nearest the pointer
     // wins; away from every edge, the card under the pointer (the front card's broad face).
-    pt.x = event.clientX; pt.y = event.clientY;
-    const p = pt.matrixTransform(svg.getScreenCTM().inverse());
     let best = null, reach = 2.5;
     for (const id of D.ORDER) {
       if (D.TYPE_OF[id] !== tray.dataset.tray) continue;
@@ -850,10 +882,78 @@ function pick(event) {
   }
   if (target.closest("[data-hopper]")) return { zone: "hopper" };
   if (target.closest("[data-desk]")) return { zone: "desk" };
-  return {};
+  const part = target.closest("[data-module]");
+  return part ? { module: part.dataset.module } : {};
+}
+
+// ── Tooltip: what the pointer is on, what it stands for, and what a click does ──
+const tipBox = stage.querySelector("[data-tip]");
+const tipLines = ["name", "what", "stat", "act"].map((key) => tipBox.querySelector("[data-tip-" + key + "]"));
+const TYPE_WHAT = {
+  user: "Who the user is: role, expertise and preferences.",
+  feedback: "How to work: corrections and confirmed approaches, each with its why.",
+  reference: "Pointers to outside resources: links, dashboards, tickets.",
+  project: "Ongoing work, goals and constraints that the code doesn't record.",
+};
+const cap = (word) => word[0].toUpperCase() + word.slice(1);
+let tipFound = null, tipText = "", tipHide = 0;
+function tipOf(f) {
+  if (f.card !== undefined) {
+    const id = f.card, type = D.TYPE_OF[id];
+    return ["Memory file · " + type, "One fact in one small file. Its header gives a name, a one-line description and the type.", D.KB[id] + " KB · " + D.DESC[id] + "-char description · " + plural(D.NEIGH[id].length, "link") + " · line " + (id + 1) + " of MEMORY.md", holding() ? "Click to file the new card in this tray" : held === id && !step ? "Click to put it back" : "Click to recall it"];
+  }
+  if (f.extra) {
+    const { type } = f.extra, i = extras.indexOf(f.extra), n = extras.filter((e) => e.type === type).indexOf(f.extra);
+    return ["New memory file · " + type, "Written and filed this visit. It gets one line in MEMORY.md, so the next session sees it.", "card " + (D.COUNT[type] + n + 1) + " of " + countIn(type) + " in the tray · " + (i < written ? "line " + (C.INDEX + i + 1) + " of MEMORY.md" : "index line not written yet"), holding() ? "Click to file the new card in this tray" : "Click to write another · Esc clears new cards"];
+  }
+  if (f.blank) return ["Blank card · in the gripper", "A new memory file on its way to a tray. Its index line is written after it is filed.", reserved ? "bound for the " + reserved + " tray" : "no tray chosen yet", holding() ? "Click a tray to file it, or the hopper to put it back" : "The gantry is filing it"];
+  if (f.tray) {
+    const n = countIn(f.tray), room = D.CAP - n;
+    return [cap(f.tray) + " tray", TYPE_WHAT[f.tray], plural(n, "card") + " · " + (room > 0 ? "room for " + room + " more" : "full"), holding() ? "Click to file the new card here" : "Click to write a " + f.tray + " card"];
+  }
+  if (f.zone === "hopper") return ["Hopper · blank cards", "Every new memory starts as a blank file. The spring keeps the next blank at the front.", plural(extras.length, "card") + " written this visit · " + plural(C.MAX_NEW - written - pending, "index line") + " left", holding() ? "Click to put the blank back" : "Click to write a new card"];
+  if (f.zone === "desk") return ["MEMORY.md · the index", "One line per card, loaded into every new session, so the agent sees every description without opening a file.", lineCount() + " lines · " + fileCount() + " files", "Click to read it"];
+  if (f.thread) {
+    const [a, b] = f.thread;
+    return ["[[link]] thread", "A link written in one card that names another. Recall follows it to related cards.", D.TYPE_OF[a] + " card ↔ " + D.TYPE_OF[b] + " card · " + D.LINKS + " links in all", "Click either card to follow it"];
+  }
+  if (f.module === "gantry") return ["Gantry · the agent", "It reads the index, opens one card at a time, and writes and files new ones.", "now: " + say.replace(/^[0-9]+ /, ""), "Click a card or a tray to give it a job"];
+  if (f.module === "rails") return ["Rails and ruler", "The gantry's travel: it reaches every tray, the hopper and the desk.", "4 trays · 1 hopper · 1 desk", ""];
+  if (f.module === "plate") return ["memory/", "One memory folder per project on this machine.", D.FOLDERS + " project folders · " + D.FILES + " files", ""];
+  if (f.module === "bench") return ["Bench · this machine's memory", "The agent's real memory, snapshotted " + D.SNAPSHOT + ".", D.FILES + " files · " + D.FOLDERS + " folders · " + C.INDEX + " index lines", ""];
+  return null;
+}
+function tipFill() {
+  const lines = tipFound && tipOf(tipFound);
+  const text = lines ? lines.join("|") : "";
+  if (text === tipText) return !!lines;
+  tipText = text;
+  if (lines) lines.forEach((line, i) => (tipLines[i].textContent = line));
+  return !!lines;
+}
+// Beside the pointer, flipped to stay inside the stage.
+function tipShow(found, clientX, clientY) {
+  clearTimeout(tipHide);
+  tipFound = found;
+  if (!tipFill()) return tipClear();
+  const box = stage.getBoundingClientRect(), w = tipBox.offsetWidth, h = tipBox.offsetHeight;
+  let x = clientX - box.left + 14, y = clientY - box.top + 18;
+  if (x + w > box.width - 4) x = clientX - box.left - 14 - w;
+  if (y + h > box.height - 4) y = clientY - box.top - 14 - h;
+  tipBox.style.transform = "translate(" + Math.max(4, x).toFixed(0) + "px," + Math.max(4, y).toFixed(0) + "px)";
+  tipBox.setAttribute("data-on", "");
+}
+function tipClear() { clearTimeout(tipHide); tipFound = null; tipBox.removeAttribute("data-on"); }
+// For the keyboard: the tooltip sits at the top edge of the chosen card.
+function tipAtCard(id) {
+  const [x1, y1, x2, y2] = D.TOPS[id];
+  pt.x = (x1 + x2) / 2; pt.y = (y1 + y2) / 2;
+  const s = pt.matrixTransform(svg.getScreenCTM());
+  tipShow({ card: id }, s.x, s.y);
 }
 stage.addEventListener("pointermove", (event) => {
   const found = pick(event);
+  if (event.pointerType !== "touch") tipShow(found, event.clientX, event.clientY);
   const id = found.card !== undefined && !holding() ? found.card : null;
   const place = found.zone || found.tray || (found.card !== undefined ? D.TYPE_OF[found.card] : null);
   if (id === hover && place === zone) return;
@@ -862,9 +962,11 @@ stage.addEventListener("pointermove", (event) => {
   if (id !== null) sel = D.ORDER.indexOf(id);
   wake();
 });
-stage.addEventListener("pointerleave", () => { hover = null; zone = null; wake(); });
+stage.addEventListener("pointerleave", () => { hover = null; zone = null; tipClear(); wake(); });
 stage.addEventListener("click", (event) => {
   const found = pick(event);
+  // A tap has no hover, so the tooltip shows for a moment where the finger landed.
+  if (event.pointerType === "touch" || event.pointerType === "pen") { tipShow(found, event.clientX, event.clientY); tipHide = setTimeout(tipClear, 2600); }
   if (found.card !== undefined) {
     const id = found.card;
     if (holding()) return command(() => file(D.TYPE_OF[id], 0));
@@ -885,6 +987,7 @@ stage.addEventListener("keydown", (event) => {
     sel = (sel + step + D.ORDER.length) % D.ORDER.length;
     hover = D.ORDER[sel];
     zone = null;
+    tipAtCard(hover);
     touched();
   } else if ((key === "Enter" || key === " ") && hover !== null) {
     const id = hover;
@@ -893,12 +996,12 @@ stage.addEventListener("keydown", (event) => {
   } else if (lower === "n") job = () => store(0);
   else if (TRAY_KEYS[lower]) job = () => file(TRAY_KEYS[lower], 0);
   else if (lower === "i") job = () => indexSteps(0);
-  else if (key === "Escape") { hover = null; job = reset; }
+  else if (key === "Escape") { hover = null; tipClear(); job = reset; }
   else return;
   event.preventDefault();
   if (job) command(job);
 });
-stage.addEventListener("blur", () => { if (hover !== null) { hover = null; wake(); } });
+stage.addEventListener("blur", () => { tipClear(); if (hover !== null) { hover = null; wake(); } });
 
 spawn(false);
 if (still.matches) {
@@ -917,6 +1020,14 @@ draw(1 / 60);
 const STRETCH = `<style>
 .iso-stage{position:relative;touch-action:pan-y;-webkit-tap-highlight-color:transparent}
 .iso-stage [data-tray],.iso-stage [data-hopper],.iso-stage [data-desk]{cursor:pointer}
+.mc-tip{position:absolute;left:0;top:0;z-index:2;width:max-content;max-width:min(244px,70%);padding:8px 10px 9px;pointer-events:none;font-family:var(--anatomy-mono);font-size:10.5px;line-height:1.45;letter-spacing:.02em;color:var(--anatomy-text);background:var(--anatomy-card);box-shadow:0 0 0 1px var(--anatomy-mid),0 6px 18px -8px #0006;opacity:0;transition:opacity .14s ease-out}
+.mc-tip[data-on]{opacity:1}
+.mc-tip b{display:block;margin-bottom:3px;color:var(--anatomy-strong);font-weight:500;font-size:10px;letter-spacing:.1em;text-transform:uppercase}
+.mc-tip [data-tip-what],.mc-tip [data-tip-stat],.mc-tip [data-tip-act]{display:block}
+.mc-tip [data-tip-stat]{margin-top:5px;color:var(--anatomy-strong);font-variant-numeric:tabular-nums}
+.mc-tip [data-tip-act]{margin-top:5px;padding-top:5px;border-top:1px solid var(--anatomy-faint);color:var(--anatomy-muted)}
+.mc-tip :empty{display:none}
+@media (prefers-reduced-motion:reduce){.mc-tip{transition:none}}
 .iso-stage [data-live]{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .iso-stage:focus-visible{outline:1px solid var(--anatomy-muted);outline-offset:6px}
 @media (max-width:520px){.iso-plate{overflow:hidden}.iso-stage svg{width:118%;margin:0 -9%}}
@@ -952,11 +1063,15 @@ body.iso[data-theme="dark"] .iso-wire[data-tone="lit"] .iso-wire-end{fill:#ff4fd
 body.iso[data-theme="dark"] .cy-grid{stroke:#0e4a62;opacity:.55}
 body.iso[data-theme="dark"] .iso-face-text{fill:#6ff6ff}
 body.iso[data-theme="dark"] .iso-legend{color:#4f8ea3}
+body.iso[data-theme="dark"] .mc-tip{background:#050b17f2;box-shadow:0 0 0 1px #1fa3c2aa,0 0 16px -4px #00d9ff55;color:#7fb8c8}
+body.iso[data-theme="dark"] .mc-tip b{color:#9ff9ff;text-shadow:0 0 6px #00d9ff66}
+body.iso[data-theme="dark"] .mc-tip [data-tip-stat]{color:#6ff6ff}
+body.iso[data-theme="dark"] .mc-tip [data-tip-act]{border-top-color:#0c3448;color:#3d9bb3}
 </style>` : "");
 const body = k.plateHtml({
   fig: "Fig 1",
   title: "Agent memory catalog",
-  hint: "Click a card, a tray or the hopper",
+  hint: "Point to inspect · click to act",
   readout: "1 store · one fact, one file",
   keys: [
     { mark: "lit", label: "The card in the gripper: the memory being written, updated or read" },
@@ -965,7 +1080,7 @@ const body = k.plateHtml({
     { mark: "edge", label: `Threads: [[name]] links, ${M.LINKS.length} between filed cards` },
   ],
   caption: `How an agent's memory keeps the right references to hand. Store: each fact goes in its own small file with a header giving its name, a one-line description and its type. Categorise: the type puts it in one of four trays. Manage: before writing, the agent looks for a card that already covers the fact and updates that one instead of adding a duplicate, and it removes a card that turns out to be wrong. Index: each card gets one line in MEMORY.md, and that sheet is loaded into every new session, so the agent sees every description without opening a single file. Recall: when a line's description matches the task, the agent opens that one card. Link: [[name]] threads lead it on to related cards. The figure uses this machine's real memory, snapshotted on ${M.SNAPSHOT}: ${M.MEMORIES.length} files in ${M.FOLDERS} project folders and ${M.INDEX.length} index lines. ${M.RAW_LINKS} links are written in the files: ${M.LINKS.length} reach a filed card, ${M.DANGLING} name a card nobody has written yet (still allowed: a dangling link marks a note worth writing), and one is repeated. Click any card and the gantry reads the index, opens that card and follows its threads. Click the hopper or a tray and it writes a new card, files it and adds its line to the index. Keys: arrows and Enter, N, U F R P, I, 1–6, Esc.`,
-  body: STRETCH + `<div class="iso-stage" tabindex="0" role="group" aria-roledescription="interactive figure" aria-label="Agent memory catalog. Arrow keys choose a card and Enter recalls it. N writes a new card; U, F, R or P files it in the user, feedback, reference or project tray. I reads the index, 1 to 6 run each stage, Escape clears new cards.">${svg}<span data-live aria-live="polite"></span></div>`,
+  body: STRETCH + `<div class="iso-stage" tabindex="0" role="group" aria-roledescription="interactive figure" aria-label="Agent memory catalog. Arrow keys choose a card and Enter recalls it. N writes a new card; U, F, R or P files it in the user, feedback, reference or project tray. I reads the index, 1 to 6 run each stage, Escape clears new cards.">${svg}<span data-live aria-live="polite"></span><div class="mc-tip" data-tip aria-hidden="true"><b data-tip-name></b><span data-tip-what></span><span data-tip-stat></span><span data-tip-act></span></div></div>`,
 });
 
 const name = theme === "light" ? "memory-catalog-light.html" : "memory-catalog.html";

@@ -59,6 +59,8 @@ const byDepth = (points) => [...points].sort((a, b) => k.depthOf([a[0], a[1], 0]
 // A line on a face that points +x (cards, cabinet fronts): it reads left to right toward -y.
 const onFaceX = (x, y0, y1, z) => k.segment([x, y0, z], [x, y1, z], P);
 const onFaceY = (y, x0, x1, z) => k.segment([x0, y, z], [x1, y, z], P);
+// A module the tooltip can name: the page finds the innermost one under the pointer.
+const tip = (kind, lane, html) => `<g data-tip="${kind}"${lane === undefined ? "" : ` data-lane="${lane}"`}>${html}</g>`;
 const halo = (plan, z, h, blur = 3) => `<path class="iso-halo" d="${k.haloOf(plan, z, h, P)}" style="filter:blur(${blur}px)"/>`;
 
 // ── Base ────────────────────────────────────────────────────────────────────
@@ -76,19 +78,17 @@ function base() {
   out.push(D(screws.map(([x, y]) => at([x, y, 0])), { size: 0.5 }));
   // A ruler down the near edge, one major tick per 25 units of lane.
   const strip = { x: 89, y: WIRE_Y0, w: 6.5, d: POST_H - 3 - WIRE_Y0, r: 1 };
-  out.push(S(slab(strip, 0, 0.6, 3), { tone: "lo", crease: "none" }));
   const ticks = k.topTicks(strip.y + 3, strip.y + strip.d - 3, 5, 5, strip.x + 0.1, 0.6, [2, 3.8], P, "y");
-  out.push(L(ticks.minor, { tone: "lo" }), L(ticks.major, { tone: "mid" }));
-  out.push(D([at([strip.x + 4.6, strip.y + 1.5, 0.6]), at([strip.x + 4.6, strip.y + strip.d - 1.5, 0.6])], { size: 0.45 }));
+  out.push(tip("ruler", undefined, S(slab(strip, 0, 0.6, 3), { tone: "lo", crease: "none" }) + L(ticks.minor, { tone: "lo" }) + L(ticks.major, { tone: "mid" }) +
+    D([at([strip.x + 4.6, strip.y + 1.5, 0.6]), at([strip.x + 4.6, strip.y + strip.d - 1.5, 0.6])], { size: 0.45 })));
   // The lane grooves: one per wire pair, under the wires.
   for (const x of LANE_X) out.push(L(k.planOutline({ x: x - 9, y: WIRE_Y0 + 8, w: 18, d: SPRING[0] - WIRE_Y0 - 16, r: 2 }, 0, P, 4), { tone: CYBER ? "mid" : "faint", className: CYBER ? "dx-lane" : undefined }));
   // Label plate at the near corner.
   const lp = { x: -92, y: BASE.y + 6, w: 46, d: 12, r: 1.6 };
-  out.push(S(slab(lp, 0, 0.8, 4), { tone: "lo", crease: "none" }));
-  out.push(L(k.planOutline(k.insetPlan(lp, 1.4), 0.8, P, 4), { tone: "faint" }));
-  out.push(k.faceTextSvg(k.topMatrix([lp.x + 4, lp.y + 7.6], 0.8, P, "x"), "dispatch/", { size: 3.6, tone: "lo" }));
-  out.push(D([at([lp.x + 2.4, lp.y + 6, 0.8]), at([lp.x + lp.w - 2.4, lp.y + 6, 0.8])], { size: 0.4 }));
-  return out.join("");
+  out.push(tip("plate", undefined, S(slab(lp, 0, 0.8, 4), { tone: "lo", crease: "none" }) + L(k.planOutline(k.insetPlan(lp, 1.4), 0.8, P, 4), { tone: "faint" }) +
+    k.faceTextSvg(k.topMatrix([lp.x + 4, lp.y + 7.6], 0.8, P, "x"), "dispatch/", { size: 3.6, tone: "lo" }) +
+    D([at([lp.x + 2.4, lp.y + 6, 0.8]), at([lp.x + lp.w - 2.4, lp.y + 6, 0.8])], { size: 0.4 })));
+  return tip("bench", undefined, out.join(""));
 }
 
 // ── Agent member: a robot on a charging dock. The LED display on its chest
@@ -153,9 +153,9 @@ function chestDisplay(cx, index) {
   ].join("");
   const face = chestOf(cx);
   // Under the window: a power LED that lights while the agent works, and three status dots.
-  return ledWindow(face, back) +
+  return tip("display", index, ledWindow(face, back) +
     `<g transform="${face.plane()}"><circle class="dx-led-off" cx="4.4" cy="15.4" r="0.55"/><circle class="dx-led-bar" data-power="${index}" cx="4.4" cy="15.4" r="0.55" opacity="0"/></g>` +
-    D([18.2, 19.9, 21.6].map((u) => at(face.at(u, 15.4))), { size: 0.34, tone: "lo" });
+    D([18.2, 19.9, 21.6].map((u) => at(face.at(u, 15.4))), { size: 0.34, tone: "lo" }));
 }
 // A leg on its boot: shin, knee and thigh up to the hip.
 function leg(cx, y) {
@@ -184,19 +184,20 @@ const BOT_DX = -7; // the robot stands toward the dock's far side, so its chest 
 function robot(lx, index) {
   const cy = botY(), cx = lx + BOT_DX;
   const dock = { x: lx - CAB.w / 2, y: CAB.y, w: CAB.w, d: CAB.d, r: 2.4 };
-  const out = [halo(dock, 0, BOT.feet)];
+  const base = [halo(dock, 0, BOT.feet)];
+  const out = [];
   // Dock: a plinth with a charging plate under each boot and the agent's name plate.
-  out.push(S(slab(dock, 0, BOT.feet, 6, 0.8), { tone: "mid", inner: L(k.sideSeam(dock, 2, P, 6), { tone: "faint" }) }));
-  out.push(L(k.planOutline(k.insetPlan(dock, 3), BOT.feet, P, 6), { tone: "faint" }));
-  out.push(D(k.corners(dock, 2.6).map(([x, y]) => at([x, y, BOT.feet])), { size: 0.45 }));
+  base.push(S(slab(dock, 0, BOT.feet, 6, 0.8), { tone: "mid", inner: L(k.sideSeam(dock, 2, P, 6), { tone: "faint" }) }));
+  base.push(L(k.planOutline(k.insetPlan(dock, 3), BOT.feet, P, 6), { tone: "faint" }));
+  base.push(D(k.corners(dock, 2.6).map(([x, y]) => at([x, y, BOT.feet])), { size: 0.45 }));
   const fx = dock.x + dock.w;
   const plate = { x: fx, y: cy - 2, w: 0.5, d: 16, r: 0.6 };
-  out.push(S(slab(plate, 1.2, 3.6, 3), { tone: "lo", crease: "none" }));
-  out.push(k.faceTextSvg(k.sideMatrix([fx + 0.5, plate.y + plate.d - 2], 3.9, P, "x"), M.LANES[index].agent, { size: 2.9, tone: "mid" }));
-  out.push(L(onFaceX(fx + 0.5, plate.y + 7, plate.y + 1.6, 3.4), { tone: "lo", free: true }));
-  out.push(L(onFaceX(fx + 0.5, plate.y + 7, plate.y + 3.2, 2.4), { tone: "lo", free: true }));
-  out.push(D([at([fx, cy - 12, 3]), at([fx, cy - 9.6, 3])], { size: 0.45, tone: "lo" }));
-  for (const y of [cy - 8, cy + 8]) out.push(L(k.planOutline({ x: cx - 7, y: y - 5, w: 15, d: 10, r: 1.6 }, BOT.feet, P, 4), { tone: "lo" }));
+  base.push(S(slab(plate, 1.2, 3.6, 3), { tone: "lo", crease: "none" }));
+  base.push(k.faceTextSvg(k.sideMatrix([fx + 0.5, plate.y + plate.d - 2], 3.9, P, "x"), M.LANES[index].agent, { size: 2.9, tone: "mid" }));
+  base.push(L(onFaceX(fx + 0.5, plate.y + 7, plate.y + 1.6, 3.4), { tone: "lo", free: true }));
+  base.push(L(onFaceX(fx + 0.5, plate.y + 7, plate.y + 3.2, 2.4), { tone: "lo", free: true }));
+  base.push(D([at([fx, cy - 12, 3]), at([fx, cy - 9.6, 3])], { size: 0.45, tone: "lo" }));
+  for (const y of [cy - 8, cy + 8]) base.push(L(k.planOutline({ x: cx - 7, y: y - 5, w: 15, d: 10, r: 1.6 }, BOT.feet, P, 4), { tone: "lo" }));
   // Far side first: the far leg and arm, the backpack, then the body, then the near leg and arm.
   out.push(leg(cx, cy - 8));
   out.push(botArm(cx, cy - TORSO.d / 2 - 2.2));
@@ -222,12 +223,12 @@ function robot(lx, index) {
   out.push(D([3.4, 5.4, 7.4].map((u) => at(visor.at(u, 6.4))), { size: 0.36, tone: "lo" }));
   out.push(S(slab({ x: cx - 1.8, y: cy + 7, w: 3.6, d: 1.2, r: 0.5 }, BOT.head + 3, 4, 2), { tone: "mid", crease: "none" }));
   const [ax, ay] = lampAt(cx);
-  out.push(S(k.cylinder(ax, ay, 1.6, BOT.crown, 0.8, P, 18), { tone: "mid" }));
-  out.push(S(k.cylinder(ax, ay, 0.45, BOT.crown + 0.8, STALK, P, 10), { tone: "mid", crease: "none" }));
-  out.push(S(k.cylinder(ax, ay, 1.3, BOT.crown + 0.8 + STALK, 1.8, P, 18), { tone: "mid" }));
-  out.push(`<g data-lamp="${index}" opacity="0">${S(k.cylinder(ax, ay, 1.3, BOT.crown + 0.8 + STALK, 1.8, P, 18), { tone: "lit", lit: true })}</g>`);
+  out.push(tip("beacon", index, S(k.cylinder(ax, ay, 1.6, BOT.crown, 0.8, P, 18), { tone: "mid" }) +
+    S(k.cylinder(ax, ay, 0.45, BOT.crown + 0.8, STALK, P, 10), { tone: "mid", crease: "none" }) +
+    S(k.cylinder(ax, ay, 1.3, BOT.crown + 0.8 + STALK, 1.8, P, 18), { tone: "mid" }) +
+    `<g data-lamp="${index}" opacity="0">${S(k.cylinder(ax, ay, 1.3, BOT.crown + 0.8 + STALK, 1.8, P, 18), { tone: "lit", lit: true })}</g>`));
   out.push(botArm(cx, cy + TORSO.d / 2 + 2.2));
-  return out.join("");
+  return tip("dock", index, base.join("")) + tip("robot", index, out.join(""));
 }
 const lampAt = (cx) => [cx - 2.6, botY() - 3];
 const STALK = 9; // tall enough that the beacon clears the crossbar in front of the far robots
@@ -286,6 +287,13 @@ function wireSvg(x, toward = "agent") {
 function springSvg(x, side) {
   const c = k.coil(SPRING[0], SPRING[1], [x, WIRE_Z + WIRE_T / 2], 1.3, 5, "y", P);
   return side === "back" ? L(c.back, { tone: "lo" }) : L(c.front, { tone: "mid" });
+}
+
+// A wire with its tension springs, and an unseen wider band along it so the thin wire is easy to point at.
+function wireModule(x, kind, index) {
+  const pad = `<path class="dx-pad" d="${k.segment([x, WIRE_Y0, WIRE_Z], [x, SPRING[1], WIRE_Z], P)}"/>`;
+  const spring = (side) => tip("spring", index, springSvg(x, side));
+  return tip(`wire-${kind}`, index, pad + spring("back") + wireSvg(x, kind === "out" ? "agent" : "human") + spring("front"));
 }
 
 // The pull cord the human uses to send a carrier: from the crossbar's far end.
@@ -383,7 +391,7 @@ function trayBack(cx) {
   out.push(S(slab({ x: x0, y: TRAY.y, w: 2, d: TRAY.d, r: 0.8 }, TRAY_FLOOR, 10, 3, 0.3), { tone: "mid" }));
   out.push(S(slab({ x: x0 + 2, y: TRAY.y, w: x1 - x0 - 4, d: 1.6, r: 0.5 }, TRAY_FLOOR, 10, 2, 0.3), { tone: "mid" }));
   // Two items filed earlier.
-  for (const dx of [-10, -7]) out.push(`<g transform="${k.translateAlong(P, [cx + dx, TRAY_Y, TRAY_FLOOR - CARD_Z])}">${cardSvg({ old: true })}</g>`);
+  for (const dx of [-10, -7]) out.push(`<g data-tip="filed" transform="${k.translateAlong(P, [cx + dx, TRAY_Y, TRAY_FLOOR - CARD_Z])}">${cardSvg({ old: true })}</g>`);
   return out.join("");
 }
 function trayFront(cx) {
@@ -426,14 +434,14 @@ function stamp(cx) {
 // ── Assemble: lanes far to near, then the desk, then cards in flight ────────
 function lane(index) {
   const cx = LANE_X[index];
-  const out = [robot(cx, index), postSvg(cx, POST_A)];
-  out.push(springSvg(cx - WIRE_DX, "back"), wireSvg(cx - WIRE_DX), springSvg(cx - WIRE_DX, "front"));
+  const out = [robot(cx, index), tip("post-agent", index, postSvg(cx, POST_A))];
+  out.push(wireModule(cx - WIRE_DX, "out", index));
   out.push(`<g data-slot="out-${index}"></g>`);
-  out.push(postSvg(cx, POST_H), cord(cx).replace(/^/, `<g data-cord="${index}">`) + "</g>");
-  out.push(`<g data-arm="${index}">${arm(cx)}<g data-pen="${index}">${penCarriage(cx)}</g></g>`);
-  out.push(springSvg(cx + WIRE_DX, "back"), wireSvg(cx + WIRE_DX, "human"), springSvg(cx + WIRE_DX, "front"));
+  out.push(tip("post-desk", index, postSvg(cx, POST_H)), `<g data-cord="${index}" data-tip="cord" data-lane="${index}">${cord(cx)}</g>`);
+  out.push(`<g data-arm="${index}" data-tip="arm" data-lane="${index}">${arm(cx)}<g data-pen="${index}">${penCarriage(cx)}</g></g>`);
+  out.push(wireModule(cx + WIRE_DX, "back", index));
   out.push(`<g data-slot="back-${index}"></g>`);
-  out.push(switchRail(cx, POST_A, M.STOPS.agent), switchRail(cx, POST_H, M.STOPS.human));
+  out.push(tip("switch-agent", index, switchRail(cx, POST_A, M.STOPS.agent)), tip("switch-desk", index, switchRail(cx, POST_H, M.STOPS.human)));
   return out.join("");
 }
 
@@ -452,10 +460,10 @@ function hits() {
   LANE_X.forEach((cx, i) => {
     const who = M.LANES[i].agent;
     const bx = cx + BOT_DX, cy = botY();
-    out.push(`<path class="dx-hit" data-hit="send" data-lane="${i}" d="${hitBox({ x: bx - 11, y: cy - 17.5, w: 19, d: 35 }, 0, BOT.crown + 2)}"><title>Assign a work item to ${who}</title></path>`);
-    out.push(`<path class="dx-hit" data-hit="send" data-lane="${i}" d="${hitBox({ x: cx - 12, y: POST_H - 3, w: 6, d: 6 }, 30, BAR_Z - 2)}"><title>Pull the cord: send a work item to ${who}</title></path>`);
-    out.push(`<path class="dx-hit" data-hit="note" data-lane="${i}" d="${hitBox({ x: cx + WIRE_DX - 1, y: M.STOPS.human - CARD.d / 2, w: 2, d: CARD.d }, CARD_Z, CARD.top)}"><title>Write a note on ${who}'s returned card and send it back</title></path>`);
-    out.push(`<path class="dx-hit" data-hit="approve" data-lane="${i}" d="${hitBox({ x: cx + 15, y: 131, w: 14, d: 31 }, DESK_H, DESK_H + 10)}"><title>Stamp ${who}'s returned card: approve it to Done</title></path>`);
+    out.push(`<path class="dx-hit" data-hit="send" data-lane="${i}" aria-label="Assign a work item to ${who}" d="${hitBox({ x: bx - 11, y: cy - 17.5, w: 19, d: 35 }, 0, BOT.crown + 2)}"/>`);
+    out.push(`<path class="dx-hit" data-hit="send" data-lane="${i}" aria-label="Pull the cord: send a work item to ${who}" d="${hitBox({ x: cx - 12, y: POST_H - 3, w: 6, d: 6 }, 30, BAR_Z - 2)}"/>`);
+    out.push(`<path class="dx-hit" data-hit="note" data-lane="${i}" aria-label="Write a note on ${who}'s returned card and send it back" d="${hitBox({ x: cx + WIRE_DX - 1, y: M.STOPS.human - CARD.d / 2, w: 2, d: CARD.d }, CARD_Z, CARD.top)}"/>`);
+    out.push(`<path class="dx-hit" data-hit="approve" data-lane="${i}" aria-label="Stamp ${who}'s returned card: approve it to Done" d="${hitBox({ x: cx + 15, y: 131, w: 14, d: 31 }, DESK_H, DESK_H + 10)}"/>`);
   });
   return `<g class="dx-hits">${out.join("")}</g>`;
 }
@@ -468,10 +476,10 @@ const svg = k.figureSvg({
   body: [
     base(),
     ...LANE_X.map((_, i) => lane(i)),
-    desk(),
-    ...LANE_X.map((cx, i) => `${trayBack(cx)}<g data-slot="tray-${i}"></g>${trayFront(cx)}${bell(cx, i)}${stamp(cx)}`),
+    tip("desk", undefined, desk()),
+    ...LANE_X.map((cx, i) => `${tip("tray", i, trayBack(cx))}<g data-slot="tray-${i}"></g>${tip("tray", i, trayFront(cx))}${tip("bell", i, bell(cx, i))}${tip("stamp", i, stamp(cx))}`),
     `<g data-slot="carried"></g>`,
-    `<template data-item><g data-carrier>${carrier()}</g><g data-card>${cardSvg()}</g></template>`,
+    `<template data-item><g data-carrier data-tip="carrier">${carrier()}</g><g data-card data-tip="card">${cardSvg()}</g></template>`,
     hits(),
   ],
 });
@@ -482,6 +490,7 @@ const live = `
 const P = ${JSON.stringify(P)};
 const STOPS = ${JSON.stringify(M.STOPS)};
 const LANES = ${JSON.stringify(M.LANES)};
+const STATE = ${JSON.stringify(M.STATE)};
 const C = ${JSON.stringify(C)};
 const createBoard = ${M.createBoard.toString()};
 const stage = document.querySelector(".iso-stage");
@@ -502,6 +511,7 @@ function elsOf(v) {
   box.innerHTML = template.innerHTML;
   const carrier = box.querySelector("[data-carrier]"), card = box.querySelector("[data-card]");
   card.querySelector(".iso-face-text").textContent = v.id;
+  carrier.dataset.id = card.dataset.id = v.id;
   e = { carrier, card, brief: [...card.querySelectorAll("[data-brief]")], rows: [...card.querySelectorAll("[data-row]")], stamp: card.querySelector("[data-stamp]"), flag: card.querySelector("[data-flag]") };
   els.set(v.id, e);
   return e;
@@ -604,6 +614,7 @@ function draw() {
   });
   setReadout(views);
   setDesk();
+  if (tip) showTip();
 }
 
 let lastText = "";
@@ -633,6 +644,8 @@ function setDesk() {
     const lane = +el.dataset.lane, kind = el.dataset.hit, w = board.waiting(lane);
     const ok = kind === "send" ? board.canSend(lane) : kind === "approve" ? !!w : board.canNote(w);
     el.toggleAttribute("data-off", !ok);
+    // With no card waiting, the card target steps aside so whatever is behind it can be pointed at.
+    el.toggleAttribute("data-none", kind === "note" && !w);
   });
 }
 // Acting takes over from the autopilot; it comes back after 20 s of quiet unless switched off.
@@ -653,7 +666,7 @@ sendEls.forEach((el) => el.addEventListener("click", () => act("send", +el.datas
 approveEl.addEventListener("click", () => act("approve"));
 noteEl.addEventListener("click", () => act("note"));
 autoEl.addEventListener("click", () => { auto = !auto; autoHeld = !auto; clearTimeout(resume); setDesk(); run(); });
-hitEls.forEach((el) => el.addEventListener("click", () => { if (!el.hasAttribute("data-off")) act(el.dataset.hit, +el.dataset.lane); }));
+hitEls.forEach((el) => el.addEventListener("click", (event) => { const p = pick(event.clientX, event.clientY); if ((!p || p.hit === el) && !el.hasAttribute("data-off")) act(el.dataset.hit, +el.dataset.lane); }));
 stage.addEventListener("keydown", (event) => {
   const n = "123".indexOf(event.key);
   if (n >= 0) act("send", n);
@@ -662,6 +675,172 @@ stage.addEventListener("keydown", (event) => {
   else return;
   event.preventDefault();
 });
+
+// ── Tooltips: every part names itself, says what it stands for, and reads its live state from the board ──
+const plate = stage.closest(".iso-plate");
+const tipEl = document.createElement("div");
+tipEl.className = "dx-tip"; tipEl.id = "dx-tip"; tipEl.setAttribute("role", "tooltip"); tipEl.hidden = true;
+const srEl = document.createElement("div");
+srEl.className = "dx-sr"; srEl.setAttribute("aria-live", "polite");
+plate.append(tipEl, srEl);
+const agentOf = (lane) => LANES[lane].agent;
+const inLane = (lane) => board.items.filter((i) => i.lane === lane);
+const viewOf = (item) => board.view().find((v) => v.id === item.id);
+const SHORT = { write: "brief", ready: "ready", launch: "moving", queue: "queued", work: "at the robot", switch: "switching", return: "returning", hold: "holding", wait: "waiting", review: "in review", note: "noting", noted: "noted", approve: "stamping" };
+function doing(i) {
+  const a = agentOf(i.lane);
+  if (i.phase === "write") return "you are writing its brief";
+  if (i.phase === "ready") return "brief written, about to leave";
+  if (i.phase === "launch") return i.wire > 0 ? "coming back to your desk" : i.target === "queue" ? "on its way to wait behind " + a + "'s current item" : "on its way to " + a;
+  if (i.phase === "queue") return "queued one card back, waiting for " + a;
+  if (i.phase === "work") { const w = viewOf(i).work; return w.end ? a + " has stopped for your approval" : a + " is writing comment " + (w.k + 1) + " of " + w.of; }
+  if (i.phase === "switch") return i.end === "agent" ? "crossing to the back wire" : "crossing to the out wire, back to " + a;
+  if (i.phase === "return") return "coming back to your desk";
+  if (i.phase === "hold") return "holding on the back wire until the desk stop is free";
+  if (i.phase === "wait") return "waiting for your review";
+  if (i.phase === "review") return "you are reading it";
+  if (i.phase === "note") return "you are writing a note on it";
+  if (i.phase === "noted") return "noted, going back out to " + a;
+  if (i.phase === "approve") return "you are stamping it";
+  return "approved and filed";
+}
+const progress = (w) => (w.k + clamp01((w.v - 0.15) / 0.7)) / w.of;
+const atRobot = (lane) => inLane(lane).find((i) => i.phase === "work");
+function agentState(lane) {
+  const list = inLane(lane), at = atRobot(lane), queued = list.find((i) => i.phase === "queue");
+  const coming = list.find((i) => i.phase === "launch" && i.wire < 0 && i.target === "agent");
+  let s;
+  if (at) { const w = viewOf(at).work; s = w.end ? "Stopped on " + at.id + ", sending it back for approval" : "Working on " + at.id + " · comment " + (w.k + 1) + " of " + w.of; }
+  else s = coming ? "Free · " + coming.id + " on its way" : "Free, waiting on its dock";
+  return queued ? s + " · " + queued.id + " queued" : s;
+}
+const onWire = (lane, side) => inLane(lane).filter((i) => Math.sign(i.wire) === side && !["approve", "done"].includes(i.phase));
+const listOf = (items) => (items.length ? items.map((i) => i.id + " " + SHORT[i.phase]).join(" · ") : "Empty");
+function cardState(i) {
+  const v = viewOf(i);
+  const rows = v.rowLens.map((_, j) => j).filter((j) => j !== v.note);
+  const written = rows.filter((j) => v.rows[j] >= 1).length;
+  return [(STATE[i.phase] || "In Progress") + " · " + doing(i), "Brief · " + written + " of " + rows.length + " comments" + (v.note !== undefined ? " · 1 note" : "")];
+}
+const RUN = STOPS.human - STOPS.agent;
+const TIPS = {
+  bench: () => ({ name: "Project board", what: "The bench is the board itself. It holds every work item between hand-offs, so nobody waits on anybody.", live: [board.items.filter((i) => i.phase !== "done").length + " items in flight · " + board.done + " approved"] }),
+  ruler: () => ({ name: "Lane ruler", what: "A minor tick every 5 units and a major every 25. Desk to robot is " + RUN + " units, about " + (0.5 + RUN / 52).toFixed(1) + " s for a carrier." }),
+  plate: () => ({ name: "Label plate", what: "Engraved with the board's name." }),
+  robot: (l) => ({ name: agentOf(l) + " · " + LANES[l].role + " agent", what: "An agent member. It takes a work item when it is free, writes its progress onto the card as comments, then stops and sends it back for your approval.", live: [agentState(l)] }),
+  display: (l) => {
+    const at = atRobot(l), w = at && viewOf(at).work;
+    return { name: agentOf(l) + " chest display", what: "Echoes each comment line as the pen writes it. The bar underneath is the item's progress; the dot beside it is lit while the agent works.", live: [w && !w.end ? at.id + " · line " + (w.k + 1) + " of " + w.of + " · " + Math.round(progress(w) * 100) + "%" : "Idle, cursor blinking"] };
+  },
+  beacon: (l) => { const at = atRobot(l), w = at && viewOf(at).work; return { name: agentOf(l) + " beacon", what: "The antenna lamp. It lights while the agent is working.", live: [w && !w.end ? "Lit · working on " + at.id : "Dark · not working"] }; },
+  dock: (l) => ({ name: agentOf(l) + " dock", what: "A charging dock with the agent's name plate. The robot stands on it between items.", live: [agentState(l)] }),
+  arm: (l) => { const at = atRobot(l), w = at && viewOf(at).work; return { name: agentOf(l) + " pen arm", what: "The agent's hand. The arm rides up its post to the row being written, and the stylus draws the comment along the card.", live: [w && !w.end ? "Writing row " + (w.row + 1) + " on " + at.id : "Parked below the card"] }; },
+  "post-agent": (l) => ({ name: agentOf(l) + " far post", what: "Holds the far end of both wires, the pen arm's sleeve and the switch rail overhead." }),
+  "post-desk": (l) => ({ name: agentOf(l) + " desk post", what: "Holds the near end of both wires, the pull cord and the switch rail overhead." }),
+  "wire-out": (l) => ({ name: agentOf(l) + " out wire", what: "The far wire: work items run out along it from your desk to the agent.", live: [listOf(onWire(l, -1))] }),
+  "wire-back": (l) => ({ name: agentOf(l) + " back wire", what: "The near wire: finished items come back along it. Up to three wait here until you get to them.", live: [listOf(onWire(l, 1))] }),
+  spring: () => ({ name: "Tension spring", what: "Keeps the wire taut between the two posts." }),
+  cord: (l) => ({ name: agentOf(l) + " pull cord", what: "Pull it to write a brief and send a work item down this lane.", live: [board.outbound(l) + " of 2 heading out"] }),
+  "switch-agent": (l) => ({ name: agentOf(l) + " far switch", what: "When the agent stops, its carrier crosses here from the out wire to the back wire." }),
+  "switch-desk": (l) => ({ name: agentOf(l) + " desk switch", what: "A card you noted crosses here from the back wire to the out wire, to go back to the agent." }),
+  carrier: (l, i) => ({ name: i.id + " carrier", what: "Two wheels on the wire and a clip for one card. It goes wherever its card goes.", live: [doing(i)] }),
+  card: (l, i) => ({ name: i.id + " · work item for " + agentOf(i.lane), what: "Mid-tone lines are your brief and notes, bright lines the agent's comments, the ring your approval.", live: cardState(i) }),
+  filed: () => ({ name: "Filed earlier", what: "Items approved before you sat down, kept for the record." }),
+  desk: () => ({ name: "Your desk", what: "You are the human. You do one thing at a time: write briefs, read returned cards, then stamp them or note them.", live: ["You are " + board.humanDoing() + (board.tasks.length ? " · " + board.tasks.length + " more lined up" : ""), "Inbox · " + (board.inbox().map((i) => i.id).join(", ") || "empty")] }),
+  tray: (l) => ({ name: agentOf(l) + " done tray", what: "Approved items, filed. It holds two; the oldest is archived when a third comes in.", live: [inLane(l).filter((i) => i.phase === "done").length + " in the tray · " + board.done + " approved in all"] }),
+  bell: (l) => { const w = board.waiting(l); return { name: agentOf(l) + " bell", what: "Rings when a carrier comes home with a report.", live: [w ? "Rang for " + w.id + ": waiting for you" : "Quiet"] }; },
+  stamp: (l) => { const w = board.waiting(l); return { name: agentOf(l) + " stamp", what: "Your approval: it stamps the waiting card and files it Done.", live: [w ? w.id + " is ready to stamp" : "Nothing to stamp in this lane"] }; },
+};
+// What clicking here would do, or why it can't.
+function actionOf(hit) {
+  const l = +hit.dataset.lane, a = agentOf(l), w = board.waiting(l), off = hit.hasAttribute("data-off");
+  if (hit.dataset.hit === "send") return off ? (board.outbound(l) >= 2 ? "Two items already heading out to " + a : "Lane full: three items in it") : "Click or press " + (l + 1) + ": write a brief and send it to " + a;
+  if (hit.dataset.hit === "approve") return off ? "" : "Click to stamp " + w.id + " Done";
+  return off ? (w && w.note !== undefined ? "Already noted once: stamp it instead" : "No room left for a note") : "Click to note " + w.id + " and send it back";
+}
+const itemOf = (el) => board.items.find((i) => i.id === el.dataset.id);
+// The innermost part under a point, skipping the click targets and cards that have faded out.
+function pick(x, y) {
+  let hit = null;
+  for (const el of document.elementsFromPoint(x, y)) {
+    if (el === svg || !svg.contains(el)) break;
+    if (el.classList.contains("dx-hit")) { hit = hit || el; continue; }
+    let part = el.closest("[data-tip]");
+    while (part && part.dataset.id && (+(part.getAttribute("opacity") ?? 1) < 0.05 || !itemOf(part))) part = part.parentNode.closest("[data-tip]");
+    if (!part) continue;
+    // A click target only counts over its own lane: A1's robot target must not reach A3's card in front of it.
+    const lane = part.dataset.id ? itemOf(part).lane : part.dataset.lane;
+    if (hit && lane !== undefined && +lane !== +hit.dataset.lane) hit = null;
+    return { part, hit };
+  }
+  return hit ? { part: null, hit } : null;
+}
+// The parts each kind of target is about: a refused action is explained only there.
+const HIT_PARTS = { send: ["robot", "dock", "display", "beacon", "cord"], approve: ["stamp"], note: ["card", "carrier"] };
+let tip = null, lastTip = "", hideAt = 0;
+function tipText() {
+  const { part, hit } = tip;
+  const lane = part && part.dataset.lane !== undefined ? +part.dataset.lane : undefined;
+  const t = part ? TIPS[part.dataset.tip](lane, part.dataset.id && itemOf(part)) : { name: agentOf(+hit.dataset.lane) + " lane", what: "" };
+  const off = !!hit && hit.hasAttribute("data-off");
+  const say = hit && (!off || (part && HIT_PARTS[hit.dataset.hit].includes(part.dataset.tip)));
+  return { ...t, act: say ? actionOf(hit) : "", off };
+}
+function showTip() {
+  if (!tip) return;
+  if (tip.part && tip.part.dataset.id && !itemOf(tip.part)) return hideTip();
+  const t = tipText();
+  const html = "<b>" + t.name + "</b>" + (t.what ? "<p>" + t.what + "</p>" : "") + (t.live || []).map((s) => '<p class="dx-tip-live">' + s + "</p>").join("") + (t.act ? '<p class="dx-tip-act"' + (t.off ? " data-off" : "") + ">" + t.act + "</p>" : "");
+  if (html !== lastTip) { tipEl.innerHTML = html; lastTip = html; }
+  tipEl.hidden = false;
+  // Beside the pointer, flipped to stay inside the plate.
+  const box = plate.getBoundingClientRect(), w = tipEl.offsetWidth, h = tipEl.offsetHeight;
+  let x = tip.x - box.left + 14, y = tip.y - box.top + 16;
+  if (x + w > box.width - 8) x = Math.max(8, tip.x - box.left - w - 14);
+  if (y + h > box.height - 8) y = Math.max(8, tip.y - box.top - h - 12);
+  tipEl.style.transform = "translate(" + Math.round(x) + "px," + Math.round(y) + "px)";
+}
+function setTip(next) {
+  const was = tip && tip.part, now = next && next.part;
+  if (was !== now) { if (was) was.classList.remove("dx-tipped"); if (now) now.classList.add("dx-tipped"); }
+  const hot = tip && tip.hit, hit = next && next.hit;
+  if (hot !== hit) { if (hot) hot.classList.remove("dx-hot"); if (hit) hit.classList.add("dx-hot"); }
+  tip = next;
+  if (tip) showTip(); else hideTip();
+}
+function hideTip() { if (tip && tip.part) tip.part.classList.remove("dx-tipped"); if (tip && tip.hit) tip.hit.classList.remove("dx-hot"); tip = null; tipEl.hidden = true; }
+stage.addEventListener("pointermove", (event) => {
+  if (event.pointerType === "touch") return;
+  const p = pick(event.clientX, event.clientY);
+  setTip(p ? { ...p, x: event.clientX, y: event.clientY } : null);
+});
+stage.addEventListener("pointerleave", (event) => { if (event.pointerType !== "touch") setTip(null); });
+// Touch: a tap names the part too, and the tip clears itself after a few seconds.
+stage.addEventListener("pointerdown", (event) => {
+  if (event.pointerType !== "touch") return;
+  const p = pick(event.clientX, event.clientY);
+  setTip(p ? { ...p, x: event.clientX, y: event.clientY } : null);
+  clearTimeout(hideAt); hideAt = setTimeout(() => setTip(null), 3500);
+});
+// Keyboard: ← and → walk through the parts, far to near; Esc puts the tip away.
+const partsNow = () => [...svg.querySelectorAll("[data-tip]")].filter((el) => !el.closest("template") && (!el.dataset.id || (itemOf(el) && +(el.getAttribute("opacity") ?? 1) >= 0.05)));
+function walk(step) {
+  const parts = partsNow();
+  let n = tip && tip.part ? parts.indexOf(tip.part) : -1;
+  n = n < 0 ? (step > 0 ? 0 : parts.length - 1) : (n + step + parts.length) % parts.length;
+  const part = parts[n], r = part.getBoundingClientRect();
+  setTip({ part, hit: null, x: r.left + r.width / 2, y: r.top + r.height / 2 });
+  const t = tipText();
+  srEl.textContent = t.name + ". " + t.what + " " + (t.live || []).join(". ");
+}
+stage.addEventListener("keydown", (event) => {
+  if (event.key === "ArrowRight" || event.key === "ArrowDown") walk(1);
+  else if (event.key === "ArrowLeft" || event.key === "ArrowUp") walk(-1);
+  else if (event.key === "Escape" && tip) setTip(null);
+  else return;
+  event.preventDefault();
+});
+stage.addEventListener("blur", () => { if (tip && !tip.hit && !stage.matches(":hover")) setTip(null); });
 
 // ── Clock ───────────────────────────────────────────────────────────────────
 const DT = 1 / 60;
@@ -694,7 +873,7 @@ const deskPanel = `<div class="dx-desk" role="group" aria-label="Your desk">
 const body = k.plateHtml({
   fig: "Fig 1",
   title: "Agent dispatch railway",
-  hint: "Click a robot to assign work",
+  hint: "Point at any part · click a robot to assign",
   readout: "human free · 0 busy · 0 done",
   keys: [
     { mark: "lit", label: "Comment lines the agent writes onto a work item, and the bell when it comes home" },
@@ -702,8 +881,8 @@ const body = k.plateHtml({
     { mark: "edge", label: "Mid-tone lines: your brief and notes; the ring: your approval" },
   ],
   caption:
-    "You are the human at a project board that trades work with three agent members, and nobody waits on anybody. Click a robot (or pull its cord, or press 1–3) to write a work item and send it down that agent's lane. A robot takes it when it is free; a second item waits one card back. It works through the item, writing progress onto it as comments, then stops and sends it back for approval. The board holds returned cards on the near wire until you get to them. Stamp one to approve it to Done (A), or click the card to write a note and send it out again (N). You do one thing at a time, so what you click queues up behind what you are doing. An autopilot plays the human while you watch, and hands the desk back to you the moment you act.",
-  body: `<div class="iso-stage" tabindex="0" role="group" aria-label="Agent dispatch railway: press 1, 2 or 3 to assign work to A1, A2 or A3; A to approve the next returned card; N to note it and send it back">${svg}</div>`,
+    "You are the human at a project board that trades work with three agent members, and nobody waits on anybody. Click a robot (or pull its cord, or press 1–3) to write a work item and send it down that agent's lane. A robot takes it when it is free; a second item waits one card back. It works through the item, writing progress onto it as comments, then stops and sends it back for approval. The board holds returned cards on the near wire until you get to them. Stamp one to approve it to Done (A), or click the card to write a note and send it out again (N). You do one thing at a time, so what you click queues up behind what you are doing. An autopilot plays the human while you watch, and hands the desk back to you the moment you act. Point at any part (or tap it, or walk the parts with the arrow keys) to read what it stands for and what it is doing right now.",
+  body: `<div class="iso-stage" tabindex="0" role="group" aria-label="Agent dispatch railway: press 1, 2 or 3 to assign work to A1, A2 or A3; A to approve the next returned card; N to note it and send it back; arrow keys to walk through the parts" aria-describedby="dx-tip">${svg}</div>`,
 }).replace("</div></div><figcaption", `</div></div>${deskPanel}<figcaption`);
 
 // The cyber data space: navy glass, cyan linework, magenta for what the agents send back.
@@ -750,10 +929,26 @@ const TERMINAL_CSS = `
 .dx-led-off circle,.dx-led-off rect,circle.dx-led-off{fill:var(--anatomy-faint)}
 .dx-led-on circle,rect.dx-led-on{fill:var(--anatomy-hi)}
 .dx-led-bar rect,circle.dx-led-bar{fill:var(--anatomy-lit)}
-.dx-hit{fill:var(--anatomy-hi);fill-opacity:0;stroke:none;cursor:pointer;pointer-events:all;transition:fill-opacity .15s}
-.dx-hit:hover{fill-opacity:.07}
-.dx-hit[data-off]{cursor:not-allowed}
-.dx-hit[data-off]:hover{fill-opacity:0}
+.dx-hit{fill:var(--anatomy-hi);fill-opacity:0;stroke:none;cursor:default;pointer-events:all;transition:fill-opacity .15s}
+.dx-hit.dx-hot{fill-opacity:.07;cursor:pointer}
+.dx-hit.dx-hot[data-off]{fill-opacity:0;cursor:not-allowed}
+.dx-hit[data-none]{pointer-events:none}
+.dx-pad{fill:none;stroke:#000;stroke-opacity:0;stroke-width:5px;pointer-events:stroke}
+.dx-tipped .iso-line.iso-edge{stroke:var(--anatomy-hi)}
+.dx-tip{position:absolute;left:0;top:0;z-index:5;width:max-content;max-width:min(260px,calc(100% - 16px));padding:8px 10px 9px;pointer-events:none;background:var(--anatomy-card);border:1px solid var(--anatomy-mid);box-shadow:0 6px 20px rgba(0,0,0,.35);font-family:var(--anatomy-mono);font-size:11px;line-height:1.45;color:var(--anatomy-text);text-align:left}
+.dx-tip[hidden]{display:none}
+.dx-tip b{display:block;margin-bottom:3px;color:var(--anatomy-strong);font-weight:600;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase}
+.dx-tip p{margin:0;color:var(--anatomy-muted)}
+.dx-tip .dx-tip-live{margin-top:4px;color:var(--anatomy-text);font-variant-numeric:tabular-nums}
+.dx-tip .dx-tip-live::before{content:"";display:inline-block;width:5px;height:5px;margin-right:6px;border-radius:50%;background:var(--anatomy-lit);vertical-align:1px}
+.dx-tip .dx-tip-act{margin-top:6px;padding-top:5px;border-top:1px solid var(--anatomy-faint);color:var(--anatomy-hi)}
+.dx-tip .dx-tip-act[data-off]{color:var(--anatomy-muted)}
+.dx-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.iso[data-theme="light"] .dx-tip{box-shadow:0 6px 20px rgba(0,0,0,.12)}
+.iso[data-theme="cyber"] .dx-tip{background:#050c18f2;border-color:#1a8c9c;box-shadow:0 0 0 3px #03050b,0 0 18px #00e5ff26,inset 0 0 18px #00e5ff0d}
+.iso[data-theme="cyber"] .dx-tip b{text-shadow:0 0 6px #21d8ee80}
+.iso[data-theme="cyber"] .dx-tip .dx-tip-live::before{box-shadow:0 0 5px #ff4fd8}
+.iso[data-theme="cyber"] .dx-tipped .iso-line.iso-edge{filter:drop-shadow(0 0 1.4px #00e5ff)}
 .dx-desk{display:grid;gap:8px;margin-top:12px;font-family:var(--anatomy-mono);font-size:11px;letter-spacing:.04em}
 .dx-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 .dx-label{min-width:8.5em;color:var(--anatomy-muted);text-transform:uppercase;letter-spacing:.1em;font-variant-numeric:tabular-nums}

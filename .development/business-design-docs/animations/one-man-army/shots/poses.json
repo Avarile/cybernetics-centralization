@@ -1,0 +1,6 @@
+[["wait",800],
+ ["eval","window.__figure.jump(1,false)"],["wait",150],["lines","shots/lines-empty.png"],
+ ["eval","window.__figure.jump(4.4,false)"],["wait",150],["lines","shots/lines-scan.png"],
+ ["eval","window.__figure.jump(8.6,false)"],["wait",150],["lines","shots/lines-print.png"],
+ ["eval","window.__figure.jump(10.0,false)"],["wait",150],["lines","shots/lines-crate.png"],
+ ["eval","window.__figure.jump(40,false)"],["wait",150],["lines","shots/lines-run.png"]]
