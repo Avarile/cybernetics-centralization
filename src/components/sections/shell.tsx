@@ -14,11 +14,16 @@ import {
   tone,
   type Module,
 } from "@/lib/content";
-import { gotoSection, THEME_LABEL, toggleCrt, toggleTheme } from "@/lib/prefs";
+import { gotoSection } from "@/lib/prefs";
 import { Box } from "../tui/box";
 import { TuiSection } from "../tui/tui-section";
 
-type Entry = { id: number; input?: string; output?: ReactNode; cyborg?: boolean };
+type Entry = {
+  id: number;
+  input?: string;
+  output?: ReactNode;
+  cyborg?: boolean;
+};
 
 const COMMANDS: Record<string, string> = {
   help: "list commands",
@@ -28,8 +33,6 @@ const COMMANDS: Record<string, string> = {
   cyborgize: "link every module to you",
   open: "open <module> in a new tab",
   goto: "goto <section> on this page",
-  theme: "theme [phosphor|paper]",
-  crt: "crt [on|off]",
   register: "get early access",
   blog: "read the blog",
   clear: "clear the screen",
@@ -37,7 +40,7 @@ const COMMANDS: Record<string, string> = {
 
 const ALIASES: Record<string, Module["id"]> = {
   data: "data",
-  "data-centre": "data",
+  "data-base": "data",
   db: "data",
   database: "data",
   projects: "proj",
@@ -51,11 +54,23 @@ const ALIASES: Record<string, Module["id"]> = {
 
 const OPEN_TARGETS = ["data", "projects", "crm", "agents"];
 
-const SUGGESTIONS = ["help", "cyborgize", "register", "goto modules", "open projects"];
+const SUGGESTIONS = [
+  "help",
+  "cyborgize",
+  "register",
+  "goto modules",
+  "open projects",
+];
 
 let nextId = 0;
 
-export function InteractiveShell({ logo, logoNarrow }: { logo: string; logoNarrow: string }) {
+export function InteractiveShell({
+  logo,
+  logoNarrow,
+}: {
+  logo: string;
+  logoNarrow: string;
+}) {
   const [entries, setEntries] = useState<Entry[]>(() => [
     { id: nextId++, output: <Banner logo={logo} logoNarrow={logoNarrow} /> },
   ]);
@@ -73,7 +88,10 @@ export function InteractiveShell({ logo, logoNarrow }: { logo: string; logoNarro
   }, [entries]);
 
   function print(inputText: string, output?: ReactNode) {
-    setEntries((e) => [...e, { id: nextId++, input: inputText, output, cyborg }]);
+    setEntries((e) => [
+      ...e,
+      { id: nextId++, input: inputText, output, cyborg },
+    ]);
   }
 
   function run(raw: string) {
@@ -97,11 +115,13 @@ export function InteractiveShell({ logo, logoNarrow }: { logo: string; logoNarro
           line,
           cyborg ? (
             <p>
-              you — <Tone c="var(--accent)">100% cyborgized</Tone>. your agents know you.
+              you — <Tone c="var(--accent)">100% cyborgized</Tone>. your agents
+              know you.
             </p>
           ) : (
             <p>
-              you — <Tone c="var(--crm)">analog</Tone>. run <Cmd>cyborgize</Cmd> to fix that.
+              you — <Tone c="var(--crm)">analog</Tone>. run <Cmd>cyborgize</Cmd>{" "}
+              to fix that.
             </p>
           ),
         );
@@ -132,21 +152,19 @@ export function InteractiveShell({ logo, logoNarrow }: { logo: string; logoNarro
       }
       case "goto":
       case "cd": {
-        const target = sections.find((sec) => sec.win === arg || sec.id === arg);
+        const target = sections.find(
+          (sec) => sec.win === arg || sec.id === arg,
+        );
         if (!target) {
-          return print(line, <p>usage: goto &lt;{sections.map((sec) => sec.win).join("|")}&gt;</p>);
+          return print(
+            line,
+            <p>
+              usage: goto &lt;{sections.map((sec) => sec.win).join("|")}&gt;
+            </p>,
+          );
         }
         gotoSection(target.id);
         return print(line, <p>→ {target.path}</p>);
-      }
-      case "theme": {
-        const to = arg === "paper" ? "light" : arg === "phosphor" ? "dark" : undefined;
-        toggleTheme(to);
-        return print(line, <p>theme: {THEME_LABEL[document.documentElement.dataset.theme ?? "dark"]}</p>);
-      }
-      case "crt": {
-        toggleCrt(arg === "on" || arg === "off" ? arg : undefined);
-        return print(line, <p>crt: {document.documentElement.dataset.crt === "off" ? "off" : "on"}</p>);
       }
       case "register":
       case "signup":
@@ -177,7 +195,8 @@ export function InteractiveShell({ logo, logoNarrow }: { logo: string; logoNarro
         return print(
           line,
           <p>
-            <Tone c="var(--crm)">command not found:</Tone> {cmd}. try <Cmd>help</Cmd>.
+            <Tone c="var(--crm)">command not found:</Tone> {cmd}. try{" "}
+            <Cmd>help</Cmd>.
           </p>,
         );
     }
@@ -192,7 +211,9 @@ export function InteractiveShell({ logo, logoNarrow }: { logo: string; logoNarro
       const hits = OPEN_TARGETS.filter((a) => a.startsWith(rest.join(" ")));
       if (hits.length === 1) setInput(`open ${hits[0]}`);
     } else if (cmd === "goto") {
-      const hits = sections.map((sec) => sec.win).filter((w) => w.startsWith(rest.join(" ")));
+      const hits = sections
+        .map((sec) => sec.win)
+        .filter((w) => w.startsWith(rest.join(" ")));
       if (hits.length === 1) setInput(`goto ${hits[0]}`);
     }
   }
@@ -234,11 +255,21 @@ export function InteractiveShell({ logo, logoNarrow }: { logo: string; logoNarro
       intro="A tiny shell into Cybernetics. Try help, cyborgize, goto modules or open projects. Tab completes, ↑/↓ recalls."
     >
       <div onClick={() => inputRef.current?.focus({ preventScroll: true })}>
-        <Box term title={`${cyborg ? "cyborg" : "guest"}@cybernetics: ~ — zsh`} bodyClassName="glow cursor-text text-[12.5px]">
-          <div ref={bodyRef} className="h-[440px] overflow-y-auto p-4 sm:p-5" aria-live="polite">
+        <Box
+          term
+          title={`${cyborg ? "cyborg" : "guest"}@cybernetics: ~ — zsh`}
+          bodyClassName="glow cursor-text text-[12.5px]"
+        >
+          <div
+            ref={bodyRef}
+            className="h-[440px] overflow-y-auto p-4 sm:p-5"
+            aria-live="polite"
+          >
             {entries.map((e) => (
               <div key={e.id}>
-                {e.input !== undefined && <Prompt cyborg={!!e.cyborg}>{e.input}</Prompt>}
+                {e.input !== undefined && (
+                  <Prompt cyborg={!!e.cyborg}>{e.input}</Prompt>
+                )}
                 {e.output && <div className="mb-2">{e.output}</div>}
               </div>
             ))}
@@ -286,7 +317,10 @@ function Banner({ logo, logoNarrow }: { logo: string; logoNarrow: string }) {
       <pre aria-hidden className="hidden leading-[1.2] text-accent sm:block">
         {logo}
       </pre>
-      <pre aria-hidden className="text-[12px] leading-tight text-accent sm:hidden">
+      <pre
+        aria-hidden
+        className="text-[12px] leading-tight text-accent sm:hidden"
+      >
         {logoNarrow}
       </pre>
       <p className="sr-only">Cybernetics</p>
@@ -341,7 +375,10 @@ function McpList() {
             <Tone c={tone[m.id]}>●</Tone> {m.url}/mcp
           </p>
         ))}
-      <p className="mt-1 text-dim">add these to any MCP client — or use {host(modules.find((m) => m.id === "agent")!.url)}.</p>
+      <p className="mt-1 text-dim">
+        add these to any MCP client — or use{" "}
+        {host(modules.find((m) => m.id === "agent")!.url)}.
+      </p>
     </div>
   );
 }
@@ -414,13 +451,22 @@ function AnimatedBar({ delay, cells = 10 }: { delay: number; cells?: number }) {
 function PromptSymbol({ cyborg }: { cyborg: boolean }) {
   return (
     <span className="shrink-0">
-      <span className={cyborg ? "text-accent" : "text-[var(--crm)]"}>{cyborg ? "cyborg" : "guest"}</span>
-      <span className="text-dim">@cybernetics</span> <span className="text-accent">❯</span>
+      <span className={cyborg ? "text-accent" : "text-[var(--crm)]"}>
+        {cyborg ? "cyborg" : "guest"}
+      </span>
+      <span className="text-dim">@cybernetics</span>{" "}
+      <span className="text-accent">❯</span>
     </span>
   );
 }
 
-function Prompt({ cyborg, children }: { cyborg: boolean; children: ReactNode }) {
+function Prompt({
+  cyborg,
+  children,
+}: {
+  cyborg: boolean;
+  children: ReactNode;
+}) {
   return (
     <p className="flex gap-2">
       <PromptSymbol cyborg={cyborg} />

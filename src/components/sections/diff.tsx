@@ -10,13 +10,16 @@ export function Diff() {
       command="git diff analog-you cyborg-you"
       intro="And that system has no API. AI agents are powerful — but without your context, they're strangers."
     >
-      <Box title="diff --git a/analog-you b/cyborg-you" bodyClassName="py-3 text-[13px] sm:text-sm">
+      <Box
+        title="diff --git a/analog-you b/cyborg-you"
+        bodyClassName="py-3 text-[13px] sm:text-sm"
+      >
         <p className="px-4 text-dim">--- a/analog-you</p>
         <p className="px-4 text-dim">+++ b/cyborg-you</p>
         <p className="px-4 text-data">@@ -1,3 +1,3 @@ you</p>
         {diffLines.map((d) => (
           <div key={d.minus} className="mt-1">
-            <p className="flex gap-3 bg-[color-mix(in_oklab,var(--red)_10%,transparent)] px-4 text-red">
+            <p className="flex gap-3 bg-[color-mix(in_oklab,var(--red)_10%,transparent)] px-4 text-red line-through decoration-dim/50">
               <span aria-hidden>-</span>
               <span className="sr-only">Before:</span>
               <span>{d.minus}</span>
@@ -29,7 +32,9 @@ export function Diff() {
           </div>
         ))}
       </Box>
-      <p className="mt-3 text-xs text-dim">3 files changed, 3 insertions(+), 3 deletions(-)</p>
+      <p className="mt-3 text-xs text-dim">
+        3 files changed, 3 insertions(+), 3 deletions(-)
+      </p>
     </TuiSection>
   );
 }

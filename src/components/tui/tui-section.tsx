@@ -91,7 +91,7 @@ export function TuiSection({
 
   return (
     <section ref={ref} id={id} aria-labelledby={`${id}-title`} className="relative">
-      <div className="mx-auto max-w-[110ch] px-4 py-16 sm:px-6 md:py-24">
+      <div className="mx-auto max-w-[110ch] px-4 py-12 sm:px-6 md:py-16">
         <div aria-hidden className="mb-8 flex items-center gap-2 text-xs text-dim">
           <span>
             ──[ <span className="text-accent">{index}</span>:{win} ]

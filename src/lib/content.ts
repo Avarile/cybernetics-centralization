@@ -32,13 +32,13 @@ export const tone: Record<ModuleId, string> = {
 export const modules: Module[] = [
   {
     id: "data",
-    name: "Data Centre",
+    name: "Data Base",
     repo: "cybernetics-data-centre",
     url: "https://cybernetics.avarile.com",
     role: "What you know",
-    tagline: "Your knowledge, structured.",
+    tagline: "The foundation. Your knowledge, structured.",
     description:
-      "A data persistence layer for everything you know — knowledge entries, how-tos, references, finances. Tables, views and a record graph an agent can query.",
+      "The foundation of everything else. One database you own for knowledge, how-tos, references and finances — tables, views and a record graph that you and your agents can query.",
     capabilities: [
       "Knowledge, how-tos and references as linked records",
       "Custom tables, fields and views — no schema lock-in",
@@ -48,17 +48,17 @@ export const modules: Module[] = [
   },
   {
     id: "proj",
-    name: "Projects",
+    name: "Project Management",
     repo: "cybernetics-projects",
     url: "https://projects.avarile.com",
     role: "What you do",
     tagline: "Your intentions, executable.",
     description:
-      "Goals, projects and tasks — with the Data Centre built in, so every task can carry the knowledge needed to finish it.",
+      "A classic project management tool that doubles as the layer connecting a person to their agents — with the Data Base built in, so every task carries the knowledge needed to finish it.",
     capabilities: [
-      "Goals → projects → tasks, with priorities and deadlines",
-      "Tasks linked to how-tos and references in the Data Centre",
-      "Progress an agent can read, plan and update",
+      "A classic project tool: goals, projects, cycles and tasks",
+      "The intermediate layer between you and your agents — assign work to either",
+      "Tasks linked to the knowledge they need in the Data Base",
     ],
     mcpTools: ["list_projects", "create_work_items", "update_work_item"],
     integratesWith: "data",
@@ -71,7 +71,7 @@ export const modules: Module[] = [
     role: "Who you work with",
     tagline: "Your relationships, remembered.",
     description:
-      "People, companies, deals, notes and follow-ups — the social graph around your work.",
+      "For anyone running a private business: people, companies, deals, notes and follow-ups — the social graph around your work.",
     capabilities: [
       "Contacts, companies and opportunities",
       "Notes, tasks and timelines on any record",
@@ -81,17 +81,17 @@ export const modules: Module[] = [
   },
   {
     id: "agent",
-    name: "Agents",
+    name: "Agentic Platform",
     repo: "cybernetics-agents",
     url: "https://agentic.avarile.com",
     role: "Who acts for you",
-    tagline: "Your delegate, connected.",
+    tagline: "Where it all comes together.",
     description:
-      "An agentic platform that plugs into every module over MCP — and into any other MCP server you use.",
+      "Data from the Data Base, Project Management and CRM meets here. Custom agents consume it over MCP and use skills for the harder jobs.",
     capabilities: [
-      "Multi-model chat and agents",
-      "Connects to all Cybernetics MCP servers",
-      "Bring your own tools and providers",
+      "Custom agents that consume all three platforms over MCP",
+      "Skills for complex, repeatable tasks",
+      "Any model, any provider — your data stays yours",
     ],
     mcpTools: ["mcp: data · projects · crm"],
   },
@@ -101,7 +101,7 @@ export const modules: Module[] = [
 export const diffLines: { minus: string; plus: string }[] = [
   {
     minus: "knowledge scattered across notes, bookmarks, chats and memory",
-    plus: "one data-centre: knowledge, how-tos and references as linked records",
+    plus: "one data base: knowledge, how-tos and references as linked records",
   },
   {
     minus: "goals and next steps live only in your head",
@@ -115,19 +115,19 @@ export const diffLines: { minus: string; plus: string }[] = [
 
 /** Section 5: how it works, as `tail -f /var/log/you.log`. */
 export const logLines: { stage: "capture" | "structure" | "delegate"; tone: ModuleId; text: string }[] = [
-  { stage: "capture", tone: "data", text: "data-centre +3 records (how-to, ref, note)" },
+  { stage: "capture", tone: "data", text: "data base +3 records (how-to, ref, note)" },
   { stage: "capture", tone: "proj", text: "projects +1 goal \"launch v2\" → 5 tasks" },
   { stage: "structure", tone: "data", text: "linked task#12 → how-to#001 \"deploy to production\"" },
   { stage: "structure", tone: "crm", text: "linked person#88 → project \"launch v2\"" },
   { stage: "delegate", tone: "agent", text: "agent claimed task#12 via mcp" },
   { stage: "delegate", tone: "agent", text: "agent read how-to#001, ran checklist, 6/6 ✓" },
-  { stage: "capture", tone: "data", text: "data-centre +1 record \"launch v2 retro\" (outcome)" },
+  { stage: "capture", tone: "data", text: "data base +1 record \"launch v2 retro\" (outcome)" },
   { stage: "delegate", tone: "agent", text: "agent drafted beta invite for 12 people (crm)" },
   { stage: "structure", tone: "proj", text: "task#13 unblocked by ref#002 \"stripe api docs\"" },
 ];
 
 export const logStages = [
-  { stage: "capture", text: "Put what you know into the Data Centre and what you intend into Projects. Agents can do the typing." },
+  { stage: "capture", text: "Put what you know into the Data Base and what you intend into Project Management. Agents can do the typing." },
   { stage: "structure", text: "Link tasks to the how-tos and references they need; people to the projects they touch." },
   { stage: "delegate", text: "Connect any MCP-capable agent. It reads your context and acts on it — within data you own." },
 ] as const;
@@ -227,9 +227,10 @@ ${mcpServers.map((s) => `  ${s.name}:\n    type: streamable-http\n    url: ${s.e
 export const sections = [
   { id: "top", win: "boot", path: "~" },
   { id: "diff", win: "diff", path: "~/problem" },
+  { id: "principles", win: "principles", path: "~/principles" },
   { id: "know", win: "know", path: "~/know-do" },
-  { id: "modules", win: "modules", path: "/opt/cybernetics" },
-  { id: "mcp", win: "mcp", path: "~/.config/mcp" },
+  { id: "modules", win: "platforms", path: "/opt/cybernetics" },
+  { id: "mcp", win: "agentic", path: "~/.config/mcp" },
   { id: "log", win: "log", path: "/var/log" },
   { id: "who", win: "who", path: "/home" },
   { id: "compose", win: "compose", path: "~/stack" },
@@ -241,7 +242,7 @@ export type SectionId = (typeof sections)[number]["id"];
 
 /** The `cyborgize` boot script: one line per module, linked in this order. */
 export const bootSequence: { id: ModuleId; label: string; detail: string }[] = [
-  { id: "data", label: "data-centre", detail: "knowledge · how-tos · refs" },
+  { id: "data", label: "data-base", detail: "knowledge · how-tos · refs" },
   { id: "proj", label: "projects", detail: "goals · projects · tasks" },
   { id: "crm", label: "crm", detail: "people · companies · deals" },
   { id: "agent", label: "agents", detail: "mcp × 3 online" },
@@ -249,3 +250,83 @@ export const bootSequence: { id: ModuleId; label: string; detail: string }[] = [
 
 export const BOOT_COMMAND = "cyborgize --subject you";
 export const BOOT_DONE = "cyborgization complete. your agents now know you.";
+
+/** The three principles behind the platform, from the Personal-migration design doc. */
+export const principles = [
+  {
+    n: "01",
+    tone: "data" as ModuleId,
+    name: "Data first, AI second",
+    line: "Compute without a data foundation is a hallucination dispenser.",
+    body: "Everything you plan, learn, decide and fix lands in one structured database — facts in a warehouse, live work in an operational layer. AI is only as good as what it can read.",
+  },
+  {
+    n: "02",
+    tone: "agent" as ModuleId,
+    name: "AI agnostic",
+    line: "Your data does not live on any LLM platform.",
+    body: "Persistence is separate from the model. Swap Claude for another provider, or use several at once: the same records can write code, draw images or draft ads.",
+  },
+  {
+    n: "03",
+    tone: "proj" as ModuleId,
+    name: "Closed loops",
+    line: "Every lap makes the next one better.",
+    body: "Who did what, when, with which knowledge, and how it turned out — all recorded. Finished work feeds back as experience, so processes improve instead of repeating mistakes.",
+  },
+];
+
+export type Shot = { file: string; label: string; caption: string };
+
+/** Screenshots per platform, in public/screens. The Agentic Platform has none yet. */
+export const screenshots: Record<"data" | "proj" | "crm", Shot[]> = {
+  data: [
+    { file: "screenshot-database-mcp.png", label: "mcp", caption: "Per-user access tokens and one MCP endpoint: your agents get exactly the access you grant." },
+  ],
+  proj: [
+    { file: "screenshot-project-management-homepage.png", label: "home", caption: "Your workspace home: recent work, quicklinks and stickies." },
+    { file: "screenshot-project-management-projects.png", label: "work items", caption: "Projects, cycles and modules — the classic tooling, done properly. Some items are assigned to AI agents." },
+    { file: "screenshot-project-management-detailed-task.png", label: "task", caption: "A work item with its history and relations — assigned to an agent, reviewed by you." },
+    { file: "screenshot-project-management-module-control.png", label: "modules", caption: "Plan in modules and cycles; people and agents work the same board." },
+  ],
+  crm: [
+    { file: "screenshot-crm-workflow.png", label: "workflow", caption: "People, companies and opportunities, with workflows running on top." },
+    { file: "screenshot-crm-mcp.png", label: "mcp", caption: "Your relationships, reachable by Claude, ChatGPT, Cursor and more over MCP." },
+  ],
+};
+
+export type Figure = { id: string; src: string; title: string; caption: string };
+
+/** Interactive isometric figures, in public/figures (light builds). */
+export const figures: Record<string, Figure> = {
+  personPrinter: {
+    id: "person-printer",
+    src: "/figures/person-printer.html",
+    title: "Person printer",
+    caption: "Digitalize yourself: what you know and do is captured once and printed into structured records.",
+  },
+  oneManArmy: {
+    id: "one-man-army",
+    src: "/figures/one-man-army.html",
+    title: "One-person studio",
+    caption: "One person, a studio's worth of output — because the agents are connected to the same memory.",
+  },
+  financeSorter: {
+    id: "finance-sorter",
+    src: "/figures/finance-sorter.html",
+    title: "Statement sorter",
+    caption: "Raw statements go in; categorised, queryable finance records come out of the Data Base.",
+  },
+  agentDispatch: {
+    id: "agent-dispatch",
+    src: "/figures/agent-dispatch.html",
+    title: "Agent dispatch railway",
+    caption: "Project Management as the layer between you and your agents: write a task, assign it, watch it move.",
+  },
+  memoryCatalog: {
+    id: "memory-catalog",
+    src: "/figures/memory-catalog.html",
+    title: "Agent memory catalog",
+    caption: "How agents file, index and recall memory — the closed loop that makes them sharper over time.",
+  },
+};

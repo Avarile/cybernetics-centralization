@@ -15,15 +15,14 @@ export const metadata: Metadata = {
     "Cybernetics turns what you know and what you do into structured data you own — ready for any AI agent over MCP.",
 };
 
-// Runs before first paint: theme (phosphor unless the visitor chose paper), CRT preference,
-// and the once-per-session startup screen (home page only — other pages never clear it).
-const bootScript = `(function(){var d=document.documentElement;try{var t=localStorage.getItem("theme");if(t!=="light"&&t!=="dark"){t="dark"}d.dataset.theme=t;var c=localStorage.getItem("crt");if(c==="off"||(c===null&&matchMedia("(prefers-reduced-motion: reduce)").matches)){d.dataset.crt="off"}if(location.pathname==="/"&&!sessionStorage.getItem("booted")&&!matchMedia("(prefers-reduced-motion: reduce)").matches){d.dataset.boot="1"}}catch(e){d.dataset.theme="dark"}})()`;
+// Runs before first paint: the once-per-session startup screen (home page only — other pages never clear it).
+const bootScript = `(function(){var d=document.documentElement;try{d.dataset.crt="off";if(location.pathname==="/"&&!sessionStorage.getItem("booted")&&!matchMedia("(prefers-reduced-motion: reduce)").matches){d.dataset.boot="1"}}catch(e){}})()`;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      data-theme="dark"
+      data-theme="light"
       suppressHydrationWarning
       className={`${geistMono.variable} h-full antialiased`}
     >

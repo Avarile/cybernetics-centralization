@@ -28,12 +28,14 @@ export function KnowDo() {
     <TuiSection
       id="know"
       title="Two layers make a person legible: what you know, and what you do."
-      command="tmux split-window -h 'data-centre' 'projects'"
+      command="tmux split-window -h 'data-base' 'projects'"
       intro={
         <>
-          The <span className="text-data">Data Centre</span> holds your knowledge, how-tos and references.{" "}
-          <span className="text-proj">Projects</span> holds your goals and tasks — with the Data Centre built in, so
-          every task carries the know-how to finish it.
+          The <span className="text-data">Data Base</span> holds your knowledge,
+          how-tos and references.{" "}
+          <span className="text-proj">Project Management</span> holds your goals
+          and tasks — with the Data Base built in, so every task carries the
+          know-how to finish it.
         </>
       }
     >
@@ -55,17 +57,24 @@ function SplitPanes() {
 
   useEffect(() => {
     if (!inView || !revealed || reduce) return;
-    const t = setInterval(() => setStep((s) => (s + 1) % (tasks.length + 2)), STEP_MS);
+    const t = setInterval(
+      () => setStep((s) => (s + 1) % (tasks.length + 2)),
+      STEP_MS,
+    );
     return () => clearInterval(t);
   }, [inView, revealed, reduce]);
 
   return (
     <div ref={ref}>
-      <Box title="tmux · know │ do" bodyClassName="grid text-[13px] lg:grid-cols-2">
+      <Box
+        title="tmux · know │ do"
+        bodyClassName="grid text-[13px] lg:grid-cols-2"
+      >
         {/* Left pane: what you know */}
         <div className="min-w-0 border-line p-4 max-lg:border-b lg:border-r">
           <p className="mb-3 text-xs">
-            <span className="text-data">data-centre&gt;</span> query knowledge --kind how-to,ref
+            <span className="text-data">data-base&gt;</span> query knowledge
+            --kind how-to,ref
           </p>
           <table className="w-full text-left">
             <thead className="text-xs text-dim">
@@ -83,8 +92,12 @@ function SplitPanes() {
                     key={r.id}
                     className={`transition-colors duration-300 ${active ? "bg-data text-bg" : ""}`}
                   >
-                    <td className={`py-0.5 pr-3 ${active ? "" : "text-dim"}`}>{r.id}</td>
-                    <td className={`pr-3 ${active ? "" : "text-data"}`}>{r.kind}</td>
+                    <td className={`py-0.5 pr-3 ${active ? "" : "text-dim"}`}>
+                      {r.id}
+                    </td>
+                    <td className={`pr-3 ${active ? "" : "text-data"}`}>
+                      {r.kind}
+                    </td>
                     <td className="truncate">{r.title}</td>
                   </tr>
                 );
@@ -97,7 +110,8 @@ function SplitPanes() {
         {/* Right pane: what you do */}
         <div className="min-w-0 p-4">
           <p className="mb-3 text-xs">
-            <span className="text-proj">projects&gt;</span> tree ~/goals/launch-v2
+            <span className="text-proj">projects&gt;</span> tree
+            ~/goals/launch-v2
           </p>
           <p className="text-proj">launch-v2/</p>
           {tasks.map((t, i) => {
@@ -108,10 +122,16 @@ function SplitPanes() {
             return (
               <p key={t.slug} className="flex flex-wrap gap-x-2 whitespace-pre">
                 <span className="text-dim">{last ? "└──" : "├──"}</span>
-                <span className={done ? "text-proj" : active ? "text-accent" : "text-dim"}>
+                <span
+                  className={
+                    done ? "text-proj" : active ? "text-accent" : "text-dim"
+                  }
+                >
                   [{done ? "x" : " "}]
                 </span>
-                <span className={active ? "bg-proj text-bg" : ""}>{t.slug}</span>
+                <span className={active ? "bg-proj text-bg" : ""}>
+                  {t.slug}
+                </span>
                 {done && (
                   <span className="flicker-in text-data">
                     → {rec.kind}
@@ -132,13 +152,21 @@ function SplitPanes() {
         {current ? (
           <>
             <span className="text-accent">❯</span> ln -s{" "}
-            <span className="text-data">data://{records[current.record].kind}{records[current.record].id}</span>{" "}
-            <span className="text-proj">projects://launch-v2/{current.slug}</span> <Cursor />
+            <span className="text-data">
+              data://{records[current.record].kind}
+              {records[current.record].id}
+            </span>{" "}
+            <span className="text-proj">
+              projects://launch-v2/{current.slug}
+            </span>{" "}
+            <Cursor />
           </>
         ) : (
           <>
             <span className="text-proj">✓</span>{" "}
-            <span className="text-dim">every task linked to the know-how it needs.</span>
+            <span className="text-dim">
+              every task linked to the know-how it needs.
+            </span>
           </>
         )}
       </p>

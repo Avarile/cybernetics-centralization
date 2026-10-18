@@ -8,28 +8,72 @@ import { Box } from "../tui/box";
 import { TuiSection, useRevealed } from "../tui/tui-section";
 
 type Profile = "standalone" | "together";
-type Line = { kind: "Network" | "Container" | "Volume"; name: string; tone?: ModuleId; state: string; note?: string };
+type Line = {
+  kind: "Network" | "Container" | "Volume";
+  name: string;
+  tone?: ModuleId;
+  state: string;
+  note?: string;
+};
 
 const OUTPUT: Record<Profile, Line[]> = {
   standalone: [
-    { kind: "Container", name: "data-centre", tone: "data", state: "Started", note: "mcp → /mcp" },
-    { kind: "Container", name: "projects", tone: "proj", state: "Started", note: "mcp → /mcp" },
-    { kind: "Container", name: "crm", tone: "crm", state: "Started", note: "mcp → /mcp" },
+    {
+      kind: "Container",
+      name: "data-base",
+      tone: "data",
+      state: "Started",
+      note: "mcp → /mcp",
+    },
+    {
+      kind: "Container",
+      name: "projects",
+      tone: "proj",
+      state: "Started",
+      note: "mcp → /mcp",
+    },
+    {
+      kind: "Container",
+      name: "crm",
+      tone: "crm",
+      state: "Started",
+      note: "mcp → /mcp",
+    },
     { kind: "Container", name: "agents", tone: "agent", state: "Started" },
   ],
   together: [
     { kind: "Network", name: "you-mesh", state: "Created" },
-    { kind: "Container", name: "data-centre", tone: "data", state: "Started" },
-    { kind: "Container", name: "projects", tone: "proj", state: "Started", note: "linked → data-centre" },
-    { kind: "Container", name: "crm", tone: "crm", state: "Started", note: "linked → projects" },
-    { kind: "Container", name: "agents", tone: "agent", state: "Started", note: "mcp → data, projects, crm" },
+    { kind: "Container", name: "data-base", tone: "data", state: "Started" },
+    {
+      kind: "Container",
+      name: "projects",
+      tone: "proj",
+      state: "Started",
+      note: "linked → data-base",
+    },
+    {
+      kind: "Container",
+      name: "crm",
+      tone: "crm",
+      state: "Started",
+      note: "linked → projects",
+    },
+    {
+      kind: "Container",
+      name: "agents",
+      tone: "agent",
+      state: "Started",
+      note: "mcp → data, projects, crm",
+    },
     { kind: "Volume", name: "you", state: "Created" },
   ],
 };
 
 const SUMMARY: Record<Profile, string> = {
-  standalone: "4 independent apps · each useful alone · each with its own MCP server",
-  together: "one person · shared links between modules · agents see everything you allow",
+  standalone:
+    "4 independent apps · each useful alone · each with its own MCP server",
+  together:
+    "one person · shared links between modules · agents see everything you allow",
 };
 
 // Segments: [text, module tone?]
@@ -37,12 +81,32 @@ type Seg = [string, ModuleId?];
 const DIAGRAM: Record<Profile, Seg[][]> = {
   standalone: [
     [["┌──────┐ ┌──────┐ ┌─────┐ ┌────────┐"]],
-    [["│ "], ["data", "data"], [" │ │ "], ["proj", "proj"], [" │ │ "], ["crm", "crm"], [" │ │ "], ["agents", "agent"], [" │"]],
+    [
+      ["│ "],
+      ["data", "data"],
+      [" │ │ "],
+      ["proj", "proj"],
+      [" │ │ "],
+      ["crm", "crm"],
+      [" │ │ "],
+      ["agents", "agent"],
+      [" │"],
+    ],
     [["└──────┘ └──────┘ └─────┘ └────────┘"]],
   ],
   together: [
     [["┌──────┐ ┌──────┐ ┌─────┐ ┌────────┐"]],
-    [["│ "], ["data", "data"], [" ├─┤ "], ["proj", "proj"], [" ├─┤ "], ["crm", "crm"], [" ├─┤ "], ["agents", "agent"], [" │"]],
+    [
+      ["│ "],
+      ["data", "data"],
+      [" ├─┤ "],
+      ["proj", "proj"],
+      [" ├─┤ "],
+      ["crm", "crm"],
+      [" ├─┤ "],
+      ["agents", "agent"],
+      [" │"],
+    ],
     [["└──┬───┘ └──┬───┘ └──┬──┘ └───┬────┘"]],
     [["   └────────┴───┬────┴────────┘"]],
     [["             ["], ["you"], ["]"]],
@@ -58,7 +122,11 @@ export function Compose() {
       command="docker compose --profile together up -d"
       intro="Every module runs on its own. Put them together and they share one person: tasks link to knowledge, contacts link to projects, agents see the whole picture."
     >
-      <div role="radiogroup" aria-label="Compose profile" className="mb-6 flex flex-wrap items-center gap-2 text-[13px]">
+      <div
+        role="radiogroup"
+        aria-label="Compose profile"
+        className="mb-6 flex flex-wrap items-center gap-2 text-[13px]"
+      >
         <span className="text-dim">--profile</span>
         {(["standalone", "together"] as const).map((p) => (
           <button
@@ -97,28 +165,53 @@ function ComposeRun({ profile }: { profile: Profile }) {
 
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto]">
-      <Box term title="docker compose" bodyClassName="glow min-h-[13em] p-4 text-[12.5px] sm:p-5">
+      <Box
+        term
+        title="docker compose"
+        bodyClassName="glow min-h-[13em] p-4 text-[12.5px] sm:p-5"
+      >
         <p>
-          <span className="text-accent">❯</span> docker compose --profile {profile} up -d
+          <span className="text-accent">❯</span> docker compose --profile{" "}
+          {profile} up -d
         </p>
         <p className="text-data">
           [+] Running {finished}/{lines.length}
         </p>
         {lines.slice(0, shown).map((l, i) => (
           <p key={l.name + l.kind} className="flex gap-2 whitespace-pre">
-            <span className="w-3 text-center">{i < finished ? <span className="text-proj">✔</span> : <Spinner />}</span>
+            <span className="w-3 text-center">
+              {i < finished ? (
+                <span className="text-proj">✔</span>
+              ) : (
+                <Spinner />
+              )}
+            </span>
             <span className="w-[9ch] shrink-0 text-dim">{l.kind}</span>
-            <span className="w-[12ch] shrink-0" style={{ color: l.tone ? tone[l.tone] : "var(--accent)" }}>
+            <span
+              className="w-[12ch] shrink-0"
+              style={{ color: l.tone ? tone[l.tone] : "var(--accent)" }}
+            >
               {l.name}
             </span>
-            <span className={i < finished ? "text-proj" : "text-dim"}>{i < finished ? l.state : "Starting"}</span>
-            {l.note && i < finished && <span className="hidden truncate text-dim sm:inline">{l.note}</span>}
+            <span className={i < finished ? "text-proj" : "text-dim"}>
+              {i < finished ? l.state : "Starting"}
+            </span>
+            {l.note && i < finished && (
+              <span className="hidden truncate text-dim sm:inline">
+                {l.note}
+              </span>
+            )}
           </p>
         ))}
-        {finished === lines.length && <p className="flicker-in mt-2 text-dim"># {SUMMARY[profile]}</p>}
+        {finished === lines.length && (
+          <p className="flicker-in mt-2 text-dim"># {SUMMARY[profile]}</p>
+        )}
       </Box>
 
-      <pre aria-hidden className="glow self-center text-[12px] leading-[1.3] text-dim sm:text-[13px]">
+      <pre
+        aria-hidden
+        className="glow self-center text-[12px] leading-[1.3] text-dim sm:text-[13px]"
+      >
         {DIAGRAM[profile].map((row, i) => (
           <div key={i}>
             {row.map(([text, t], j) => (

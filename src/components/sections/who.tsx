@@ -9,10 +9,15 @@ export function Who() {
       command="finger @cybernetics"
       intro="If you keep knowledge and have things to do, you already run a system. Cybernetics makes it one your agents can use."
     >
-      <p className="mb-6 text-[13px] text-dim">[cybernetics.avarile.com] · {personas.length} users on since forever</p>
+      <p className="mb-6 text-[13px] text-dim">
+        [cybernetics.avarile.com] · {personas.length} users on since forever
+      </p>
       <div className="grid gap-x-10 gap-y-8 text-[13px] md:grid-cols-2 lg:grid-cols-3">
         {personas.map((p) => (
-          <article key={p.login} className="border-l border-line pl-4 transition-colors hover:border-accent">
+          <article
+            key={p.login}
+            className="border-l border-line pl-4 transition-colors hover:border-accent"
+          >
             <h3 className="flex flex-wrap gap-x-4">
               <span>
                 <span className="text-dim">Login: </span>

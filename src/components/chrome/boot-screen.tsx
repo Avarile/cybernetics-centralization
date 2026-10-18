@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
 const LINES: [string, string?][] = [
   ["CYBERNETICS BIOS v1.0 · (c) 2026 avarile"],
   ["cpu0: human cortex, 1 core, variable clock", "ok"],
-  ["memory test: 4 modules", "ok"],
-  ["  data-centre · projects · crm · agents"],
+  ["memory test: 4 platforms", "ok"],
+  ["  data base · project management · crm · agentic"],
   ["loading kernel you.ko", "ok"],
   ["mounting /home/you/knowledge", "ok"],
   ["mounting /home/you/projects", "ok"],
@@ -63,7 +63,7 @@ export function BootScreen() {
     <div
       role="status"
       aria-label="Starting Cybernetics"
-      className={`boot-screen term glow fixed inset-0 z-[80] flex-col justify-between bg-bg p-5 text-[13px] transition-opacity duration-200 sm:p-8 ${
+      className={`boot-screen fixed inset-0 z-[80] flex-col justify-between bg-bg bg-none p-5 text-[13px] transition-opacity duration-200 sm:p-8 ${
         leaving ? "opacity-0" : ""
       }`}
     >

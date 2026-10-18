@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { host, modules, sections, SITE_URL } from "@/lib/content";
-import { gotoSection, toggleCrt, toggleTheme } from "@/lib/prefs";
+import { gotoSection } from "@/lib/prefs";
 
 type Item = { cmd: string; hint: string; run: () => void };
 
@@ -19,10 +19,6 @@ const ITEMS: Item[] = [
     hint: host(m.url),
     run: () => window.open(m.url, "_blank", "noopener,noreferrer"),
   })),
-  { cmd: "theme phosphor", hint: "dark", run: () => toggleTheme("dark") },
-  { cmd: "theme paper", hint: "light", run: () => toggleTheme("light") },
-  { cmd: "crt on", hint: "scanlines + glow", run: () => toggleCrt("on") },
-  { cmd: "crt off", hint: "plain screen", run: () => toggleCrt("off") },
   { cmd: "blog", hint: host(SITE_URL), run: () => window.open(SITE_URL, "_blank", "noopener,noreferrer") },
   { cmd: "exocortex", hint: "what's the big idea?", run: () => { window.location.href = "/exocortex"; } },
   { cmd: "register", hint: "get early access", run: () => { window.location.href = "/register"; } },

@@ -1,61 +1,31 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
-
-/* ---------- Themes: "paper" (light) and "phosphor" (dark) ---------- */
+/* ---------- Theme: light, black / white / grey only ---------- */
 
 :root {
-  --bg: #f4f1e8;
-  --bg-alt: #ebe6d8;
-  --fg: #1d1f21;
-  --dim: #6f6a5e;
-  --line: #d6cfbd;
-  --accent: #0f766e;
-  --accent-fg: #f4f1e8;
-  --data: #0369a1;
-  --proj: #3f6212;
-  --crm: #92400e;
-  --agent: #7c3aed;
-  --red: #b91c1c;
-  --scan: rgb(0 0 0 / 0.035);
+  --bg: #fafafa;
+  --bg-alt: #efefef;
+  --fg: #0a0a0a;
+  --dim: #5f5f5f;
+  --line: #d4d4d4;
+  --accent: #0a0a0a;
+  --accent-fg: #fafafa;
+  /* Platform tones: four distinct greys, all readable on white. */
+  --data: #0a0a0a;
+  --proj: #3d3d3d;
+  --crm: #5c5c5c;
+  --agent: #767676;
+  --red: #3d3d3d;
+  --panel: #ffffff;
   --glow: 0;
   color-scheme: light;
 }
 
-[data-theme="dark"] {
-  --bg: #050607;
-  --bg-alt: #0b0e11;
-  --fg: #d4dde3;
-  --dim: #7a848f;
-  --line: #1c2229;
-  --accent: #5eead4;
-  --accent-fg: #042f2e;
-  --data: #38bdf8;
-  --proj: #a3e635;
-  --crm: #f5b544;
-  --agent: #a78bfa;
-  --red: #f87171;
-  --scan: rgb(0 0 0 / 0.22);
-  --glow: 1;
-  color-scheme: dark;
-}
-
-/* Terminal panels stay phosphor-dark even on paper, for contrast. */
+/* Panels that read as a screen: white card, soft shadow. */
 .term {
-  --bg: #050607;
-  --bg-alt: #0b0e11;
-  --fg: #d4dde3;
-  --dim: #7a848f;
-  --line: #1c2229;
-  --accent: #5eead4;
-  --accent-fg: #042f2e;
-  --data: #38bdf8;
-  --proj: #a3e635;
-  --crm: #f5b544;
-  --agent: #a78bfa;
-  --red: #f87171;
-  --glow: 1;
-  color-scheme: dark;
+  --bg: var(--panel);
+  background: var(--panel);
+  box-shadow: 0 1px 0 rgb(15 23 42 / 0.04), 0 12px 32px -18px rgb(15 23 42 / 0.25);
   color: var(--fg);
 }
 
@@ -82,7 +52,9 @@ html {
 }
 
 body {
-  background: var(--bg);
+  background-color: var(--bg);
+  background-image: radial-gradient(circle, rgb(0 0 0 / 0.08) 1px, transparent 1px);
+  background-size: 22px 22px;
   color: var(--fg);
   font-family: var(--font-geist-mono), ui-monospace, monospace;
   font-size: 15px;
@@ -178,7 +150,7 @@ body {
 }
 
 @keyframes topo-flash {
-  0% { filter: brightness(2.2); }
+  0% { filter: brightness(0.55) saturate(2); }
   100% { filter: none; }
 }
 
@@ -351,7 +323,6 @@ body {
 
 @media print {
   :root,
-  [data-theme="dark"],
   .term {
     --bg: #ffffff;
     --bg-alt: #f4f4f4;

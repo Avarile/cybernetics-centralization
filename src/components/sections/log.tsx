@@ -8,7 +8,11 @@ import { Cursor } from "../tui/bits";
 import { Box } from "../tui/box";
 import { TuiSection, useRevealed } from "../tui/tui-section";
 
-const STAGE_TONE = { capture: tone.data, structure: tone.proj, delegate: tone.agent };
+const STAGE_TONE = {
+  capture: tone.data,
+  structure: tone.proj,
+  delegate: tone.agent,
+};
 const START = 4; // lines present on first render
 const MAX = 9; // lines kept on screen
 const EVERY_MS = 1800;
@@ -63,17 +67,31 @@ function LogStream() {
 
   return (
     <div ref={ref}>
-      <Box term title="/var/log/you.log" right={<span className="text-proj">● live</span>} bodyClassName="glow min-h-[15.5em] p-4 text-[12.5px] sm:p-5">
+      <Box
+        term
+        title="/var/log/you.log"
+        right={<span className="text-proj">● live</span>}
+        bodyClassName="glow min-h-[15.5em] p-4 text-[12.5px] sm:p-5"
+      >
         {visible.map((k) => {
           const l = logLines[k % logLines.length];
           return (
-            <p key={k} className={`flex gap-3 whitespace-pre ${k >= START ? "flicker-in" : ""}`}>
+            <p
+              key={k}
+              className={`flex gap-3 whitespace-pre ${k >= START ? "flicker-in" : ""}`}
+            >
               <span className="text-dim">{stamp(k)}</span>
               <span className="text-proj">INFO</span>
-              <span className="w-[9ch] shrink-0" style={{ color: STAGE_TONE[l.stage] }}>
+              <span
+                className="w-[9ch] shrink-0"
+                style={{ color: STAGE_TONE[l.stage] }}
+              >
                 {l.stage}
               </span>
-              <span className="min-w-0 truncate" style={{ color: k === count - 1 ? tone[l.tone] : undefined }}>
+              <span
+                className="min-w-0 truncate"
+                style={{ color: k === count - 1 ? tone[l.tone] : undefined }}
+              >
                 {l.text}
               </span>
             </p>
