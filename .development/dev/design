@@ -1,0 +1,489 @@
+# Design: Email Two-Factor Authentication (v1) + Verification-Code Hardening
+
+- Status: Approved for implementation
+- Date: 2026-10-19
+- Target repo: `cybernetics-data-centre` (Teable-based app; NestJS backend + Next.js pages-router frontend)
+- Delivered as: one PR
+
+## 1. Decisions
+
+| # | Question | Decision |
+|---|---|---|
+| 1 | Should social logins (Google / GitHub / OIDC) be challenged? | **No, not in v1.** 2FA applies to email + password sign-in only. The UI copy says so. |
+| 2 | Scope | **Full stack**: settings UI, API, data model, sign-in challenge, emails, i18n, tests. |
+| 3 | Verification codes leaking through JWTs (signup, change-email) | **Fix in the same PR** with one shared verification-code service, which 2FA also uses. |
+
+## 2. Background
+
+### 2.1 Where the feature lives
+
+The Profile Modal opens when the user clicks their name. Its Account tab is
+`apps/nextjs-app/src/features/app/components/setting/Account.tsx`. Under **Account security** it currently has:
+
+- **Email**: `setting/account/ChangeEmailDialog.tsx`
+- **Password**: `setting/account/ChangePasswordDialog.tsx` (only shown when `user.hasPassword`), or `AddPassword.tsx` when there is no password
+
+Relevant backend pieces:
+
+- `apps/nestjs-backend/src/features/auth/local-auth/local-auth.controller.ts` + `local-auth.service.ts`: signin, signup, change email, change password, reset password
+- `apps/nestjs-backend/src/features/auth/strategies/local.strategy.ts`: Passport-local `validate()`, with lockout via `signin:attempts:{email}` / `signin:lockout:{email}`
+- `apps/nestjs-backend/src/features/auth/guard/local-auth.guard.ts`: runs the strategy, then `logIn()` (creates the session)
+- `apps/nestjs-backend/src/features/mail-sender/mail-sender.service.ts`: `sendEmailVerifyCodeEmailOptions`, `checkSendMailRateLimit`
+- `apps/nestjs-backend/src/cache/cache.service.ts` (Keyv) + `cache/types.ts`: typed cache keys
+- `apps/nestjs-backend/src/features/auth/session/session-store.service.ts`: `clearByUserId`
+
+UI primitives that already exist in `@teable/ui-lib/shadcn`: `dialog`, `input-otp`, `badge`, `switch`, `button`, `input`, `label`, `sonner`. No new dependencies are needed.
+
+### 2.2 The verification-code leak (fixed in this PR)
+
+Two flows put the code inside a JWT and send that JWT to the browser:
+
+- **Signup**: `LocalAuthService.jwtSignupCode(email, code)` signs `{ email, code }`. The token is returned by `POST /api/auth/send-signup-verification-code` and in the 422 body from `POST /api/auth/signup`.
+- **Change email**: `LocalAuthService.sendChangeEmailCode` signs `{ email, newEmail, code }`. The token is returned by `POST /api/auth/send-change-email-code`.
+
+A JWT is signed but **not encrypted**, so anyone can base64-decode the payload and read the code.
+
+**Impact:**
+- Signup email verification can be bypassed: anyone can register with an address they don't own.
+- Change-email ownership proof can be bypassed: a signed-in user (or anyone with a stolen session plus the password) can move the account to an address they don't control.
+- The codes are 4 digits (10,000 possibilities) and nothing limits how many guesses one token gets.
+
+**Fix:** codes are stored on the server and only a hash is kept. The client only ever gets an opaque random token (section 4).
+
+## 3. Goals and non-goals
+
+**Goals**
+
+- A user with a password can turn email 2FA on or off from Profile Modal → Account security.
+- With 2FA on, password sign-in needs a 6-digit code emailed to the account address before a session is created.
+- Turning 2FA on or off requires the password plus an emailed code. A stolen session cookie alone can't disable it.
+- All emailed codes (signup, change email, 2FA) are stored server-side, hashed, single-use, expire, and allow at most 5 guesses.
+
+**Non-goals (v1)**
+
+- Challenging social / OIDC logins.
+- Authenticator-app TOTP, WebAuthn, recovery codes. Recovery codes add little for email 2FA: password reset uses the same inbox.
+- "Trust this device for 30 days".
+- Admin reset of a user's 2FA (planned for v2; see section 12).
+- Signing out other sessions when 2FA is turned on.
+- Personal access tokens, MCP / OAuth-app access tokens. These are token-based, never go through `/auth/signin`, and are not affected.
+
+## 4. Shared component: `VerificationCodeService`
+
+New: `apps/nestjs-backend/src/features/auth/verification-code/verification-code.service.ts`, exported from a small module that `LocalAuthModule` and `TwoFactorModule` import.
+
+### 4.1 API
+
+```ts
+export type VerificationPurpose = 'signup' | 'change-email' | '2fa-setup' | '2fa-signin';
+
+interface IVerificationEntry<T> {
+  codeHash: string;   // hex HMAC
+  attempts: number;
+  expiresAt: number;  // epoch ms; used to keep the remaining TTL when re-saving after a wrong guess
+  data: T;            // what the code is bound to (email, userId, action, ...)
+}
+
+issue<T>(purpose: VerificationPurpose, data: T, expiresIn: string):
+  Promise<{ token: string; code: string; expiresTime: string }>;
+
+verify<T>(purpose: VerificationPurpose, token: string, code: string): Promise<T>; // consumes on success
+
+peek<T>(purpose: VerificationPurpose, token: string): Promise<T | undefined>;    // for resend; no attempt counted
+
+revoke(purpose: VerificationPurpose, token: string): Promise<void>;
+```
+
+### 4.2 Rules
+
+| Item | Rule |
+|---|---|
+| Token | `crypto.randomBytes(32).toString('base64url')`. Opaque, carries no data. |
+| Code | 6 digits: `crypto.randomInt(0, 1_000_000).toString().padStart(6, '0')`. |
+| Storage | Cache key `verify-code:{purpose}:{token}` → `IVerificationEntry`, with TTL = `expiresIn`. |
+| Hash | `HMAC-SHA256(authConfig.jwt.secret, "{purpose}:{token}:{code}")`. The plaintext code is never stored, so a leaked cache can't be brute-forced offline without the secret. |
+| Compare | `crypto.timingSafeEqual` on the hash buffers. |
+| Wrong guess | `attempts += 1`. At 5 the entry is deleted. Otherwise it is re-saved with TTL `expiresAt - now`. Throws `INVALID_CAPTCHA` (`httpErrors.auth.verificationCodeInvalid`). |
+| Missing / expired | Throws `INVALID_CAPTCHA` (`httpErrors.auth.verificationCodeExpired`). |
+| Success | Entry deleted (single use), returns `data`. |
+| Dev | Code is still logged when `baseConfig.enableEmailCodeConsole` is on (existing behaviour in `MailSenderService`). |
+
+Add to `cache/types.ts`:
+
+```ts
+[key: `verify-code:${string}:${string}`]: {
+  codeHash: string;
+  attempts: number;
+  expiresAt: number;
+  data: Record<string, unknown>;
+};
+```
+
+Constant: `MAX_VERIFICATION_ATTEMPTS = 5`.
+
+### 4.3 Moving signup and change-email onto it (the leak fix)
+
+The wire contract stays the same: the client still gets `{ token, expiresTime }` / `{ token }` and sends `{ token, code }` back. **No frontend changes are needed for the fix.** The only visible change is that codes are 6 digits instead of 4. Both inputs are free text, so this needs no UI change.
+
+| Flow | Before | After |
+|---|---|---|
+| `sendSignupVerificationCode(email)` | `jwtSignupCode(email, code)` | `issue('signup', { email }, authConfig.signupVerificationExpiresIn)` |
+| `verifySignup(body)` | `jwtVerifySignupCode` + compare | `verify('signup', token, code)`, then check `data.email === email` (lower-cased) |
+| `sendChangeEmailCode(newEmail, password)` | `jwtService.signAsync({ email, newEmail, code })` | `issue('change-email', { userId, email, newEmail }, baseConfig.emailCodeExpiresIn)` |
+| `changeEmail(email, token, code)` | `jwtService.verifyAsync` + compare | `verify('change-email', token, code)`, then check `data.userId === cls user.id` and `data.newEmail === email.toLowerCase()` |
+
+Clean-up: delete `jwtSignupCode` and `jwtVerifySignupCode`. Remove `JwtService` from `LocalAuthService` if nothing else uses it (today nothing else does).
+
+**Deploy note:** a JWT token issued before the deploy stops working afterwards. Those users click "Get code" again. Codes expire within 30 minutes anyway.
+
+## 5. Data model
+
+`packages/db-main-prisma/prisma/template.prisma`, `model User`:
+
+```prisma
+twoFactorEmailEnabled Boolean?  @map("two_factor_email_enabled")
+twoFactorEnabledTime  DateTime? @map("two_factor_enabled_time")
+```
+
+Migrations, following the existing naming (latest is `20261018000000_add_user_onboarding`):
+
+- `prisma/postgres/migrations/20261019000000_add_user_two_factor/migration.sql`
+- `prisma/sqlite/migrations/20261019000000_add_user_two_factor/migration.sql`
+
+```sql
+-- postgres
+ALTER TABLE "users" ADD COLUMN "two_factor_email_enabled" BOOLEAN;
+ALTER TABLE "users" ADD COLUMN "two_factor_enabled_time" TIMESTAMP(3);
+```
+
+`NULL` means off. No backfill is needed.
+
+## 6. API contract (`packages/openapi`)
+
+### 6.1 `auth/user-me.ts`
+
+```ts
+twoFactor: z.object({
+  email: z.boolean(),
+  enabledTime: z.string().nullable().optional(),
+}).optional(),
+```
+
+`apps/nestjs-backend/src/features/auth/utils.ts`: add `twoFactorEmailEnabled` and `twoFactorEnabledTime` to `IPickUserMe`, and have `pickUserMe` return
+`twoFactor: { email: !!user.twoFactorEmailEnabled, enabledTime: user.twoFactorEnabledTime?.toISOString() ?? null }`.
+Check that every `pickUserMe` caller selects the new columns: `UserService.getUserById` / `getUserByEmail` already return the full row.
+
+### 6.2 New `auth/two-factor.ts` (settings)
+
+```ts
+export const TWO_FACTOR_EMAIL_SEND_CODE = '/auth/two-factor/email/send-code';
+export const TWO_FACTOR_EMAIL_ENABLE    = '/auth/two-factor/email/enable';
+export const TWO_FACTOR_EMAIL_DISABLE   = '/auth/two-factor/email/disable';
+
+export const twoFactorEmailSendCodeRoSchema = z.object({
+  action: z.enum(['enable', 'disable']),
+  password: z.string(),
+});
+export const twoFactorEmailSendCodeVoSchema = z.object({ token: z.string(), expiresTime: z.string() });
+
+export const twoFactorEmailConfirmRoSchema = z.object({ token: z.string(), code: z.string() });
+```
+
+Axios helpers: `sendTwoFactorEmailCode`, `enableTwoFactorEmail`, `disableTwoFactorEmail`. Routes are registered with `registerRoute`, like the existing files.
+
+### 6.3 New `auth/signin-two-factor.ts` (login challenge)
+
+```ts
+export const SIGN_IN_TWO_FACTOR        = '/auth/signin/two-factor';
+export const SIGN_IN_TWO_FACTOR_RESEND = '/auth/signin/two-factor/resend';
+
+export const twoFactorChallengeSchema = z.object({
+  challengeId: z.string(),
+  maskedEmail: z.string(),   // e.g. "a•••••e@gmail.com"
+  expiresTime: z.string(),
+});
+export const signinTwoFactorRoSchema = z.object({ challengeId: z.string(), code: z.string() });
+export const signinTwoFactorResendRoSchema = z.object({ challengeId: z.string() });
+// signin/two-factor → userMeVoSchema; resend → twoFactorChallengeSchema
+```
+
+Export both new files from `auth/index.ts`.
+
+### 6.4 Error code (`packages/core`)
+
+- `HttpErrorCode.TWO_FACTOR_REQUIRED = 'two_factor_required'`
+- `ErrorCodeToStatusMap[TWO_FACTOR_REQUIRED] = 422`. Deliberately **not 401**, because `withAuthSSR` and similar code treat 401 as "redirect to login".
+- The error's `data` is `ITwoFactorChallenge`.
+
+### 6.5 Public setting (`admin/setting/get-public.ts`)
+
+- `mailConfigured: z.boolean().optional()`: true when the Notify transporter resolves to a config (instance setting or env). The UI uses it to disable the 2FA row on servers without SMTP, so nobody locks themselves out.
+- `twoFactorSendCodeMailRate: z.number().optional()`: resend countdown.
+
+## 7. Backend
+
+### 7.1 Config
+
+- `auth.config.ts`: `twoFactorCodeExpiresIn: process.env.BACKEND_TWO_FACTOR_CODE_EXPIRES_IN ?? '10m'`
+- `threshold.config.ts`: `twoFactorSendCodeMailRate: Number(process.env.BACKEND_TWO_FACTOR_SEND_CODE_MAIL_RATE ?? 30)`
+
+### 7.2 New module `features/auth/two-factor/`
+
+```
+two-factor.module.ts       imports VerificationCodeModule, MailSenderModule, UserModule
+two-factor.service.ts
+two-factor.controller.ts   @Controller('api/auth')
+two-factor.service.spec.ts
+```
+
+Make `LocalAuthService.validateUserByEmail` (password check) callable from here. It is already public, and `TwoFactorModule` imports `LocalAuthModule` or receives the method as a provider.
+
+### 7.3 Settings endpoints (signed-in session)
+
+| Method / path | Body | Behaviour |
+|---|---|---|
+| `POST /api/auth/two-factor/email/send-code` | `{ action, password }` | 1. Load the current user. If there is no password → `VALIDATION_ERROR` (`passwordNotSet`). 2. Check the password with `validateUserByEmail`. If wrong → `INVALID_CREDENTIALS`. 3. State check: `enable` while already on, or `disable` while already off → `CONFLICT`. 4. Rate limit with `checkSendMailRateLimit({ email, rateLimitKey: 'two-factor-setup', rateLimit: twoFactorSendCodeMailRate })`. 5. `issue('2fa-setup', { userId, action }, twoFactorCodeExpiresIn)`. 6. Send the code to the **current** email (`EmailVerifyCodeType.TwoFactorSetup`). 7. Return `{ token, expiresTime }`. |
+| `POST /api/auth/two-factor/email/enable` | `{ token, code }` | `verify('2fa-setup')` and check `data.userId === me && data.action === 'enable'`. Set `twoFactorEmailEnabled = true` and `twoFactorEnabledTime = now`. Send the "2FA enabled" notice email (async; a failure doesn't fail the request). Emit `Events.USER_TWO_FACTOR_CHANGE`. Return `204`. |
+| `POST /api/auth/two-factor/email/disable` | `{ token, code }` | Same, with `action === 'disable'`. Set both columns to `null` and send the "2FA disabled" notice. |
+
+Sessions are **not** cleared on enable or disable, so the user stays signed in.
+
+### 7.4 Sign-in challenge
+
+`LocalStrategy.validate` is restructured so that only the password check sits inside the lockout `try/catch`. Today that `catch` turns **every** error into "Email or password is incorrect" and counts a failed attempt. If the 2FA error were thrown inside it, a correct password would count as a failure.
+
+```ts
+async validate(req: Request, email: string, password: string) {
+  const user = await this.validatePasswordWithLockout(req, email, password); // existing try/catch, moved unchanged
+  if (user.deactivatedTime) { /* existing accountDeactivated error */ }
+
+  if (user.twoFactorEmailEnabled) {
+    const challenge = await this.twoFactorService.createSigninChallenge(user); // issues + emails code
+    throw new CustomHttpException('Two-factor authentication required', HttpErrorCode.TWO_FACTOR_REQUIRED, {
+      ...challenge,
+      localization: { i18nKey: 'httpErrors.auth.twoFactorRequired' },
+    });
+  }
+
+  await this.userService.refreshLastSignTime(user.id);
+  return pickUserMe(user);
+}
+```
+
+`LocalAuthGuard` only calls `logIn()` after `canActivate` succeeds, so **no session is created** when the challenge is thrown.
+
+`TwoFactorService.createSigninChallenge(user)`:
+
+1. `checkSendMailRateLimit({ email, rateLimitKey: 'two-factor-signin', ... })`. If rate-limited, pass on the existing `TOO_MANY_REQUESTS { seconds }` error.
+2. `issue('2fa-signin', { userId, email }, twoFactorCodeExpiresIn)`, then send the email (`EmailVerifyCodeType.TwoFactorSignin`).
+3. Return `{ challengeId: token, maskedEmail, expiresTime }`.
+
+If sending the email fails, return `INTERNAL_SERVER_ERROR` ("We couldn't send your sign-in code"). This does **not** count as a failed password.
+
+Endpoints, both `@Public()`:
+
+| Method / path | Body | Behaviour |
+|---|---|---|
+| `POST /api/auth/signin/two-factor` | `{ challengeId, code }` | `peek('2fa-signin')` to get the email (if missing → expired). `verify()`. **On a wrong code**, also `cacheService.incr('signin:attempts:{email}')` and apply the same lockout threshold as `LocalStrategy`, sharing a `SigninLockoutService` helper taken out of the strategy. **On success:** load the user and check they still exist, are not deactivated and still have 2FA on. Then `refreshLastSignTime`, `req.login(pickUserMe(user))`, return `IUserMeVo`. |
+| `POST /api/auth/signin/two-factor/resend` | `{ challengeId }` | `peek()`. If missing → expired (the client sends the user back to the password step). Check the rate limit. `revoke()` the old token, then `issue()` a new one, send the email, and return a new `ITwoFactorChallenge`. The client replaces `challengeId`. |
+
+Notes:
+
+- Turnstile is checked once, on the password step. It is not needed on the code step.
+- `req.login` regenerates the session id (Passport ≥ 0.6), so there is no session fixation.
+- Lockout entries for email-only `signin:*` keys already exist in `cache/types.ts`. Only the `verify-code:*` key is new.
+
+### 7.5 Email templates
+
+`packages/openapi/src/mail/types.ts`:
+
+```ts
+export enum EmailVerifyCodeType {
+  Signup = 'signup',
+  ChangeEmail = 'changeEmail',
+  DomainVerification = 'domainVerification',
+  TwoFactorSetup = 'twoFactorSetup',
+  TwoFactorSignin = 'twoFactorSignin',
+}
+```
+
+`MailSenderService.sendEmailVerifyCodeEmailOptions`: add both cases, reusing the `email-verify-code` partial.
+
+| Type | Subject | Body |
+|---|---|---|
+| TwoFactorSetup | "Confirm two-factor authentication for {brandName}" | Code, expiry, "You asked to turn two-factor authentication on/off." |
+| TwoFactorSignin | "Your {brandName} sign-in code" | Code, expiry, "If you didn't just try to sign in, change your password now." |
+
+New method `twoFactorChangedNoticeEmailOptions({ name, enabled })`, using the `normal` template with a `common` partial: "Two-factor authentication was turned on/off for your account on {time}. If this wasn't you, reset your password." Sent with `MailType.Notify` via `MailTransporterType.Notify`.
+
+Backend i18n keys: `common.email.templates.emailVerifyCode.twoFactorSetup.*`, `...twoFactorSignin.*`, `common.email.templates.twoFactorChanged.*`.
+
+## 8. Frontend
+
+### 8.1 Account security row (`setting/Account.tsx`)
+
+A third card goes under Password, styled like the existing rows:
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│ Two-factor authentication  [Off]                 [Enable]    │
+│ Ask for a code sent to a•••••e@gmail.com each time you       │
+│ sign in with your password.                                  │
+└──────────────────────────────────────────────────────────────┘
+```
+
+| State | Badge | Description | Action |
+|---|---|---|---|
+| Off | `Off` (secondary) | "Ask for a code sent to {maskedEmail} each time you sign in with your password." | `[Enable]` (outline) |
+| On | `On` (green) | "On since {date}. Signing in with Google, GitHub or SSO isn't affected." | `[Disable]` (outline, destructive text) |
+| No password | `Off` | "Add a password to use two-factor authentication." | Button disabled |
+| `!mailConfigured` | `Off` | "Email delivery isn't configured on this server." | Button disabled (still shown as `[Disable]` if already on, so a user can always turn it off) |
+
+The row is its own component, `setting/account/TwoFactorEmailRow.tsx`, so `Account.tsx` only gains one line.
+
+### 8.2 `setting/account/TwoFactorEmailDialog.tsx`
+
+Props: `{ action: 'enable' | 'disable'; children: ReactNode }` (the trigger). Two steps inside one `Dialog`, `md:w-[400px]`, the same as `ChangeEmailDialog`:
+
+```
+Step 1: Confirm it's you            Step 2: Enter the code
+┌─────────────────────────────┐     ┌─────────────────────────────┐
+│ Turn on two-factor auth     │     │ Check your email            │
+│ We'll email a 6-digit code  │     │ We sent a code to           │
+│ to a•••••e@gmail.com.       │     │ a•••••e@gmail.com           │
+│                             │     │                             │
+│ Current password            │     │   [_][_][_]-[_][_][_]       │
+│ [••••••••••]                │     │                             │
+│                             │     │ Didn't get it? Resend (27s) │
+│ [Send code]                 │     │ [Confirm]       [Back]      │
+└─────────────────────────────┘     └─────────────────────────────┘
+```
+
+Behaviour:
+
+- `useMutation(sendTwoFactorEmailCode)`. On success: store `token`, go to step 2, start `useCutDown` with `twoFactorSendCodeMailRate`.
+- `InputOTP` (6 slots, `inputMode="numeric"`, `autoComplete="one-time-code"`). Submits automatically when all 6 are filled, and Confirm is also available.
+- `useMutation(enableTwoFactorEmail | disableTwoFactorEmail)`. On success: `toast.success`, `useSession().refresh()`, close and reset the dialog. No reload or sign-out.
+- Errors map to inline `<Error>` with `meta: { preventGlobalError: true }`: `INVALID_CREDENTIALS` → "Password is incorrect"; `INVALID_CAPTCHA` → "Code is invalid or expired"; `TOO_MANY_REQUESTS` → existing rate-limit message with `{seconds}`; `CONFLICT` → refresh the session and close (state changed in another tab).
+- Resend calls send-code again with the password kept in state. Closing the dialog clears all state, including the password.
+- Disable copy: title "Turn off two-factor authentication", with a warning line "Your account will only be protected by your password."
+
+### 8.3 Login (`features/auth/components/SignForm.tsx`)
+
+- `onError`: add `case HttpErrorCode.TWO_FACTOR_REQUIRED:` → `setTwoFactorChallenge(error.data)`.
+- When `twoFactorChallenge` is set, the form shows a code step instead of email and password:
+
+```
+Check your email
+We sent a 6-digit sign-in code to a•••••e@gmail.com
+
+      [_][_][_]-[_][_][_]
+
+[Verify]
+Resend code (30s)   ·   Use a different account
+```
+
+- Verify → `signinTwoFactor({ challengeId, code })`. On success, run the same path as a normal sign-in (`onSuccess?.()` + existing redirect handling).
+- Resend → `resendSigninTwoFactor({ challengeId })`, which replaces the challenge and restarts the countdown.
+- `INVALID_CAPTCHA` → "That code isn't right." Expired → reset to the password step with "Your code expired, sign in again." `TOO_MANY_REQUESTS` (lockout) → existing lockout message.
+- "Use a different account" clears the challenge and returns to the password form, keeping the email filled in.
+- Sub-component: `features/auth/components/TwoFactorCodeStep.tsx`, so `SignForm` doesn't grow by 100+ lines.
+
+### 8.4 Frontend i18n (`packages/common-i18n/src/locales/{en,zh}/`)
+
+- `common.json` → `settings.account.twoFactor.{title, on, off, descOff, descOn, noPassword, mailNotConfigured, enable, disable, enableTitle, disableTitle, sendDesc, sendCode, codeTitle, codeDesc, resend, confirm, back, disableWarning, success.enabled, success.disabled, error.invalidCode, error.invalidPassword, error.sendMailRateLimit}`
+- `auth.json` → `twoFactor.{title, desc, verify, resend, useDifferentAccount, invalidCode, expired}`
+- Backend `httpErrors.auth.{twoFactorRequired, twoFactorAlreadyEnabled, twoFactorNotEnabled, verificationCodeExpired, sendTwoFactorCodeFailed}`
+
+Other locales fall back to `en`.
+
+## 9. Security summary
+
+| Threat | Mitigation |
+|---|---|
+| Stolen password | Sign-in also needs a code from the account's inbox. |
+| Stolen session cookie used to turn off 2FA | Disabling needs the password **and** an emailed code. |
+| Brute-forcing a code | 6 digits, 5 guesses per token, 10-minute expiry, send rate limit per email, wrong 2FA codes count toward the existing account lockout. |
+| Reading a code from the token | Tokens are opaque random values. Codes are stored as an HMAC on the server (section 4). This also fixes signup and change-email. |
+| Replaying a code | Single use: the entry is deleted on success. |
+| Timing attack on compare | `timingSafeEqual`. |
+| Lock-out on a server without SMTP | Enabling is blocked when `mailConfigured` is false. Disabling is always allowed. |
+| User enumeration through the 2FA step | The challenge only appears **after** a correct password, so it reveals nothing new. |
+| Silent change by an attacker | Notice email on every enable or disable. |
+
+**Out of scope, flagged:** `auth.config.ts` falls back to a hard-coded `jwt.secret` (and session secret / access-token key) when env vars are missing. The HMAC uses `jwt.secret`, so production **must** set `BACKEND_JWT_SECRET` / `SECRET_KEY`. Worth a separate ticket to refuse to start in production on default secrets.
+
+## 10. Edge cases
+
+| Case | Behaviour |
+|---|---|
+| Change email while 2FA is on | Allowed. The new address is proven by its own code (now leak-free), and 2FA codes go to the new address afterwards. |
+| Password reset while 2FA is on | Reset clears all sessions, as today. The next sign-in still needs a 2FA code, which goes to the same inbox. |
+| Social login for a user with 2FA on | Not challenged (decision 1). The UI copy says so. |
+| User deactivated, or 2FA turned off mid-challenge | `POST /signin/two-factor` reloads the user and rejects a deactivated account. If 2FA was turned off in between, the code is still accepted, which is harmless. |
+| Several tabs | The settings `CONFLICT` refreshes the session. Login challenges are independent tokens. |
+| User adds a password later (social-only account) | The row becomes active after `AddPassword` signs them out and back in. |
+| Deleting the account | Columns go with the row. Cache entries expire on their own. |
+
+## 11. Files to change
+
+**Shared / contracts**
+- `packages/core/src/errors/http/http-response.types.ts`, `constant.ts`: `TWO_FACTOR_REQUIRED`
+- `packages/openapi/src/auth/user-me.ts`, `index.ts`; new `two-factor.ts`, `signin-two-factor.ts`
+- `packages/openapi/src/mail/types.ts`: `EmailVerifyCodeType` additions
+- `packages/openapi/src/admin/setting/get-public.ts`: `mailConfigured`, `twoFactorSendCodeMailRate`
+- `packages/db-main-prisma/prisma/template.prisma` + postgres and sqlite migrations
+
+**Backend**
+- new `features/auth/verification-code/{verification-code.module.ts, verification-code.service.ts, verification-code.service.spec.ts}`
+- new `features/auth/two-factor/{two-factor.module.ts, two-factor.service.ts, two-factor.controller.ts, two-factor.service.spec.ts}`
+- new `features/auth/signin-lockout.service.ts` (taken out of `local.strategy.ts`)
+- `features/auth/local-auth/local-auth.service.ts`: move signup and change-email onto `VerificationCodeService`, remove the JWT code helpers
+- `features/auth/local-auth/local-auth.module.ts`, `auth.module.ts`: wiring
+- `features/auth/strategies/local.strategy.ts`: restructure + challenge
+- `features/auth/utils.ts`: `pickUserMe`
+- `features/mail-sender/mail-sender.service.ts`: new verify-code cases + notice email
+- `features/setting/...` public setting service: `mailConfigured`, rate
+- `configs/auth.config.ts`, `configs/threshold.config.ts`
+- `cache/types.ts`
+- `event-emitter/events`: `USER_TWO_FACTOR_CHANGE`
+- backend i18n (`common.email.templates.*`, `httpErrors.auth.*`)
+
+**Frontend**
+- `features/app/components/setting/Account.tsx` (+1 line)
+- new `features/app/components/setting/account/TwoFactorEmailRow.tsx`, `TwoFactorEmailDialog.tsx`
+- `features/auth/components/SignForm.tsx`; new `TwoFactorCodeStep.tsx`
+- `packages/common-i18n/src/locales/{en,zh}/{common,auth}.json`
+
+## 12. Test plan
+
+**Unit (Vitest, next to existing `*.spec.ts`)**
+- `VerificationCodeService`: issue → verify OK; wrong code increments `attempts`; the 5th wrong code deletes the entry; expired → error; single use (a second verify fails); the token contains no code; HMAC differs per purpose (a `signup` token can't verify as `change-email`).
+- `LocalAuthService`: signup with a valid code / an invalid code / a code issued for a different email; change-email bound to `userId` and `newEmail`.
+- `TwoFactorService`: send-code wrong password / no password / state conflict / rate limit; enable and disable flip the columns and send the notice.
+- `LocalStrategy`: 2FA off → returns user; 2FA on → throws `TWO_FACTOR_REQUIRED` and does **not** increment `signin:attempts`; wrong password still locks out as before.
+
+**E2E (`apps/nestjs-backend/test`)**
+1. Sign up with email verification on: the token returned is opaque (not a decodable JWT).
+2. Enable 2FA: send-code → read the code from the mail mock → enable → `/auth/user/me` shows `twoFactor.email = true`.
+3. Sign out → sign in → 422 `two_factor_required` with no `Set-Cookie` session → `/signin/two-factor` with a wrong code ×4 → correct code → session works.
+4. Five wrong codes → challenge gone; lockout triggers once the threshold is reached.
+5. Disable 2FA → sign in goes straight through.
+6. A personal access token still works with 2FA on.
+
+**Manual UI**
+- Profile Modal row in all four states (off, on, no password, no SMTP), light and dark.
+- Dialog: auto-submit on 6 digits, paste of a 6-digit code, resend countdown, closing and reopening resets state.
+- Login code step: paste, resend, expired path, "Use a different account".
+
+## 13. Rollout
+
+1. Deploy runs the migrations automatically (`prisma-migrate-deploy`). Columns are nullable, so it's safe to roll back the code without rolling back the schema.
+2. Signup and change-email tokens issued before the deploy become invalid. Users request a new code.
+3. Make sure production sets `BACKEND_JWT_SECRET` / `SECRET_KEY` (section 9).
+4. Nothing changes for users until they turn 2FA on themselves.
+
+## 14. Later phases
+
+- **v2:** admin reset of a user's 2FA (instance admin user panel); "trust this device for 30 days" (a signed HttpOnly cookie checked in `LocalStrategy`); "sign out other devices" on enable (`clearByUserId` that skips the current session); challenging social / OIDC logins in `ControllerAdapter.callback` with a challenge page.
+- **v3:** authenticator-app TOTP as a second method, plus recovery codes. `cybernetics-agents/client/src/components/Nav/SettingsTabs/Account/TwoFactorPhases/*` can be used as a UI reference.
