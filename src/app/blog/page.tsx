@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { TuiButton } from "@/components/tui/tui-button";
-import { getPublishedPosts } from "@/lib/blog";
+import { getAllPosts, getPublishedPosts } from "@/lib/blog";
 import { absolute, alternates, author, baseOpenGraph, JsonLd, organization } from "@/lib/seo";
 
 const TITLE = "Cyborg Migration";
@@ -14,8 +14,12 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
 };
 
+// `pnpm dev` lists drafts too, marked, so they can be reviewed; the production build never does.
+const showDrafts = process.env.NODE_ENV === "development";
+
 export default function BlogIndex() {
   const posts = getPublishedPosts();
+  const listed = showDrafts ? getAllPosts() : posts;
   return (
     <main className="mx-auto max-w-[110ch] px-4 py-10 sm:px-6 md:py-16">
       <JsonLd
@@ -57,10 +61,14 @@ export default function BlogIndex() {
       </p>
 
       <ul className="mt-10 space-y-6">
-        {posts.map((p) => (
-          <li key={p.slug} className="border-l border-line pl-4 transition-colors hover:border-accent">
+        {listed.map((p) => (
+          <li
+            key={p.slug}
+            className={`border-l pl-4 transition-colors hover:border-accent ${p.draft ? "border-dashed border-red" : "border-line"}`}
+          >
             <a href={`/blog/${p.slug}`} className="group block">
               <span className="text-xs text-dim">
+                {p.draft && <span className="mr-2 border border-dashed border-red px-1 text-red">draft</span>}
                 <time dateTime={p.date}>{p.date}</time> · {p.readingMinutes} min
                 {p.series && <> · {p.series}</>}
               </span>
@@ -69,7 +77,7 @@ export default function BlogIndex() {
             </a>
           </li>
         ))}
-        {!posts.length && <li className="text-dim">$ ls posts/ — nothing published yet.</li>}
+        {!listed.length && <li className="text-dim">$ ls posts/ — nothing published yet.</li>}
       </ul>
     </main>
   );
