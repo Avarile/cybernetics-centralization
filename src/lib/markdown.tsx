@@ -1,9 +1,11 @@
 import type { ReactNode } from "react";
+import { CodeBlock } from "@/components/code-block";
 
 /**
  * Small Markdown renderer for our own blog posts (trusted content, no raw HTML).
- * Blocks: ## / ### headings, paragraphs, - and 1. lists (`- [ ] ` items are checkboxes), > quotes, | tables |,
- * ---, and `:::cta` lines.
+ * Blocks: ## / ### / #### headings (with ids for deep links), paragraphs, - and 1. lists (`- [ ] ` items are
+ * checkboxes; an ordered list keeps counting after a code block), > quotes, | tables |, ---, ``` fenced code
+ * ```, `:::cta` lines, and `:::note|tip|warning [title]` … `:::` callouts.
  * Inline: **bold**, *italic*, `code`, [text](url), and `[YOU: …]` placeholders (highlighted for review).
  */
 export type Slots = { cta: (text: string, key: number) => ReactNode };
@@ -34,6 +36,16 @@ export function inline(text: string): ReactNode[] {
   });
 }
 
+/** "Create a token (Data Base)" → "create-a-token-data-base"; the docs' "on this page" list uses the same ids. */
+export const headingId = (text: string) =>
+  text
+    .toLowerCase()
+    .replace(/[*`]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
+const CALLOUT = /^:::(note|tip|warning)\b\s*(.*)$/;
+
 const cells = (row: string) =>
   row
     .trim()
@@ -59,10 +71,33 @@ export function renderMarkdown(src: string, slots: Slots): ReactNode[] {
     } else if (line.startsWith(":::cta")) {
       i++;
       out.push(slots.cta(line.slice(6).trim(), key));
-    } else if (/^#{2,3} /.test(line)) {
+    } else if (CALLOUT.test(line)) {
+      const [, kind, title] = CALLOUT.exec(line)!;
       i++;
-      const text = line.replace(/^#{2,3} /, "");
-      out.push(line.startsWith("### ") ? <h3 key={key}>{inline(text)}</h3> : <h2 key={key}>{inline(text)}</h2>);
+      const inner = take((l) => l.trim() !== ":::");
+      i++; // closing :::
+      out.push(
+        <aside key={key} className={`callout callout-${kind}`}>
+          <p className="callout-title">{title || kind}</p>
+          {renderMarkdown(inner.join("\n"), slots)}
+        </aside>,
+      );
+    } else if (line.startsWith("```")) {
+      const lang = line.slice(3).trim();
+      i++;
+      const code = take((l) => !l.startsWith("```"));
+      i++; // closing fence
+      out.push(<CodeBlock key={key} lang={lang} code={code.join("\n")} />);
+    } else if (/^#{2,4} /.test(line)) {
+      i++;
+      const level = line.indexOf(" ");
+      const text = line.slice(level + 1);
+      const Tag = (["h2", "h3", "h4"] as const)[level - 2];
+      out.push(
+        <Tag key={key} id={headingId(text)}>
+          {inline(text)}
+        </Tag>,
+      );
     } else if (/^-{3,}\s*$/.test(line)) {
       i++;
       out.push(<hr key={key} />);
@@ -91,10 +126,11 @@ export function renderMarkdown(src: string, slots: Slots): ReactNode[] {
       );
     } else if (/^(- |\d+\. )/.test(line)) {
       const ordered = /^\d+\. /.test(line);
+      const start = ordered ? Number(/^\d+/.exec(line)![0]) : undefined;
       const items = take((l) => /^(- |\d+\. )/.test(l)).map((l) => l.replace(/^(- |\d+\. )/, ""));
       const List = ordered ? "ol" : "ul";
       out.push(
-        <List key={key}>
+        <List key={key} start={start !== 1 ? start : undefined}>
           {items.map((t, j) =>
             t.startsWith("[ ] ") ? (
               <li key={j} className="task">
@@ -107,7 +143,7 @@ export function renderMarkdown(src: string, slots: Slots): ReactNode[] {
         </List>,
       );
     } else {
-      const para = take((l) => !!l.trim() && !/^(#{2,3} |>|\||- |\d+\. |:::|-{3,}\s*$)/.test(l));
+      const para = take((l) => !!l.trim() && !/^(#{2,4} |>|\||- |\d+\. |:::|```|-{3,}\s*$)/.test(l));
       out.push(<p key={key}>{inline(para.join(" "))}</p>);
     }
   }

@@ -24,15 +24,25 @@ export type Post = {
   readingMinutes: number;
 };
 
-/** `---` front matter with `key: value` lines; values may be quoted. */
-function parse(slug: string, raw: string): Post {
+/** `---` front matter with `key: value` lines; values may be quoted. Shared with docs and guides. */
+export function parseFrontMatter(raw: string) {
   const match = /^---\n([\s\S]*?)\n---\n?/.exec(raw);
   const meta: Record<string, string> = {};
   for (const line of match?.[1].split("\n") ?? []) {
     const i = line.indexOf(":");
     if (i > 0) meta[line.slice(0, i).trim()] = line.slice(i + 1).trim().replace(/^"(.*)"$/, "$1");
   }
-  const body = match ? raw.slice(match[0].length) : raw;
+  return { meta, body: match ? raw.slice(match[0].length) : raw };
+}
+
+/** `[YOU: …]` marks facts only the author can fill in; never publish one unfilled. */
+export function assertFilled(entry: { draft: boolean; body: string }, file: string) {
+  if (!entry.draft && entry.body.includes("[YOU"))
+    throw new Error(`${file} is published but still has a [YOU: …] placeholder`);
+}
+
+function parse(slug: string, raw: string): Post {
+  const { meta, body } = parseFrontMatter(raw);
   const stage = Number(meta.stage ?? 3);
   return {
     slug,
@@ -53,9 +63,7 @@ export function getAllPosts(): Post[] {
   const posts = readdirSync(DIR)
     .filter((f) => f.endsWith(".md"))
     .map((f) => parse(f.replace(/\.md$/, ""), readFileSync(join(DIR, f), "utf8")));
-  // `[YOU: …]` marks facts only the author can fill in; never publish one unfilled.
-  const unfilled = posts.find((p) => !p.draft && p.body.includes("[YOU"));
-  if (unfilled) throw new Error(`content/blog/${unfilled.slug}.md is published but still has a [YOU: …] placeholder`);
+  for (const p of posts) assertFilled(p, `content/blog/${p.slug}.md`);
   return posts.sort((a, b) => b.date.localeCompare(a.date));
 }
 
@@ -79,8 +87,7 @@ export function getNeighbours(post: Post) {
 /** A standalone page (same front matter as posts), e.g. `getPage("start")`. */
 export function getPage(name: string) {
   const page = parse(name, readFileSync(join(PAGES_DIR, `${name}.md`), "utf8"));
-  if (!page.draft && page.body.includes("[YOU"))
-    throw new Error(`content/pages/${name}.md is published but still has a [YOU: …] placeholder`);
+  assertFilled(page, `content/pages/${name}.md`);
   return page;
 }
 

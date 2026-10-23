@@ -1,17 +1,23 @@
 import Link from "next/link";
 import { pageHref } from "@/lib/blog";
+import { hasPublishedDocs, hasPublishedGuides } from "@/lib/docs";
 import { host, modules, tone } from "@/lib/content";
 import { TuiButton } from "../tui/tui-button";
 import { TuiSection } from "../tui/tui-section";
 
-/** Footer links to standalone pages; drafts stay unlinked until published. */
-const pageLinks = [
-  { name: "about", label: "about — who builds this" },
-  { name: "privacy", label: "privacy policy" },
-].flatMap((p) => {
-  const href = pageHref(p.name);
-  return href ? [{ href, label: p.label }] : [];
-});
+/** Footer links to docs and standalone pages; drafts stay unlinked until published. */
+const pageLinks = () => [
+  ...(hasPublishedDocs() ? [{ href: "/docs", label: "docs — connect and self-host" }] : []),
+  ...(hasPublishedGuides() ? [{ href: "/guides", label: "guides — workflows" }] : []),
+  ...[
+    { name: "about", label: "about — who builds this" },
+    { name: "open-source", label: "open source — credits and code" },
+    { name: "privacy", label: "privacy policy" },
+  ].flatMap((p) => {
+    const href = pageHref(p.name);
+    return href ? [{ href, label: p.label }] : [];
+  }),
+];
 
 export function Logout() {
   return (
@@ -87,7 +93,7 @@ export function Logout() {
                   exocortex — the big idea
                 </a>
               </li>
-              {pageLinks.map((p) => (
+              {pageLinks().map((p) => (
                 <li key={p.href}>
                   <Link
                     href={p.href}
