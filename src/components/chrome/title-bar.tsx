@@ -1,10 +1,16 @@
 "use client";
 
+import Link from "next/link";
 import { sections } from "@/lib/content";
+import type { NavLink } from "@/lib/docs";
 import { useActiveSection } from "../tui/use-active-section";
 
-/** Window title: `you@cybernetics: <path>` follows the section you're reading. */
-export function TitleBar() {
+/**
+ * Window title: `you@cybernetics: <path>` follows the section you're reading.
+ * `links` are the reading sections (blog, docs, guides); hidden on phones, where the
+ * status bar's palette lists them instead.
+ */
+export function TitleBar({ links = [] }: { links?: NavLink[] }) {
   const active = useActiveSection();
   const path = sections.find((s) => s.id === active)?.path ?? "~";
 
@@ -24,6 +30,15 @@ export function TitleBar() {
           <span className="text-dim">: </span>
           <span className="text-data">{path}</span>
         </p>
+        {links.length > 0 && (
+          <nav aria-label="Read" className="hidden items-center gap-3 sm:flex">
+            {links.map((l) => (
+              <Link key={l.href} href={l.href} className="text-dim transition-colors hover:text-fg">
+                {l.label}
+              </Link>
+            ))}
+          </nav>
+        )}
         <a
           href="/register"
           className="bg-accent px-1.5 font-semibold text-accent-fg transition-colors hover:bg-fg hover:text-bg"

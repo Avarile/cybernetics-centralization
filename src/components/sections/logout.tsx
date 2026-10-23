@@ -1,14 +1,15 @@
 import Link from "next/link";
 import { pageHref } from "@/lib/blog";
-import { hasPublishedDocs, hasPublishedGuides } from "@/lib/docs";
+import { readingLinks } from "@/lib/docs";
 import { host, modules, tone } from "@/lib/content";
 import { TuiButton } from "../tui/tui-button";
 import { TuiSection } from "../tui/tui-section";
 
 /** Footer links to docs and standalone pages; drafts stay unlinked until published. */
 const pageLinks = () => [
-  ...(hasPublishedDocs() ? [{ href: "/docs", label: "docs — connect and self-host" }] : []),
-  ...(hasPublishedGuides() ? [{ href: "/guides", label: "guides — workflows" }] : []),
+  ...readingLinks()
+    .filter((l) => l.href !== "/blog")
+    .map((l) => ({ href: l.href, label: `${l.label} — ${l.hint}` })),
   ...[
     { name: "about", label: "about — who builds this" },
     { name: "open-source", label: "open source — credits and code" },

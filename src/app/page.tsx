@@ -14,6 +14,7 @@ import { Principles } from "@/components/sections/principles";
 import { InteractiveShell } from "@/components/sections/shell";
 import { Who } from "@/components/sections/who";
 import { BASE_URL, SITE_DESCRIPTION, SITE_NAME } from "@/lib/content";
+import { readingLinks } from "@/lib/docs";
 import { figletText } from "@/lib/figlet";
 import { JsonLd, organization } from "@/lib/seo";
 
@@ -23,6 +24,7 @@ const LOGO_NARROW = figletText("CYBERNETICS", "Calvin S");
 const LOGO_SMALL = figletText("cybernetics", "Small");
 
 export default function Home() {
+  const links = readingLinks();
   return (
     <>
       <JsonLd
@@ -41,7 +43,7 @@ export default function Home() {
         }}
       />
       <BootScreen />
-      <TitleBar />
+      <TitleBar links={links} />
       <main className="pt-9 pb-7">
         <Hero logo={LOGO_WIDE} />
         {/* <Diff /> */}
@@ -56,7 +58,7 @@ export default function Home() {
         <Logout />
       </main>
       <StatusBar />
-      <CommandPalette />
+      <CommandPalette links={links} />
     </>
   );
 }

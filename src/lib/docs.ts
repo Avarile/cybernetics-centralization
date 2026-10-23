@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { assertFilled, parseFrontMatter } from "./blog";
+import { assertFilled, getPublishedPosts, parseFrontMatter } from "./blog";
 import type { ModuleId } from "./content";
 import { headingId } from "./markdown";
 
@@ -148,6 +148,22 @@ export const getGuide = (slug: string) => getAllGuides().find((g) => g.slug === 
 /** Whether any doc or guide is published, so nav links appear only once there's something to read. */
 export const hasPublishedDocs = () => getAllDocs().some((d) => !d.draft);
 export const hasPublishedGuides = () => getAllGuides().some((g) => !g.draft);
+
+export type NavLink = { href: string; label: string; hint: string };
+
+/**
+ * The reading sections for site navigation (title bar, command palette, footer): each
+ * once it has something published, and always under `pnpm dev` so drafts can be reviewed.
+ */
+export function readingLinks(): NavLink[] {
+  return [
+    { href: "/blog", label: "blog", hint: "cyborg migration build log", show: getPublishedPosts().length > 0 },
+    { href: "/docs", label: "docs", hint: "connect your AI, self-host", show: hasPublishedDocs() },
+    { href: "/guides", label: "guides", hint: "workflows, step by step", show: hasPublishedGuides() },
+  ]
+    .filter((l) => showDrafts || l.show)
+    .map(({ href, label, hint }) => ({ href, label, hint }));
+}
 
 /** `## Heading` lines of a body, for the "on this page" list; ids match `renderMarkdown`'s. */
 export const headings = (body: string) =>

@@ -2,13 +2,15 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { host, modules, sections } from "@/lib/content";
+import type { NavLink } from "@/lib/docs";
 import { gotoSection } from "@/lib/prefs";
 
 type Item = { cmd: string; hint: string; run: () => void };
 
 const OPEN_NAMES: Record<string, string> = { data: "data", proj: "projects", crm: "crm", agent: "agents" };
 
-const ITEMS: Item[] = [
+/** Jump to a section or open a module; the reading links go after these. */
+const NAV_ITEMS: Item[] = [
   ...sections.map((s, i) => ({
     cmd: `goto ${s.win}`,
     hint: `${i} · ${s.path}`,
@@ -19,7 +21,9 @@ const ITEMS: Item[] = [
     hint: host(m.url),
     run: () => window.open(m.url, "_blank", "noopener,noreferrer"),
   })),
-  { cmd: "blog", hint: "cyborg migration build log", run: () => { window.location.href = "/blog"; } },
+];
+
+const END_ITEMS: Item[] = [
   { cmd: "exocortex", hint: "what's the big idea?", run: () => { window.location.href = "/exocortex"; } },
   { cmd: "register", hint: "get early access", run: () => { window.location.href = "/register"; } },
 ];
@@ -28,18 +32,30 @@ function isTyping(el: EventTarget | null) {
   return el instanceof HTMLElement && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName));
 }
 
-/** vim-style `:` command line. Opens on `:` or Ctrl/⌘+K, or from the status bar. */
-export function CommandPalette() {
+/**
+ * vim-style `:` command line. Opens on `:` or Ctrl/⌘+K, or from the status bar.
+ * `links` are the reading sections (blog, docs, guides), decided on the server.
+ */
+export function CommandPalette({ links = [] }: { links?: NavLink[] }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [sel, setSel] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const returnFocus = useRef<HTMLElement | null>(null);
 
+  const items = useMemo<Item[]>(
+    () => [
+      ...NAV_ITEMS,
+      ...links.map((l) => ({ cmd: l.label, hint: l.hint, run: () => window.location.assign(l.href) })),
+      ...END_ITEMS,
+    ],
+    [links],
+  );
+
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return q ? ITEMS.filter((it) => `${it.cmd} ${it.hint}`.toLowerCase().includes(q)) : ITEMS;
-  }, [query]);
+    return q ? items.filter((it) => `${it.cmd} ${it.hint}`.toLowerCase().includes(q)) : items;
+  }, [query, items]);
 
   useEffect(() => {
     const show = () => {
