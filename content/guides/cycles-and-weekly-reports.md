@@ -8,7 +8,7 @@ personas: team, founder, freelancer
 modules: proj, data
 packs: knowledge
 updated: 2026-10-23
-draft: true
+draft: false
 ---
 
 A cycle is a fixed stretch of time with a set of work items in it. Because the cycle knows what was planned and what moved, the weekly report can be drafted from the facts rather than from five people's memories.

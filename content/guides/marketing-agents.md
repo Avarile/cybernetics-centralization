@@ -8,7 +8,7 @@ personas: founder, freelancer, team
 modules: agent, data, proj
 packs:
 updated: 2026-10-23
-draft: true
+draft: false
 ---
 
 The Agentic Platform ships with 52 marketing agents, one per specialist skill: positioning, copywriting, SEO, paid media, email, pricing, launches and more. Each works the way its skill prescribes, using **your** business context, and turns committed work into tracked work items.

@@ -8,7 +8,7 @@ personas: team, founder
 modules: data, proj, crm, agent
 packs: progress, knowledge, people
 updated: 2026-10-23
-draft: true
+draft: false
 ---
 
 The same three ideas that work for one person (one memory, any AI, closed loops) work for a team, with one addition: everyone gets their own access, so nobody shares a login and leaving is clean.

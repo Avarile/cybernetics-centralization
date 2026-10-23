@@ -6,7 +6,7 @@ time: "5 min"
 modules: data, proj, crm
 verified:
 updated: 2026-10-23
-draft: true
+draft: false
 ---
 
 Create one token per AI app, per module. Name it after the app ("Claude Code on laptop") so you know which one to revoke later.

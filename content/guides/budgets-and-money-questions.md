@@ -8,7 +8,7 @@ personas: freelancer, student, founder
 modules: data
 packs: finance
 updated: 2026-10-23
-draft: true
+draft: false
 ---
 
 Once your transactions are categorised, money questions take one sentence. Budgets turn "am I spending too much?" into a number.

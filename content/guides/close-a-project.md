@@ -8,7 +8,7 @@ personas: founder, team, freelancer, researcher
 modules: data, proj
 packs: progress, knowledge
 updated: 2026-10-23
-draft: true
+draft: false
 ---
 
 Most projects end by being forgotten. This guide gives them a proper ending: a check that the thing worked, a short look back built from the record, and one lesson that changes how the next project runs.

@@ -6,14 +6,20 @@ time: "10 min"
 modules: agent, data, proj, crm
 verified:
 updated: 2026-10-23
-draft: true
+draft: false
 ---
 
 The Agentic Platform is where custom agents and skills run. The three MCP servers are added as **app connections**: each user connects with their own credentials, so an agent only ever sees what that user can see.
 
 ## Add the connections
 
-[YOU: the exact menu path in the Agentic Platform for adding an MCP server or app connection, and the fields it asks for.]
+Add each server once, with your own credentials:
+
+1. Choose **Add MCP Server**. If you don't see it, ask your admin to turn on **Allow users to create MCP servers**.
+2. Fill in **Title**, **MCP Server URL** and **Transport** (Streamable HTTP) from the table below.
+3. For the Data Base and Project Management, set **Authentication Type** to **API Key**, **Header Format** to **Bearer**, and paste your token.
+4. For the CRM, leave **Authentication Type** on **None (Auto-detect)**. The server is detected as needing OAuth.
+5. Save. A server that needs a sign-in shows **Needs Auth**: choose **Authenticate**, sign in to the CRM in the window that opens, and approve.
 
 Use these settings:
 

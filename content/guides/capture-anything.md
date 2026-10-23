@@ -8,7 +8,7 @@ personas: freelancer, founder, researcher, student, team
 modules: data
 packs: progress, knowledge
 updated: 2026-10-23
-draft: true
+draft: false
 ---
 
 Capture fails when it takes decisions: which app, which folder, which tag. This guide moves those decisions to the AI. You say one sentence; it decides where things go, links them, and tells you what it saved.

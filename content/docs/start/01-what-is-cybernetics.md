@@ -5,7 +5,7 @@ time: "5 min"
 modules: data, proj, crm, agent
 verified:
 updated: 2026-10-23
-draft: true
+draft: false
 ---
 
 Cybernetics is one memory you own, with any AI plugged into it. It's four apps that work alone or together, and every one of them speaks MCP, the standard plug AI apps use to read and write your data.

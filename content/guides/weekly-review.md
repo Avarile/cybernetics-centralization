@@ -8,7 +8,7 @@ personas: freelancer, founder, researcher, student, team
 modules: data, proj
 packs: progress, knowledge
 updated: 2026-10-23
-draft: true
+draft: false
 ---
 
 A review from memory is a story about how the week felt. A review from the record is what actually happened. This guide sets up the second kind, and makes sure its lessons change next week.

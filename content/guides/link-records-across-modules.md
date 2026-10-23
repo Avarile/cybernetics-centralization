@@ -8,7 +8,7 @@ personas: founder, team, freelancer
 modules: data, proj, crm
 packs: knowledge
 updated: 2026-10-23
-draft: true
+draft: false
 ---
 
 Your how-tos and records live in the Data Base. The work happens in Project Management and the CRM. These two integrations let you attach Data Base records to work items, people, companies and deals, so nobody has to go looking.

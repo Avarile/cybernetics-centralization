@@ -6,7 +6,7 @@ time: "5 min"
 modules: data, proj, crm
 verified:
 updated: 2026-10-23
-draft: true
+draft: false
 ---
 
 Claude Code adds remote MCP servers from the terminal and sends any header you give it.

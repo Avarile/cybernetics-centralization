@@ -8,7 +8,7 @@ personas: founder, team, researcher
 modules: agent, data, proj
 packs:
 updated: 2026-10-23
-draft: true
+draft: false
 ---
 
 An agent is a named helper for one job: instructions, a model, the tools it may use, and skills for the harder parts. This guide builds a made-up "Meeting prep" agent. Swap in your own recurring job.

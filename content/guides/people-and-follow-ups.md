@@ -8,7 +8,7 @@ personas: freelancer, founder, team
 modules: data, crm
 packs: people, progress
 updated: 2026-10-23
-draft: true
+draft: false
 ---
 
 Most of what goes wrong between people is a dropped follow-up. This guide keeps the details of your relationships next to the work they're part of, so your AI can prepare you and remind you.

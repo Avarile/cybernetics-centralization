@@ -8,7 +8,7 @@ personas: founder, freelancer, team, student
 modules: data, proj
 packs: progress, knowledge
 updated: 2026-10-23
-draft: true
+draft: false
 ---
 
 Planning stalls on the blank page. This guide starts from the last time you did something similar: your how-tos and frameworks become the plan's skeleton, and the AI does the typing.

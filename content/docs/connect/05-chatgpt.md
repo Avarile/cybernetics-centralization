@@ -6,7 +6,7 @@ time: "5 min"
 modules: crm
 verified:
 updated: 2026-10-23
-draft: true
+draft: false
 ---
 
 ChatGPT adds remote MCP servers as connectors. A connector signs in with OAuth and can't send a custom header. So today:

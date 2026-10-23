@@ -8,7 +8,7 @@ personas: founder, team, freelancer
 modules: proj, agent
 packs:
 updated: 2026-10-23
-draft: true
+draft: false
 ---
 
 In Project Management, an agent can be a member: it has a profile, a goal and a workflow, it can be assigned work items, and it works through them in any AI app that connects over MCP. You stay the reviewer.

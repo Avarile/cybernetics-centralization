@@ -6,10 +6,10 @@ time: "3 min"
 modules: data, proj, crm
 verified:
 updated: 2026-10-23
-draft: true
+draft: false
 ---
 
-Each module that holds data exposes an MCP endpoint. MCP is the standard plug AI apps use to talk to outside tools. If it's new to you, [What is MCP?](/blog/what-is-mcp-in-plain-english) explains it in plain English.
+Each module that holds data exposes an MCP endpoint. MCP (Model Context Protocol) is the standard plug AI apps use to talk to outside tools: think of it as USB for AI. Any app that speaks it can read and write your data, with a key you control.
 
 ## The endpoints
 

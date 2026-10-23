@@ -8,7 +8,7 @@ personas: freelancer, founder, researcher, student, team
 modules: data
 packs: progress, knowledge
 updated: 2026-10-23
-draft: true
+draft: false
 ---
 
 By the end of this guide you'll have one organised place for your goals, projects, tasks and know-how, an AI connected to it, and a first answer that came from your records rather than a guess.

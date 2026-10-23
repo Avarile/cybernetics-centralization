@@ -6,7 +6,7 @@ time: "10 min"
 modules: data, proj, crm
 verified:
 updated: 2026-10-23
-draft: true
+draft: false
 ---
 
 Claude's connector form signs in with OAuth only. The CRM supports that, so it goes in as a connector. The Data Base and Project Management need a token header, so they go into Claude Desktop's configuration file through `mcp-remote`, a small bridge that runs on your computer and adds the header for you.
@@ -60,10 +60,6 @@ You need Node.js installed, because the bridge runs with `npx`.
 Open a new chat. The tools menu should list `cybernetics-data`, `cybernetics-projects` and `cybernetics-crm`. Ask:
 
 > What's overdue in my projects, and which notes are linked to those tasks?
-
-## Claude Cowork
-
-[YOU: confirm on a real machine whether servers added through claude_desktop_config.json are available in Cowork, or only connectors are, and describe the steps.]
 
 ## If it doesn't connect
 

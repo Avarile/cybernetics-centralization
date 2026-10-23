@@ -8,7 +8,7 @@ personas: freelancer, founder, student
 modules: data
 packs: finance
 updated: 2026-10-23
-draft: true
+draft: false
 ---
 
 Raw statements go in; categorised, queryable transactions come out. Your bank login never goes anywhere near an AI: you export a file, and the AI only sees what's in it.

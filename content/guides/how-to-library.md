@@ -8,7 +8,7 @@ personas: freelancer, founder, researcher, team
 modules: data
 packs: knowledge
 updated: 2026-10-23
-draft: true
+draft: false
 ---
 
 Every fix you've figured out once is worth writing down: the router reset, the deploy steps, the tax form. Written down in the right shape, an agent can find it, follow it, and point out the step that no longer works.

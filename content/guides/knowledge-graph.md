@@ -8,7 +8,7 @@ personas: researcher, student, founder
 modules: data
 packs: knowledge, progress
 updated: 2026-10-23
-draft: true
+draft: false
 ---
 
 Tables are good for entering things. A graph is good for seeing them. Once your notes, goals and tasks are linked, the graph shows what depends on what, and what's floating on its own.
