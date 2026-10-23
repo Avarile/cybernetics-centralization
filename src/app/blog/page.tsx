@@ -1,16 +1,39 @@
 import type { Metadata } from "next";
 import { TuiButton } from "@/components/tui/tui-button";
-import { getAllPosts } from "@/lib/blog";
+import { getPublishedPosts } from "@/lib/blog";
+import { absolute, alternates, author, baseOpenGraph, JsonLd, organization } from "@/lib/seo";
+
+const TITLE = "Cyborg Migration";
+const DESCRIPTION = "A build log about becoming AI-native: one memory you own, any AI plugged into it, and a weekly loop that learns.";
 
 export const metadata: Metadata = {
-  title: "Blog — Cybernetics",
-  description: "Cyborg Migration: a build log about becoming AI-native. My memory. Any mind. Closed loops.",
+  title: `${TITLE} blog`,
+  description: DESCRIPTION,
+  alternates: alternates("/blog"),
+  openGraph: { ...baseOpenGraph, url: "/blog", title: TITLE, description: DESCRIPTION },
+  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
 };
 
 export default function BlogIndex() {
-  const posts = getAllPosts().filter((p) => !p.draft);
+  const posts = getPublishedPosts();
   return (
     <main className="mx-auto max-w-[110ch] px-4 py-10 sm:px-6 md:py-16">
+      <JsonLd
+        data={{
+          "@type": "Blog",
+          name: TITLE,
+          description: DESCRIPTION,
+          url: absolute("/blog"),
+          author,
+          publisher: organization,
+          blogPost: posts.map((p) => ({
+            "@type": "BlogPosting",
+            headline: p.title,
+            url: absolute(`/blog/${p.slug}`),
+            datePublished: p.date,
+          })),
+        }}
+      />
       <TuiButton href="/" label="← cybernetics" />
 
       <div aria-hidden className="mt-10 mb-8 flex items-center gap-2 text-xs text-dim">
@@ -24,16 +47,22 @@ export default function BlogIndex() {
         <span aria-hidden className="text-dim">
           #{" "}
         </span>
-        Cyborg Migration
+        {TITLE}
       </h1>
-      <p className="mt-4 text-sm text-dim">Becoming AI-native, one system at a time.</p>
+      <p className="mt-4 text-sm text-dim">
+        Becoming AI-native, one system at a time.{" "}
+        <a href="/blog/feed.xml" className="underline decoration-line underline-offset-4 hover:text-accent">
+          rss
+        </a>
+      </p>
 
       <ul className="mt-10 space-y-6">
         {posts.map((p) => (
           <li key={p.slug} className="border-l border-line pl-4 transition-colors hover:border-accent">
             <a href={`/blog/${p.slug}`} className="group block">
               <span className="text-xs text-dim">
-                {p.date} · {p.readingMinutes} min
+                <time dateTime={p.date}>{p.date}</time> · {p.readingMinutes} min
+                {p.series && <> · {p.series}</>}
               </span>
               <span className="block text-lg group-hover:text-accent">{p.title}</span>
               <span className="block text-sm text-dim">{p.dek}</span>

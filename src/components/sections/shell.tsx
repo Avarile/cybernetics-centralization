@@ -10,7 +10,6 @@ import {
   host,
   modules,
   sections,
-  SITE_URL,
   tone,
   type Module,
 } from "@/lib/content";
@@ -171,8 +170,8 @@ export function InteractiveShell({
         window.location.assign("/register");
         return print(line, <p>opening /register …</p>);
       case "blog":
-        window.open(SITE_URL, "_blank", "noopener,noreferrer");
-        return print(line, <p>opening {host(SITE_URL)} …</p>);
+        window.location.assign("/blog");
+        return print(line, <p>opening /blog …</p>);
       case "clear":
         setEntries([]);
         return;

@@ -1,7 +1,12 @@
-export const SITE_URL = "https://blog.avarile.com";
-
 /** Where this site is served; absolute URLs for canonical links and OG images. */
 export const BASE_URL = "https://avarile.com";
+
+export const SITE_NAME = "Cybernetics";
+export const SITE_TITLE = "Cybernetics — Cyborgize yourself, agentically";
+export const SITE_DESCRIPTION =
+  "Cybernetics turns what you know and what you do into structured data you own — ready for any AI agent over MCP.";
+/** Byline on blog posts and in structured data. */
+export const AUTHOR = { name: "Avarile", url: BASE_URL };
 
 /** "https://crm.avarile.com" → "crm.avarile.com" */
 export const host = (url: string) => url.replace(/^https?:\/\//, "");
@@ -13,6 +18,8 @@ export type Module = {
   name: string;
   repo: string;
   url: string;
+  /** Streamable HTTP endpoint agents connect to; absent for modules without an MCP server. */
+  mcpUrl?: string;
   role: string;
   tagline: string;
   description: string;
@@ -35,10 +42,11 @@ export const modules: Module[] = [
     name: "Data Base",
     repo: "cybernetics-data-centre",
     url: "https://cybernetics.avarile.com",
+    mcpUrl: "https://cybernetics.avarile.com/api/mcp",
     role: "What you know",
     tagline: "The foundation. Your knowledge, structured.",
     description:
-      "The foundation of everything else. One database you own for knowledge, how-tos, references, finances and anyother things you can define — tables, views and a record graph that you and your agents can query.",
+      "The foundation of everything else. One database you own for knowledge, how-tos, references, finances and any other things you can define — tables, views and a record graph that you and your agents can query.",
     capabilities: [
       "Knowledge, how-tos and references as linked records",
       "Custom tables, fields and views — no schema lock-in",
@@ -51,6 +59,7 @@ export const modules: Module[] = [
     name: "Project Management",
     repo: "cybernetics-projects",
     url: "https://projects.avarile.com",
+    mcpUrl: "https://projects.avarile.com/api/mcp",
     role: "What you do",
     tagline: "Your intentions, executable.",
     description:
@@ -68,6 +77,7 @@ export const modules: Module[] = [
     name: "CRM",
     repo: "cybernetics-crm",
     url: "https://crm.avarile.com",
+    mcpUrl: "https://crm.avarile.com/mcp",
     role: "Who your clients are",
     tagline: "Your relationships, remembered.",
     description:
@@ -172,10 +182,9 @@ export type TranscriptLine =
   | { kind: "reply"; text: string };
 
 /** Modules that expose an MCP server for agents to connect to. */
-const mcpServers = (["data", "proj", "crm"] as const).map((id) => {
-  const m = modules.find((mod) => mod.id === id)!;
-  return { name: m.repo.replace("-centre", ""), endpoint: `${m.url}/mcp` };
-});
+const mcpServers = modules
+  .filter((m) => m.mcpUrl)
+  .map((m) => ({ name: m.repo.replace("-centre", ""), endpoint: m.mcpUrl! }));
 
 const pad = (s: string, n: number) => s + " ".repeat(Math.max(0, n - s.length));
 const width = Math.max(...mcpServers.map((s) => s.name.length));

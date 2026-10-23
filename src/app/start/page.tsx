@@ -3,13 +3,22 @@ import { CyborgFigure } from "@/components/blog/cyborg-figure";
 import { TuiButton } from "@/components/tui/tui-button";
 import { getPage } from "@/lib/blog";
 import { renderMarkdown } from "@/lib/markdown";
+import { alternates, baseOpenGraph, defaultOgImage } from "@/lib/seo";
 
 const PDF = "/downloads/cyborg-migration-4-week-checklist.pdf";
 
 // Sign-up reward: linked from the /register success screen, kept out of search.
 export const metadata: Metadata = {
-  title: "Your 4-week Cyborg Migration — Cybernetics",
+  title: "Your 4-week Cyborg Migration",
   description: "The week-by-week checklist and the starter template.",
+  alternates: alternates("/start"),
+  openGraph: {
+    ...baseOpenGraph,
+    url: "/start",
+    title: "Your 4-week Cyborg Migration",
+    description: "The week-by-week checklist and the starter template.",
+    images: [defaultOgImage],
+  },
   robots: { index: false, follow: false },
 };
 

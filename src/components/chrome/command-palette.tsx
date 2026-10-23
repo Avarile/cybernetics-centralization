@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { host, modules, sections, SITE_URL } from "@/lib/content";
+import { host, modules, sections } from "@/lib/content";
 import { gotoSection } from "@/lib/prefs";
 
 type Item = { cmd: string; hint: string; run: () => void };
@@ -19,7 +19,7 @@ const ITEMS: Item[] = [
     hint: host(m.url),
     run: () => window.open(m.url, "_blank", "noopener,noreferrer"),
   })),
-  { cmd: "blog", hint: host(SITE_URL), run: () => window.open(SITE_URL, "_blank", "noopener,noreferrer") },
+  { cmd: "blog", hint: "cyborg migration build log", run: () => { window.location.href = "/blog"; } },
   { cmd: "exocortex", hint: "what's the big idea?", run: () => { window.location.href = "/exocortex"; } },
   { cmd: "register", hint: "get early access", run: () => { window.location.href = "/register"; } },
 ];

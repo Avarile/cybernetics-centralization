@@ -58,6 +58,21 @@ export function getAllPosts(): Post[] {
 
 export const getPost = (slug: string) => getAllPosts().find((p) => p.slug === slug);
 
+/** Posts that are listed, indexed and in the feed: newest first. */
+export const getPublishedPosts = () => getAllPosts().filter((p) => !p.draft);
+
+/**
+ * The published posts either side of `post` in reading order (oldest first).
+ * A draft gets neighbours too, so its review link shows the finished layout.
+ */
+export function getNeighbours(post: Post) {
+  const order = getAllPosts()
+    .filter((p) => !p.draft || p.slug === post.slug)
+    .reverse();
+  const i = order.findIndex((p) => p.slug === post.slug);
+  return { prev: order[i - 1], next: order[i + 1] };
+}
+
 /** A standalone page (same front matter as posts), e.g. `getPage("start")`. */
 export const getPage = (name: string) => parse(name, readFileSync(join(PAGES_DIR, `${name}.md`), "utf8"));
 

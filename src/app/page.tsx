@@ -13,7 +13,9 @@ import { Modules } from "@/components/sections/platforms";
 import { Principles } from "@/components/sections/principles";
 import { InteractiveShell } from "@/components/sections/shell";
 import { Who } from "@/components/sections/who";
+import { BASE_URL, SITE_DESCRIPTION, SITE_NAME } from "@/lib/content";
 import { figletText } from "@/lib/figlet";
+import { JsonLd, organization } from "@/lib/seo";
 
 // ASCII art is rendered once at build time.
 const LOGO_WIDE = figletText("CYBERNETICS", "ANSI Shadow");
@@ -23,6 +25,21 @@ const LOGO_SMALL = figletText("cybernetics", "Small");
 export default function Home() {
   return (
     <>
+      <JsonLd
+        data={{
+          "@graph": [
+            organization,
+            {
+              "@type": "WebSite",
+              "@id": `${BASE_URL}/#website`,
+              name: SITE_NAME,
+              url: BASE_URL,
+              description: SITE_DESCRIPTION,
+              publisher: { "@id": organization["@id"] },
+            },
+          ],
+        }}
+      />
       <BootScreen />
       <TitleBar />
       <main className="pt-9 pb-7">

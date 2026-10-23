@@ -1,9 +1,18 @@
 import type { Metadata } from "next";
 import { TuiButton } from "@/components/tui/tui-button";
+import { alternates, baseOpenGraph, defaultOgImage } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Exocortex — Cybernetics",
+  title: "Exocortex",
   description: "A basic idea of the exocortex, shown rather than explained.",
+  alternates: alternates("/exocortex"),
+  openGraph: {
+    ...baseOpenGraph,
+    url: "/exocortex",
+    title: "Exocortex",
+    description: "A basic idea of the exocortex, shown rather than explained.",
+    images: [defaultOgImage],
+  },
 };
 
 export default function ExocortexPage() {

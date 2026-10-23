@@ -2,11 +2,15 @@ import type { Metadata } from "next";
 import { RegisterForm } from "@/components/register-form";
 import { TuiButton } from "@/components/tui/tui-button";
 import { modules, tone } from "@/lib/content";
+import { alternates, baseOpenGraph } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Register — Cybernetics",
+  title: "Register for early access",
   description: "Register for early access to Cybernetics: your knowledge, projects and relationships, ready for any AI agent over MCP.",
+  alternates: alternates("/register"),
   openGraph: {
+    ...baseOpenGraph,
+    url: "/register",
     title: "Start your 4-week Cyborg Migration",
     description: "One memory you own, any AI plugged into it, and a weekly loop that learns. No tech skills needed.",
   },

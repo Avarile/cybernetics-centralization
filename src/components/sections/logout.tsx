@@ -1,4 +1,5 @@
-import { host, modules, SITE_URL, tone } from "@/lib/content";
+import Link from "next/link";
+import { host, modules, tone } from "@/lib/content";
 import { TuiButton } from "../tui/tui-button";
 import { TuiSection } from "../tui/tui-section";
 
@@ -22,7 +23,7 @@ export function Logout() {
             label="Register for early access"
             primary
           />
-          <TuiButton href={SITE_URL} label="Read the blog" external />
+          <TuiButton href="/blog" label="Read the blog" />
         </div>
       </div>
 
@@ -53,14 +54,12 @@ export function Logout() {
             <p className="text-dim"># more</p>
             <ul className="mt-2 space-y-1">
               <li>
-                <a
-                  href={SITE_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <Link
+                  href="/blog"
                   className="underline decoration-line underline-offset-4 hover:text-accent"
                 >
-                  {host(SITE_URL)}
-                </a>
+                  blog — cyborg migration
+                </Link>
               </li>
               <li>
                 <a
@@ -90,9 +89,10 @@ export function Logout() {
           <p>
             <span className="text-accent">you@cybernetics</span>:~$ logout
           </p>
-          <p>Connection to cybernetics.avarile.com closed.</p>
+          <p>Connection to avarile.com closed.</p>
           <p className="mt-4 text-xs">
-            © {new Date().getFullYear()} cybernetics · 4 modules · 4 mcp servers
+            © {new Date().getFullYear()} cybernetics · {modules.length} modules ·{" "}
+            {modules.filter((m) => m.mcpUrl).length} mcp servers
             · 1 you
           </p>
         </div>
