@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { tone, type ModuleId } from "@/lib/content";
+import { useLocale } from "@/lib/locale-context";
 
 export type GuideCard = {
   href: string;
@@ -18,17 +19,18 @@ export function GuideList({ guides, personas }: { guides: GuideCard[]; personas:
   const [persona, setPersona] = useState<string | null>(null);
   const shown = persona ? guides.filter((g) => g.personas.includes(persona)) : guides;
   const chip = "border px-2 py-0.5 transition-colors";
+  const zh = useLocale() === "zh";
 
   return (
     <>
-      <div role="group" aria-label="Filter by who you are" className="mt-8 flex flex-wrap gap-2 text-xs">
+      <div role="group" aria-label={zh ? "按身份筛选" : "Filter by who you are"} className="mt-8 flex flex-wrap gap-2 text-xs">
         <button
           type="button"
           aria-pressed={!persona}
           onClick={() => setPersona(null)}
           className={`${chip} ${!persona ? "border-accent bg-accent text-accent-fg" : "border-line text-dim hover:text-fg"}`}
         >
-          everyone
+          {zh ? "所有人" : "everyone"}
         </button>
         {personas.map((p) => (
           <button
@@ -61,7 +63,9 @@ export function GuideList({ guides, personas }: { guides: GuideCard[]; personas:
             </a>
           </li>
         ))}
-        {!shown.length && <li className="text-dim">$ ls guides/ — nothing for this one yet.</li>}
+        {!shown.length && (
+          <li className="text-dim">$ ls guides/ — {zh ? "这一类暂时还没有。" : "nothing for this one yet."}</li>
+        )}
       </ol>
     </>
   );

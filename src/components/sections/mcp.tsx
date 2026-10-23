@@ -4,26 +4,56 @@ import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { Bot, ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 import { useInView } from "motion/react";
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
-import {
-  consumers,
-  modules,
-  tone,
-  type Consumer,
-  type TranscriptLine,
-} from "@/lib/content";
+import { tone, type Consumer, type TranscriptLine } from "@/lib/content";
+import { contentFor } from "@/lib/content-i18n";
+import type { Copy } from "@/lib/i18n";
+import { useLocale } from "@/lib/locale-context";
 import { Cursor, Spinner } from "../tui/bits";
 import { Box } from "../tui/box";
 import { BrandIcon } from "../tui/brand-icon";
 import { TuiSection, useRevealed } from "../tui/tui-section";
 
+const COPY = {
+  en: {
+    title: "One memory. Any agent.",
+    intro:
+      "Knowledge from the Data Base, work from Project Management and relationships from the CRM are consumed over MCP — by Claude Code, Codex, ChatGPT, Claude Cowork, our own Agentic Platform or any other MCP client. Your data stays put; the model is your choice.",
+    carousel: "LLM platforms consuming your data over MCP",
+    tabs: "LLM platforms",
+    browse: "use ← → or the tabs to browse",
+    paused: "paused — move away to resume",
+    playing: "auto-playing",
+    prev: "Previous platform",
+    next: "Next platform",
+    skills: "skills ▸",
+    session: "mcp session",
+    replay: "replay",
+    replayLabel: "Replay the session",
+    you: "you",
+  },
+  zh: {
+    title: "同一份记忆。任何智能体。",
+    intro:
+      "数据库里的知识、项目管理里的工作、CRM 里的人际关系，都通过 MCP 被读取——无论是 Claude Code、Codex、ChatGPT、Claude Cowork、我们自己的智能体平台，还是任何其他 MCP 客户端。你的数据留在原地；模型由你来选。",
+    carousel: "通过 MCP 读取你数据的大模型平台",
+    tabs: "大模型平台",
+    browse: "用 ← → 或标签页浏览",
+    paused: "已暂停——移开鼠标继续",
+    playing: "自动播放中",
+    prev: "上一个平台",
+    next: "下一个平台",
+    skills: "技能 ▸",
+    session: "mcp 会话",
+    replay: "重放",
+    replayLabel: "重放这段会话",
+    you: "你",
+  },
+} satisfies Copy<Record<string, string>>;
+
 export function Mcp() {
+  const t = COPY[useLocale()];
   return (
-    <TuiSection
-      id="mcp"
-      title="One memory. Any agent."
-      command="mcp connect --all"
-      intro="Knowledge from the Data Base, work from Project Management and relationships from the CRM are consumed over MCP — by Claude Code, Codex, ChatGPT, Claude Cowork, our own Agentic Platform or any other MCP client. Your data stays put; the model is your choice."
-    >
+    <TuiSection id="mcp" title={t.title} command="mcp connect --all" intro={t.intro}>
       <Sources />
       <Consumers />
     </TuiSection>
@@ -32,6 +62,7 @@ export function Mcp() {
 
 /** The three platforms that serve data over MCP, flowing down into the consumers. */
 function Sources() {
+  const { modules } = contentFor(useLocale());
   const sources = (["data", "proj", "crm"] as const).map((id) =>
     modules.find((m) => m.id === id)!,
   );
@@ -75,6 +106,9 @@ const HOLD_MS = 6000;
 
 /** Carousel of LLM platforms, each replaying its own MCP session. */
 function Consumers() {
+  const locale = useLocale();
+  const { consumers } = contentFor(locale);
+  const t = COPY[locale];
   const reduce = useReducedMotion();
   const uid = useId();
   const [index, setIndex] = useState(0);
@@ -91,7 +125,7 @@ function Consumers() {
       HOLD_MS,
     );
     return () => clearTimeout(t);
-  }, [done, paused, reduce]);
+  }, [done, paused, reduce, consumers.length]);
 
   const go = (i: number) => setIndex((i + consumers.length) % consumers.length);
 
@@ -109,7 +143,7 @@ function Consumers() {
     <div
       role="group"
       aria-roledescription="carousel"
-      aria-label="LLM platforms consuming your data over MCP"
+      aria-label={t.carousel}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
@@ -122,7 +156,7 @@ function Consumers() {
       >
         <div
           role="tablist"
-          aria-label="LLM platforms"
+          aria-label={t.tabs}
           onKeyDown={onKeyDown}
           className="flex flex-wrap border-b border-line bg-bg-alt text-xs"
         >
@@ -162,14 +196,14 @@ function Consumers() {
       <div className="mt-3 flex items-center justify-between gap-3 text-xs text-dim">
         <p>
           {reduce ? (
-            <>use ← → or the tabs to browse</>
+            <>{t.browse}</>
           ) : paused ? (
             <>
-              <span className="text-crm">❚❚</span> paused — move away to resume
+              <span className="text-crm">❚❚</span> {t.paused}
             </>
           ) : (
             <>
-              <span className="text-proj">●</span> auto-playing · {index + 1}/
+              <span className="text-proj">●</span> {t.playing} · {index + 1}/
               {consumers.length}
             </>
           )}
@@ -178,7 +212,7 @@ function Consumers() {
           <button
             type="button"
             onClick={() => go(index - 1)}
-            aria-label="Previous platform"
+            aria-label={t.prev}
             className="p-1 hover:text-fg"
           >
             <ChevronLeft className="size-4" aria-hidden />
@@ -186,7 +220,7 @@ function Consumers() {
           <button
             type="button"
             onClick={() => go(index + 1)}
-            aria-label="Next platform"
+            aria-label={t.next}
             className="p-1 hover:text-fg"
           >
             <ChevronRight className="size-4" aria-hidden />
@@ -218,6 +252,7 @@ function ConsumerSlide({
   consumer: Consumer;
   onFinished: () => void;
 }) {
+  const t = COPY[useLocale()];
   return (
     <article aria-labelledby={`consumer-${c.id}`} className="flicker-in">
       <div className="grid items-start gap-x-10 gap-y-8 text-[13px] lg:grid-cols-12">
@@ -244,7 +279,7 @@ function ConsumerSlide({
           </ul>
           {c.chips && (
             <p className="mt-4 flex flex-wrap gap-1.5">
-              <span className="text-xs text-dim">skills ▸</span>
+              <span className="text-xs text-dim">{t.skills}</span>
               {c.chips.map((k) => (
                 <span
                   key={k}
@@ -259,7 +294,7 @@ function ConsumerSlide({
         <div className="min-w-0 lg:col-span-7">
           <AgentSession
             session={c.session}
-            title={`you@${c.tab} — mcp session`}
+            title={`you@${c.tab} — ${t.session}`}
             onFinished={onFinished}
           />
         </div>
@@ -287,6 +322,7 @@ function AgentSession({
 }) {
   const prompt = session[0].kind === "prompt" ? session[0].text : "";
   const rest = session.slice(1);
+  const t = COPY[useLocale()];
 
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-120px" });
@@ -355,15 +391,15 @@ function AgentSession({
             type="button"
             onClick={() => setRun((r) => r + 1)}
             disabled={!finished || !!reduce}
-            aria-label="Replay the session"
+            aria-label={t.replayLabel}
             className="flex items-center gap-1 text-dim transition-opacity hover:text-fg disabled:opacity-0"
           >
-            <RotateCcw className="size-3" aria-hidden /> replay
+            <RotateCcw className="size-3" aria-hidden /> {t.replay}
           </button>
         }
       >
         <p>
-          <span className="text-agent">you</span>{" "}
+          <span className="text-agent">{t.you}</span>{" "}
           <span className="text-accent">❯</span> {prompt.slice(0, typedCount)}
           {typedCount < prompt.length && <Cursor />}
         </p>
@@ -403,7 +439,7 @@ function AgentSession({
         </div>
         {finished && (
           <p className="pt-2">
-            <span className="text-agent">you</span>{" "}
+            <span className="text-agent">{t.you}</span>{" "}
             <span className="text-accent">❯</span> <Cursor />
           </p>
         )}

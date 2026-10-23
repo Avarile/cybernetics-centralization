@@ -89,6 +89,14 @@ body {
   font-variant-ligatures: none;
 }
 
+/* Geist Mono has no CJK glyphs: name Simplified Chinese faces before the generic fallback picks one. */
+:lang(zh) body,
+body [lang|="zh"] {
+  font-family:
+    var(--font-geist-mono), ui-monospace, "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Microsoft YaHei",
+    monospace;
+}
+
 ::selection {
   background: var(--accent);
   color: var(--accent-fg);

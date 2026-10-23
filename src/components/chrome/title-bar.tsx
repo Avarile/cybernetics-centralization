@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { sections } from "@/lib/content";
 import type { NavLink } from "@/lib/docs";
+import { localePath } from "@/lib/i18n";
+import { useLocale } from "@/lib/locale-context";
+import { LangToggle } from "./lang-toggle";
 import { ThemeToggle } from "./theme-toggle";
 import { useActiveSection } from "../tui/use-active-section";
 
@@ -14,6 +17,8 @@ import { useActiveSection } from "../tui/use-active-section";
 export function TitleBar({ links = [] }: { links?: NavLink[] }) {
   const active = useActiveSection();
   const path = sections.find((s) => s.id === active)?.path ?? "~";
+  const locale = useLocale();
+  const zh = locale === "zh";
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-line bg-[color-mix(in_oklab,var(--bg)_88%,transparent)] backdrop-blur">
@@ -32,7 +37,7 @@ export function TitleBar({ links = [] }: { links?: NavLink[] }) {
           <span className="text-data">{path}</span>
         </p>
         {links.length > 0 && (
-          <nav aria-label="Read" className="hidden items-center gap-3 sm:flex">
+          <nav aria-label={zh ? "阅读" : "Read"} className="hidden items-center gap-3 sm:flex">
             {links.map((l) => (
               <Link key={l.href} href={l.href} className="text-dim transition-colors hover:text-fg">
                 {l.label}
@@ -41,16 +46,22 @@ export function TitleBar({ links = [] }: { links?: NavLink[] }) {
           </nav>
         )}
         <span className="hidden sm:inline">
+          <LangToggle className="text-xs" />
+        </span>
+        <span className="sm:hidden">
+          <LangToggle compact className="text-xs" />
+        </span>
+        <span className="hidden sm:inline">
           <ThemeToggle className="text-xs" />
         </span>
         <span className="sm:hidden">
           <ThemeToggle compact className="text-xs" />
         </span>
         <a
-          href="/register"
+          href={localePath(locale, "/register")}
           className="bg-accent px-1.5 font-semibold text-accent-fg transition-colors hover:bg-fg hover:text-bg"
         >
-          [register<span className="hidden sm:inline"> — early access</span>]
+          [{zh ? "注册" : "register"}<span className="hidden sm:inline">{zh ? " — 抢先体验" : " — early access"}</span>]
         </a>
       </div>
     </header>

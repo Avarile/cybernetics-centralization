@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { sections } from "@/lib/content";
+import { useLocale } from "@/lib/locale-context";
 import { gotoSection, openPalette } from "@/lib/prefs";
 import { useActiveSection } from "../tui/use-active-section";
 
@@ -10,10 +11,11 @@ export function StatusBar() {
   const active = useActiveSection();
   const index = sections.findIndex((s) => s.id === active);
   const clock = useClock();
+  const zh = useLocale() === "zh";
 
   return (
     <nav
-      aria-label="Sections"
+      aria-label={zh ? "章节" : "Sections"}
       className="fixed inset-x-0 bottom-0 z-50 flex h-7 items-center border-t border-line bg-bg-alt text-xs"
     >
       <span className="flex h-full items-center bg-accent px-2 font-semibold text-accent-fg">[cybernetics]</span>
@@ -44,7 +46,7 @@ export function StatusBar() {
         type="button"
         onClick={openPalette}
         className="flex h-full min-w-0 flex-1 items-center gap-1 px-2 text-left lg:hidden"
-        aria-label="Open command palette to jump to a section"
+        aria-label={zh ? "打开命令面板，跳转到某个章节" : "Open command palette to jump to a section"}
       >
         <span className="bg-fg px-1 text-bg">
           {index}:{sections[index]?.win}*
@@ -56,10 +58,10 @@ export function StatusBar() {
 
       <div className="flex h-full items-center gap-3 px-2 text-dim">
         <button type="button" onClick={openPalette} className="hidden hover:text-fg sm:inline">
-          <span className="text-accent">:</span> cmd
+          <span className="text-accent">:</span> {zh ? "命令" : "cmd"}
         </button>
         <button type="button" onClick={() => gotoSection("mcp")} className="hidden hover:text-fg md:inline">
-          <span className="text-proj">●</span> 3 mcp online
+          <span className="text-proj">●</span> {zh ? "3 个 mcp 在线" : "3 mcp online"}
         </button>
         <span className="tabular-nums" suppressHydrationWarning>
           {clock}

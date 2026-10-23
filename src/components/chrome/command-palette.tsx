@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { host, modules, sections } from "@/lib/content";
 import type { NavLink } from "@/lib/docs";
+import { localePath, switchLocalePath, type Copy, type Locale } from "@/lib/i18n";
+import { useLocale } from "@/lib/locale-context";
 import { gotoSection, toggleTheme } from "@/lib/prefs";
 
 type Item = { cmd: string; hint: string; run: () => void };
@@ -23,10 +25,23 @@ const NAV_ITEMS: Item[] = [
   })),
 ];
 
-const END_ITEMS: Item[] = [
-  { cmd: "theme", hint: "light ⇄ cyberpunk", run: toggleTheme },
-  { cmd: "exocortex", hint: "what's the big idea?", run: () => { window.location.href = "/exocortex"; } },
-  { cmd: "register", hint: "get early access", run: () => { window.location.href = "/register"; } },
+const HINTS: Copy<Record<"lang" | "theme" | "exocortex" | "register", string>> = {
+  en: { lang: "english ⇄ 中文", theme: "light ⇄ cyberpunk", exocortex: "what's the big idea?", register: "get early access" },
+  zh: { lang: "中文 ⇄ english", theme: "浅色 ⇄ 赛博朋克", exocortex: "核心理念是什么？", register: "获取抢先体验资格" },
+};
+
+const go = (href: string) => () => window.location.assign(href);
+
+const endItems = (locale: Locale): Item[] => [
+  {
+    cmd: "lang",
+    hint: HINTS[locale].lang,
+    run: () =>
+      window.location.assign(switchLocalePath(window.location.pathname, locale === "en" ? "zh" : "en") + window.location.hash),
+  },
+  { cmd: "theme", hint: HINTS[locale].theme, run: toggleTheme },
+  { cmd: "exocortex", hint: HINTS[locale].exocortex, run: go(localePath(locale, "/exocortex")) },
+  { cmd: "register", hint: HINTS[locale].register, run: go(localePath(locale, "/register")) },
 ];
 
 function isTyping(el: EventTarget | null) {
@@ -43,14 +58,16 @@ export function CommandPalette({ links = [] }: { links?: NavLink[] }) {
   const [sel, setSel] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const returnFocus = useRef<HTMLElement | null>(null);
+  const locale = useLocale();
+  const zh = locale === "zh";
 
   const items = useMemo<Item[]>(
     () => [
       ...NAV_ITEMS,
-      ...links.map((l) => ({ cmd: l.label, hint: l.hint, run: () => window.location.assign(l.href) })),
-      ...END_ITEMS,
+      ...links.map((l) => ({ cmd: l.label, hint: l.hint, run: go(l.href) })),
+      ...endItems(locale),
     ],
-    [links],
+    [links, locale],
   );
 
   const results = useMemo(() => {
@@ -117,14 +134,14 @@ export function CommandPalette({ links = [] }: { links?: NavLink[] }) {
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Command palette"
+        aria-label={zh ? "命令面板" : "Command palette"}
         onMouseDown={(e) => e.stopPropagation()}
         onKeyDown={onKeyDown}
         className="term glow w-full max-w-[64ch] border border-[color-mix(in_oklab,var(--accent)_50%,var(--line))] bg-bg text-sm shadow-2xl"
       >
         <label className="flex items-center gap-2 border-b border-line px-3 py-2.5">
           <span className="text-accent">:</span>
-          <span className="sr-only">Command</span>
+          <span className="sr-only">{zh ? "命令" : "Command"}</span>
           <input
             ref={inputRef}
             value={query}
@@ -138,7 +155,7 @@ export function CommandPalette({ links = [] }: { links?: NavLink[] }) {
             aria-activedescendant={results[sel] ? `palette-${sel}` : undefined}
             spellCheck={false}
             autoComplete="off"
-            placeholder="goto, open, docs, theme…"
+            placeholder={zh ? "goto、open、文档、theme、lang…" : "goto, open, docs, theme, lang…"}
             className="min-w-0 flex-1 bg-transparent text-fg caret-[var(--accent)] outline-none placeholder:text-dim"
           />
           <span className="text-xs text-dim">esc</span>

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { CodeBlock } from "@/components/code-block";
+import { localePath, type Locale } from "./i18n";
 
 /**
  * Small Markdown renderer for our own blog posts (trusted content, no raw HTML).
@@ -7,12 +8,18 @@ import { CodeBlock } from "@/components/code-block";
  * checkboxes; an ordered list keeps counting after a code block), > quotes, | tables |, ---, ``` fenced code
  * ```, `:::cta` lines, and `:::note|tip|warning [title]` … `:::` callouts.
  * Inline: **bold**, *italic*, `code`, [text](url), and `[YOU: …]` placeholders (highlighted for review).
+ * With a `locale`, links to site pages ("/docs/…", not files like "/downloads/x.pdf") point to that
+ * language's copy, so a translation can keep the English paths.
  */
-export type Slots = { cta: (text: string, key: number) => ReactNode };
+export type Slots = { cta: (text: string, key: number) => ReactNode; locale?: Locale };
 
 const INLINE = /(\[YOU:[^\]]*\]|\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|\[[^\]]+\]\([^)\s]+\))/g;
 
-export function inline(text: string): ReactNode[] {
+/** A site page in `locale`; files in public/ have an extension and one copy. */
+const pageLink = (href: string, locale: Locale) =>
+  href.startsWith("/") && !/\.[a-z0-9]+(?:[?#]|$)/i.test(href) ? localePath(locale, href) : href;
+
+export function inline(text: string, locale: Locale = "en"): ReactNode[] {
   return text.split(INLINE).map((part, i) => {
     if (part.startsWith("[YOU:"))
       return (
@@ -26,7 +33,11 @@ export function inline(text: string): ReactNode[] {
     if (link) {
       const external = /^https?:/.test(link[2]);
       return (
-        <a key={i} href={link[2]} {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
+        <a
+          key={i}
+          href={pageLink(link[2], locale)}
+          {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+        >
           {link[1]}
         </a>
       );
@@ -36,15 +47,24 @@ export function inline(text: string): ReactNode[] {
   });
 }
 
-/** "Create a token (Data Base)" → "create-a-token-data-base"; the docs' "on this page" list uses the same ids. */
+/**
+ * "Create a token (Data Base)" → "create-a-token-data-base", "创建令牌" → "创建令牌"; the docs'
+ * "on this page" list uses the same ids.
+ */
 export const headingId = (text: string) =>
   text
     .toLowerCase()
     .replace(/[*`]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/[^a-z0-9\u3400-\u9fff]+/g, "-")
     .replace(/^-|-$/g, "");
 
 const CALLOUT = /^:::(note|tip|warning)\b\s*(.*)$/;
+
+/** A callout's heading when the Markdown gives none. */
+const CALLOUT_TITLE: Record<Locale, Record<string, string>> = {
+  en: { note: "note", tip: "tip", warning: "warning" },
+  zh: { note: "注意", tip: "提示", warning: "警告" },
+};
 
 const cells = (row: string) =>
   row
@@ -78,7 +98,7 @@ export function renderMarkdown(src: string, slots: Slots): ReactNode[] {
       i++; // closing :::
       out.push(
         <aside key={key} className={`callout callout-${kind}`}>
-          <p className="callout-title">{title || kind}</p>
+          <p className="callout-title">{title || CALLOUT_TITLE[slots.locale ?? "en"][kind]}</p>
           {renderMarkdown(inner.join("\n"), slots)}
         </aside>,
       );
@@ -95,7 +115,7 @@ export function renderMarkdown(src: string, slots: Slots): ReactNode[] {
       const Tag = (["h2", "h3", "h4"] as const)[level - 2];
       out.push(
         <Tag key={key} id={headingId(text)}>
-          {inline(text)}
+          {inline(text, slots.locale)}
         </Tag>,
       );
     } else if (/^-{3,}\s*$/.test(line)) {
@@ -105,7 +125,7 @@ export function renderMarkdown(src: string, slots: Slots): ReactNode[] {
       const block = take((l) => l.startsWith(">")).map((l) => l.replace(/^>\s?/, ""));
       out.push(
         <blockquote key={key}>
-          <p>{inline(block.join(" "))}</p>
+          <p>{inline(block.join(" "), slots.locale)}</p>
         </blockquote>,
       );
     } else if (line.startsWith("|")) {
@@ -114,11 +134,11 @@ export function renderMarkdown(src: string, slots: Slots): ReactNode[] {
         <div key={key} className="table-wrap">
           <table>
             <thead>
-              <tr>{cells(head).map((c, j) => <th key={j}>{inline(c)}</th>)}</tr>
+              <tr>{cells(head).map((c, j) => <th key={j}>{inline(c, slots.locale)}</th>)}</tr>
             </thead>
             <tbody>
               {rows.map((r, j) => (
-                <tr key={j}>{cells(r).map((c, k) => <td key={k}>{inline(c)}</td>)}</tr>
+                <tr key={j}>{cells(r).map((c, k) => <td key={k}>{inline(c, slots.locale)}</td>)}</tr>
               ))}
             </tbody>
           </table>
@@ -134,17 +154,17 @@ export function renderMarkdown(src: string, slots: Slots): ReactNode[] {
           {items.map((t, j) =>
             t.startsWith("[ ] ") ? (
               <li key={j} className="task">
-                {inline(t.slice(4))}
+                {inline(t.slice(4), slots.locale)}
               </li>
             ) : (
-              <li key={j}>{inline(t)}</li>
+              <li key={j}>{inline(t, slots.locale)}</li>
             ),
           )}
         </List>,
       );
     } else {
       const para = take((l) => !!l.trim() && !/^(#{2,4} |>|\||- |\d+\. |:::|```|-{3,}\s*$)/.test(l));
-      out.push(<p key={key}>{inline(para.join(" "))}</p>);
+      out.push(<p key={key}>{inline(para.join(" "), slots.locale)}</p>);
     }
   }
   return out;

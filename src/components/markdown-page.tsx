@@ -1,17 +1,57 @@
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { PrefToggles } from "@/components/chrome/lang-toggle";
 import { TuiButton } from "@/components/tui/tui-button";
-import type { Post } from "@/lib/blog";
+import { UntranslatedNote } from "@/components/untranslated-note";
+import { getPage, type Post } from "@/lib/blog";
+import { HTML_LANG, localePath, type Copy, type Locale } from "@/lib/i18n";
 import { renderMarkdown } from "@/lib/markdown";
-import { ThemeToggle } from "@/components/chrome/theme-toggle";
+import { alternates, baseOpenGraph, defaultOgImage } from "@/lib/seo";
+
+const COPY: Copy<{ blog: string; updated: string }> = {
+  en: { blog: "blog", updated: "last updated" },
+  zh: { blog: "博客", updated: "最后更新" },
+};
+
+/** Metadata for a standalone page from `content/pages/`, served at `/<name>`. */
+export function markdownPageMetadata(name: string, locale: Locale, og: Partial<Metadata["openGraph"]> = {}): Metadata {
+  const page = getPage(name, locale);
+  const path = `/${name}`;
+  return {
+    title: page.title,
+    description: page.dek,
+    alternates: alternates(path, locale),
+    openGraph: {
+      ...baseOpenGraph(locale),
+      url: localePath(locale, path),
+      title: page.title,
+      description: page.dek,
+      images: [defaultOgImage],
+      ...og,
+    } as Metadata["openGraph"],
+    ...(page.draft && { robots: { index: false, follow: false } }),
+  };
+}
 
 /** A standalone page from `content/pages/` (about, privacy): header, draft notice and body. */
-export function MarkdownPage({ page, label, children }: { page: Post; label: string; children?: ReactNode }) {
+export function MarkdownPage({
+  page,
+  label,
+  locale,
+  children,
+}: {
+  page: Post;
+  label: string;
+  locale: Locale;
+  children?: ReactNode;
+}) {
+  const t = COPY[locale];
   return (
     <main className="mx-auto max-w-[110ch] px-4 py-10 sm:px-6 md:py-16">
       <div className="flex flex-wrap gap-3">
-        <TuiButton href="/" label="← cybernetics" />
-        <TuiButton href="/blog" label="blog" />
-        <ThemeToggle className="ml-auto" />
+        <TuiButton href={localePath(locale, "/")} label="← cybernetics" />
+        <TuiButton href={localePath(locale, "/blog")} label={t.blog} />
+        <PrefToggles className="ml-auto" />
       </div>
 
       <div aria-hidden className="mt-10 mb-8 flex items-center gap-2 text-xs text-dim">
@@ -26,21 +66,24 @@ export function MarkdownPage({ page, label, children }: { page: Post; label: str
           DRAFT — unlisted, not indexed. Fill in every [YOU: …] line, then set draft: false.
         </p>
       )}
+      <UntranslatedNote locale={locale} lang={page.lang} />
 
-      <h1 className="glow text-2xl font-semibold tracking-tight text-balance sm:text-4xl">
-        <span aria-hidden className="text-dim">
-          #{" "}
-        </span>
-        {page.title}
-      </h1>
-      {page.dek && <p className="mt-4 text-dim text-pretty">{page.dek}</p>}
-      {page.date && (
-        <p className="mt-4 text-xs text-dim">
-          last updated <time dateTime={page.date}>{page.date}</time>
-        </p>
-      )}
+      <div lang={HTML_LANG[page.lang]}>
+        <h1 className="glow text-2xl font-semibold tracking-tight text-balance sm:text-4xl">
+          <span aria-hidden className="text-dim">
+            #{" "}
+          </span>
+          {page.title}
+        </h1>
+        {page.dek && <p className="mt-4 text-dim text-pretty">{page.dek}</p>}
+        {page.date && (
+          <p className="mt-4 text-xs text-dim">
+            {t.updated} <time dateTime={page.date}>{page.date}</time>
+          </p>
+        )}
 
-      <div className="prose-tui mt-12 max-w-[72ch]">{renderMarkdown(page.body, { cta: () => null })}</div>
+        <div className="prose-tui mt-12 max-w-[72ch]">{renderMarkdown(page.body, { cta: () => null, locale })}</div>
+      </div>
       {children}
     </main>
   );

@@ -1,7 +1,8 @@
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { assertFilled, getPublishedPosts, parseFrontMatter } from "./blog";
+import { assertFilled, getPublishedPosts, readContent } from "./blog";
 import type { ModuleId } from "./content";
+import { localePath, type Copy, type Locale } from "./i18n";
 import { headingId } from "./markdown";
 
 /**
@@ -14,14 +15,16 @@ const DOCS_DIR = join(process.cwd(), "content", "docs");
 const GUIDES_DIR = join(process.cwd(), "content", "guides");
 
 /** Docs sections in sidebar order. */
-export const docSections = [
-  { id: "start", title: "Start here" },
-  { id: "connect", title: "Connect your AI" },
-  { id: "self-host", title: "Self-hosting" },
-  { id: "modules", title: "Modules" },
-] as const;
+const SECTIONS = [
+  { id: "start", title: { en: "Start here", zh: "从这里开始" } },
+  { id: "connect", title: { en: "Connect your AI", zh: "连接你的 AI" } },
+  { id: "self-host", title: { en: "Self-hosting", zh: "自托管" } },
+  { id: "modules", title: { en: "Modules", zh: "模块" } },
+] as const satisfies readonly { id: string; title: Copy<string> }[];
 
-export type DocSectionId = (typeof docSections)[number]["id"];
+export type DocSectionId = (typeof SECTIONS)[number]["id"];
+
+export const docSections = (locale: Locale = "en") => SECTIONS.map((s) => ({ id: s.id, title: s.title[locale] }));
 
 const MODULE_IDS: ModuleId[] = ["data", "proj", "crm", "agent"];
 
@@ -54,6 +57,8 @@ export type Doc = {
   updated: string;
   draft: boolean;
   body: string;
+  /** The language `title` and `body` are in: a doc without a translation shows the English. */
+  lang: Locale;
 };
 
 export type Guide = {
@@ -72,25 +77,26 @@ export type Guide = {
   updated: string;
   draft: boolean;
   body: string;
+  lang: Locale;
 };
 
 /** Dev lists drafts too (marked) so they can be reviewed; the production build never does. */
 export const showDrafts = process.env.NODE_ENV === "development";
 
-export function getAllDocs(): Doc[] {
-  return docSections.flatMap(({ id: section }) => {
+export function getAllDocs(locale: Locale = "en"): Doc[] {
+  return SECTIONS.flatMap(({ id: section }) => {
     const dir = join(DOCS_DIR, section);
     if (!existsSync(dir)) return [];
     return readdirSync(dir)
       .filter((f) => f.endsWith(".md"))
       .sort()
       .map((file) => {
-        const { meta, body } = parseFrontMatter(readFileSync(join(dir, file), "utf8"));
+        const { meta, body, lang } = readContent(`docs/${section}/${file}`, locale);
         const slug = file.replace(/^\d+-/, "").replace(/\.md$/, "");
         const doc: Doc = {
           section,
           slug,
-          href: `/docs/${section}/${slug}`,
+          href: localePath(locale, `/docs/${section}/${slug}`),
           title: meta.title ?? slug,
           seoTitle: meta.seoTitle || meta.title || slug,
           description: meta.description ?? "",
@@ -100,29 +106,30 @@ export function getAllDocs(): Doc[] {
           updated: meta.updated ?? "",
           draft: meta.draft === "true",
           body,
+          lang,
         };
-        assertFilled(doc, `content/docs/${section}/${file}`);
+        assertFilled(doc, `content/${lang === "en" ? "" : `${lang}/`}docs/${section}/${file}`);
         return doc;
       });
   });
 }
 
 /** Docs a reader sees: published ones, plus drafts under `pnpm dev`. */
-export const getVisibleDocs = () => getAllDocs().filter((d) => showDrafts || !d.draft);
+export const getVisibleDocs = (locale: Locale = "en") => getAllDocs(locale).filter((d) => showDrafts || !d.draft);
 
-export const getDoc = (section: string, slug: string) =>
-  getAllDocs().find((d) => d.section === section && d.slug === slug);
+export const getDoc = (section: string, slug: string, locale: Locale = "en") =>
+  getAllDocs(locale).find((d) => d.section === section && d.slug === slug);
 
-export function getAllGuides(): Guide[] {
+export function getAllGuides(locale: Locale = "en"): Guide[] {
   if (!existsSync(GUIDES_DIR)) return [];
   return readdirSync(GUIDES_DIR)
     .filter((f) => f.endsWith(".md"))
     .map((file) => {
-      const { meta, body } = parseFrontMatter(readFileSync(join(GUIDES_DIR, file), "utf8"));
+      const { meta, body, lang } = readContent(`guides/${file}`, locale);
       const slug = file.replace(/\.md$/, "");
       const guide: Guide = {
         slug,
-        href: `/guides/${slug}`,
+        href: localePath(locale, `/guides/${slug}`),
         title: meta.title ?? slug,
         seoTitle: meta.seoTitle || meta.title || slug,
         dek: meta.dek ?? "",
@@ -134,16 +141,17 @@ export function getAllGuides(): Guide[] {
         updated: meta.updated ?? "",
         draft: meta.draft === "true",
         body,
+        lang,
       };
-      assertFilled(guide, `content/guides/${file}`);
+      assertFilled(guide, `content/${lang === "en" ? "" : `${lang}/`}guides/${file}`);
       return guide;
     })
     .sort((a, b) => a.order - b.order);
 }
 
-export const getVisibleGuides = () => getAllGuides().filter((g) => showDrafts || !g.draft);
+export const getVisibleGuides = (locale: Locale = "en") => getAllGuides(locale).filter((g) => showDrafts || !g.draft);
 
-export const getGuide = (slug: string) => getAllGuides().find((g) => g.slug === slug);
+export const getGuide = (slug: string, locale: Locale = "en") => getAllGuides(locale).find((g) => g.slug === slug);
 
 /** Whether any doc or guide is published, so nav links appear only once there's something to read. */
 export const hasPublishedDocs = () => getAllDocs().some((d) => !d.draft);
@@ -155,14 +163,20 @@ export type NavLink = { href: string; label: string; hint: string };
  * The reading sections for site navigation (title bar, command palette, footer): each
  * once it has something published, and always under `pnpm dev` so drafts can be reviewed.
  */
-export function readingLinks(): NavLink[] {
+export function readingLinks(locale: Locale = "en"): NavLink[] {
+  const zh = locale === "zh";
   return [
-    { href: "/blog", label: "blog", hint: "cyborg migration build log", show: getPublishedPosts().length > 0 },
-    { href: "/docs", label: "docs", hint: "connect your AI, self-host", show: hasPublishedDocs() },
-    { href: "/guides", label: "guides", hint: "workflows, step by step", show: hasPublishedGuides() },
+    {
+      href: "/blog",
+      label: zh ? "博客" : "blog",
+      hint: zh ? "赛博格迁移建造日志" : "cyborg migration build log",
+      show: getPublishedPosts().length > 0,
+    },
+    { href: "/docs", label: zh ? "文档" : "docs", hint: zh ? "连接你的 AI，自托管" : "connect your AI, self-host", show: hasPublishedDocs() },
+    { href: "/guides", label: zh ? "指南" : "guides", hint: zh ? "工作流，一步一步来" : "workflows, step by step", show: hasPublishedGuides() },
   ]
     .filter((l) => showDrafts || l.show)
-    .map(({ href, label, hint }) => ({ href, label, hint }));
+    .map(({ href, label, hint }) => ({ href: localePath(locale, href), label, hint }));
 }
 
 /** `## Heading` lines of a body, for the "on this page" list; ids match `renderMarkdown`'s. */

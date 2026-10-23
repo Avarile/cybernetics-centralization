@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { Copy } from "@/lib/i18n";
+import { useLocale } from "@/lib/locale-context";
 
-const LINES: [string, string?][] = [
+const EN: [string, string?][] = [
   ["CYBERNETICS BIOS v1.0 · (c) 2026 avarile"],
   ["cpu0: human cortex, 1 core, variable clock", "ok"],
   ["memory test: 4 platforms", "ok"],
@@ -14,6 +16,21 @@ const LINES: [string, string?][] = [
   ["boot complete."],
 ];
 
+const ZH: [string, string?][] = [
+  ["CYBERNETICS BIOS v1.0 · (c) 2026 avarile"],
+  ["cpu0：人类大脑皮层，单核，可变主频", "ok"],
+  ["内存检测：4 个平台", "ok"],
+  ["  数据库 · 项目管理 · crm · 智能体"],
+  ["加载内核 you.ko", "ok"],
+  ["挂载 /home/you/knowledge", "ok"],
+  ["挂载 /home/you/projects", "ok"],
+  ["启动 mcp 守护进程 [3/3]", "ok"],
+  ["启动完成。"],
+];
+
+const LINES: Copy<[string, string?][]> = { en: EN, zh: ZH };
+const SKIP: Copy<string> = { en: "press any key to skip", zh: "按任意键跳过" };
+
 const STEP_MS = 120;
 const HOLD_MS = 450;
 
@@ -23,6 +40,8 @@ const HOLD_MS = 450;
  * tap skips it.
  */
 export function BootScreen() {
+  const locale = useLocale();
+  const lines = LINES[locale];
   const [shown, setShown] = useState(0);
   const [leaving, setLeaving] = useState(false);
 
@@ -47,8 +66,9 @@ export function BootScreen() {
       );
     };
 
-    LINES.forEach((_, i) => timers.push(setTimeout(() => setShown(i + 1), (i + 1) * STEP_MS)));
-    timers.push(setTimeout(finish, LINES.length * STEP_MS + HOLD_MS));
+    // Both languages have the same number of lines.
+    EN.forEach((_, i) => timers.push(setTimeout(() => setShown(i + 1), (i + 1) * STEP_MS)));
+    timers.push(setTimeout(finish, EN.length * STEP_MS + HOLD_MS));
 
     window.addEventListener("keydown", finish);
     window.addEventListener("pointerdown", finish);
@@ -62,13 +82,13 @@ export function BootScreen() {
   return (
     <div
       role="status"
-      aria-label="Starting Cybernetics"
+      aria-label={locale === "zh" ? "正在启动 Cybernetics" : "Starting Cybernetics"}
       className={`boot-screen fixed inset-0 z-[80] flex-col justify-between bg-bg bg-none p-5 text-[13px] transition-opacity duration-200 sm:p-8 ${
         leaving ? "opacity-0" : ""
       }`}
     >
       <div className="max-w-[72ch]">
-        {LINES.slice(0, shown).map(([text, status], i) => (
+        {lines.slice(0, shown).map(([text, status], i) => (
           <p key={i} className="flex gap-2">
             <span className={i === 0 ? "text-accent" : ""}>{text}</span>
             {status && (
@@ -83,7 +103,7 @@ export function BootScreen() {
         ))}
         <span className="cursor-block" />
       </div>
-      <p className="text-dim">press any key to skip</p>
+      <p className="text-dim">{SKIP[locale]}</p>
     </div>
   );
 }

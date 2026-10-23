@@ -3,6 +3,7 @@
 import { useInView } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Figure } from "@/lib/content";
+import { useLocale } from "@/lib/locale-context";
 import { Bar, Spinner } from "./bits";
 import { Box } from "./box";
 import { useRevealed } from "./tui-section";
@@ -14,6 +15,7 @@ const LOADER_MIN_MS = 500;
 /** Terminal-style loader: braille spinner over a sweeping `[███░░░]` bar. */
 function Loader({ name }: { name: string }) {
   const [fill, setFill] = useState(2);
+  const zh = useLocale() === "zh";
   useEffect(() => {
     const t = setInterval(() => setFill((f) => (f + 1) % (LOADER_CELLS + 1)), 90);
     return () => clearInterval(t);
@@ -21,11 +23,11 @@ function Loader({ name }: { name: string }) {
   return (
     <div
       role="status"
-      aria-label={`Loading ${name}`}
+      aria-label={zh ? `正在加载 ${name}` : `Loading ${name}`}
       className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-(--figure-bg) text-xs"
     >
       <p>
-        <Spinner className="text-accent" /> <span className="text-dim">loading</span> fig/{name}
+        <Spinner className="text-accent" /> <span className="text-dim">{zh ? "加载中" : "loading"}</span> fig/{name}
         <span className="text-dim">…</span>
       </p>
       <Bar fill={fill} cells={LOADER_CELLS} tone="var(--accent)" />
@@ -65,6 +67,7 @@ export function FigureEmbed({
   const [height, setHeight] = useState<number>();
   const [minDone, setMinDone] = useState(false);
   const boxRef = useRef<HTMLDivElement>(null);
+  const zh = useLocale() === "zh";
 
   useEffect(() => {
     const t = setTimeout(() => setMinDone(true), LOADER_MIN_MS);
@@ -183,7 +186,7 @@ export function FigureEmbed({
           term
           tone={tone}
           title={`fig · ${figure.id}`}
-          right={<span className="text-dim">interactive</span>}
+          right={<span className="text-dim">{zh ? "可交互" : "interactive"}</span>}
           bodyClassName="p-0"
         >
           {frame}
@@ -191,7 +194,7 @@ export function FigureEmbed({
       )}
       {caption && (
         <figcaption className="mt-3 max-w-[68ch] text-xs text-dim">
-          <span className="text-accent">fig.</span> {figure.caption}
+          <span className="text-accent">{zh ? "图" : "fig."}</span> {figure.caption}
         </figcaption>
       )}
     </figure>

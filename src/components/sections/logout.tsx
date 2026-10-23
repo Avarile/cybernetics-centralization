@@ -1,53 +1,82 @@
 import Link from "next/link";
 import { pageHref } from "@/lib/blog";
 import { readingLinks } from "@/lib/docs";
-import { host, modules, tone } from "@/lib/content";
+import { host, tone } from "@/lib/content";
+import { contentFor } from "@/lib/content-i18n";
+import { localePath, type Copy, type Locale } from "@/lib/i18n";
 import { TuiButton } from "../tui/tui-button";
 import { TuiSection } from "../tui/tui-section";
 
+const COPY = {
+  en: {
+    title: "Become legible to your agents.",
+    password: "[sudo] password for you: ••••••••",
+    welcome: "welcome, cyborg. start with your knowledge and your projects — everything else plugs in when you're ready.",
+    register: "Register for early access",
+    blog: "Read the blog",
+    modules: "# modules",
+    more: "# more",
+    blogLink: "blog — cyborg migration",
+    mcp: "mcp integration",
+    exocortex: "exocortex — the big idea",
+    pages: { about: "about — who builds this", "open-source": "open source — credits and code", privacy: "privacy policy" },
+    palette: (key: React.ReactNode) => (
+      <>
+        press {key} anywhere for the command palette
+      </>
+    ),
+    closed: "Connection to avarile.com closed.",
+    stats: (modules: number, servers: number) => `${modules} modules · ${servers} mcp servers · 1 you`,
+  },
+  zh: {
+    title: "让你的智能体读懂你。",
+    password: "[sudo] you 的密码：••••••••",
+    welcome: "欢迎你，赛博格。从你的知识和项目开始——其余的一切，等你准备好再接入。",
+    register: "注册抢先体验",
+    blog: "阅读博客",
+    modules: "# 模块",
+    more: "# 更多",
+    blogLink: "博客 — 赛博格迁移",
+    mcp: "mcp 集成",
+    exocortex: "外脑 — 核心理念",
+    pages: { about: "关于 — 谁在做这个", "open-source": "开源 — 致谢与代码", privacy: "隐私政策" },
+    palette: (key: React.ReactNode) => <>在任意位置按 {key} 打开命令面板</>,
+    closed: "与 avarile.com 的连接已关闭。",
+    stats: (modules: number, servers: number) => `${modules} 个模块 · ${servers} 个 mcp 服务器 · 1 个你`,
+  },
+} satisfies Copy<unknown>;
+
 /** Footer links to docs and standalone pages; drafts stay unlinked until published. */
-const pageLinks = () => [
-  ...readingLinks()
-    .filter((l) => l.href !== "/blog")
+const pageLinks = (locale: Locale) => [
+  ...readingLinks(locale)
+    .filter((l) => l.href !== localePath(locale, "/blog"))
     .map((l) => ({ href: l.href, label: `${l.label} — ${l.hint}` })),
-  ...[
-    { name: "about", label: "about — who builds this" },
-    { name: "open-source", label: "open source — credits and code" },
-    { name: "privacy", label: "privacy policy" },
-  ].flatMap((p) => {
-    const href = pageHref(p.name);
-    return href ? [{ href, label: p.label }] : [];
+  ...(["about", "open-source", "privacy"] as const).flatMap((name) => {
+    const href = pageHref(name, locale);
+    return href ? [{ href, label: COPY[locale].pages[name] }] : [];
   }),
 ];
 
-export function Logout() {
+export function Logout({ locale = "en" }: { locale?: Locale }) {
+  const { modules } = contentFor(locale);
+  const t = COPY[locale];
   return (
-    <TuiSection
-      id="logout"
-      title="Become legible to your agents."
-      command="sudo cyborgize --me"
-    >
+    <TuiSection id="logout" title={t.title} command="sudo cyborgize --me">
       <div className="text-[13px] sm:text-sm">
-        <p className="text-dim">[sudo] password for you: ••••••••</p>
+        <p className="text-dim">{t.password}</p>
         <p className="mt-1">
-          <span className="text-proj">✓</span> welcome, cyborg. start with your
-          knowledge and your projects — everything else plugs in when
-          you&apos;re ready.
+          <span className="text-proj">✓</span> {t.welcome}
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
-          <TuiButton
-            href="/register"
-            label="Register for early access"
-            primary
-          />
-          <TuiButton href="/blog" label="Read the blog" />
+          <TuiButton href={localePath(locale, "/register")} label={t.register} primary />
+          <TuiButton href={localePath(locale, "/blog")} label={t.blog} />
         </div>
       </div>
 
       <footer className="mt-20 text-[13px]">
         <div className="grid gap-8 sm:grid-cols-2">
           <div>
-            <p className="text-dim"># modules</p>
+            <p className="text-dim">{t.modules}</p>
             <ul className="mt-2 space-y-1">
               {modules.map((m) => (
                 <li key={m.id}>
@@ -68,14 +97,14 @@ export function Logout() {
             </ul>
           </div>
           <div>
-            <p className="text-dim"># more</p>
+            <p className="text-dim">{t.more}</p>
             <ul className="mt-2 space-y-1">
               <li>
                 <Link
-                  href="/blog"
+                  href={localePath(locale, "/blog")}
                   className="underline decoration-line underline-offset-4 hover:text-accent"
                 >
-                  blog — cyborg migration
+                  {t.blogLink}
                 </Link>
               </li>
               <li>
@@ -83,18 +112,18 @@ export function Logout() {
                   href="#mcp"
                   className="underline decoration-line underline-offset-4 hover:text-accent"
                 >
-                  mcp integration
+                  {t.mcp}
                 </a>
               </li>
               <li>
                 <a
-                  href="/exocortex"
+                  href={localePath(locale, "/exocortex")}
                   className="underline decoration-line underline-offset-4 hover:text-accent"
                 >
-                  exocortex — the big idea
+                  {t.exocortex}
                 </a>
               </li>
-              {pageLinks().map((p) => (
+              {pageLinks(locale).map((p) => (
                 <li key={p.href}>
                   <Link
                     href={p.href}
@@ -104,10 +133,7 @@ export function Logout() {
                   </Link>
                 </li>
               ))}
-              <li className="text-dim">
-                press <kbd className="text-accent">:</kbd> anywhere for the
-                command palette
-              </li>
+              <li className="text-dim">{t.palette(<kbd className="text-accent">:</kbd>)}</li>
             </ul>
           </div>
         </div>
@@ -116,11 +142,9 @@ export function Logout() {
           <p>
             <span className="text-accent">you@cybernetics</span>:~$ logout
           </p>
-          <p>Connection to avarile.com closed.</p>
+          <p>{t.closed}</p>
           <p className="mt-4 text-xs">
-            © {new Date().getFullYear()} cybernetics · {modules.length} modules ·{" "}
-            {modules.filter((m) => m.mcpUrl).length} mcp servers
-            · 1 you
+            © {new Date().getFullYear()} cybernetics · {t.stats(modules.length, modules.filter((m) => m.mcpUrl).length)}
           </p>
         </div>
       </footer>

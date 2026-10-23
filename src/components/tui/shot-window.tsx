@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Shot } from "@/lib/content";
+import { useLocale } from "@/lib/locale-context";
 import { Box } from "./box";
 
 /**
@@ -19,6 +20,7 @@ export function ShotWindow({
 }) {
   const [active, setActive] = useState(0);
   const shot = shots[active];
+  const zh = useLocale() === "zh";
 
   return (
     <Box
@@ -48,7 +50,7 @@ export function ShotWindow({
       {shots.length > 1 && (
         <div
           role="tablist"
-          aria-label={`${name} screenshots`}
+          aria-label={zh ? `${name}截图` : `${name} screenshots`}
           className="flex flex-wrap border-t border-line bg-bg-alt text-xs"
         >
           {shots.map((s, i) => (
