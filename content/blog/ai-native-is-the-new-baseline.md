@@ -1,11 +1,11 @@
 ---
 title: "AI-native is the new baseline. The gap compounds."
 dek: "Everyone has AI now, so AI isn't your advantage anymore. What is? Whether your AI knows your life. Here's my plan to build that, and why I'm starting now."
-date: 2026-10-21
+date: 2026-10-23
 series: "Cyborg Migration #1"
 piece: blog-01
 stage: 0
-draft: true
+draft: false
 ---
 
 I once spent an evening fixing a problem on one of my servers. I read the docs, tried four things, and finally got it working. A year later the same problem came back, and I had no idea what I'd done.
