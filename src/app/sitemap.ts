@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getPublishedPosts } from "@/lib/blog";
+import { getPublishedPosts, pageHref } from "@/lib/blog";
 import { absolute } from "@/lib/seo";
 
 // Static export: written to out/sitemap.xml at build time.
@@ -18,5 +18,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     })),
     { url: absolute("/exocortex"), changeFrequency: "yearly", priority: 0.4 },
+    ...["about", "privacy"].flatMap((name) => {
+      const href = pageHref(name);
+      return href ? [{ url: absolute(href), changeFrequency: "yearly" as const, priority: 0.3 }] : [];
+    }),
   ];
 }

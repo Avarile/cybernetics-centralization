@@ -4,14 +4,20 @@ import type { ReactNode } from "react";
  * Small Markdown renderer for our own blog posts (trusted content, no raw HTML).
  * Blocks: ## / ### headings, paragraphs, - and 1. lists (`- [ ] ` items are checkboxes), > quotes, | tables |,
  * ---, and `:::cta` lines.
- * Inline: **bold**, *italic*, `code`, [text](url).
+ * Inline: **bold**, *italic*, `code`, [text](url), and `[YOU: …]` placeholders (highlighted for review).
  */
 export type Slots = { cta: (text: string, key: number) => ReactNode };
 
-const INLINE = /(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|\[[^\]]+\]\([^)\s]+\))/g;
+const INLINE = /(\[YOU:[^\]]*\]|\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|\[[^\]]+\]\([^)\s]+\))/g;
 
 export function inline(text: string): ReactNode[] {
   return text.split(INLINE).map((part, i) => {
+    if (part.startsWith("[YOU:"))
+      return (
+        <mark key={i} className="border border-dashed border-red bg-transparent px-1 text-red">
+          {part}
+        </mark>
+      );
     if (part.startsWith("**") && part.endsWith("**")) return <strong key={i}>{part.slice(2, -2)}</strong>;
     if (part.startsWith("`") && part.endsWith("`")) return <code key={i}>{part.slice(1, -1)}</code>;
     const link = /^\[([^\]]+)\]\(([^)\s]+)\)$/.exec(part);

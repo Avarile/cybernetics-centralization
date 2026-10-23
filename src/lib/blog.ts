@@ -74,7 +74,15 @@ export function getNeighbours(post: Post) {
 }
 
 /** A standalone page (same front matter as posts), e.g. `getPage("start")`. */
-export const getPage = (name: string) => parse(name, readFileSync(join(PAGES_DIR, `${name}.md`), "utf8"));
+export function getPage(name: string) {
+  const page = parse(name, readFileSync(join(PAGES_DIR, `${name}.md`), "utf8"));
+  if (!page.draft && page.body.includes("[YOU"))
+    throw new Error(`content/pages/${name}.md is published but still has a [YOU: …] placeholder`);
+  return page;
+}
+
+/** Where a page lives once published; `undefined` while it's a draft, so nothing links to it yet. */
+export const pageHref = (name: string) => (getPage(name).draft ? undefined : `/${name}`);
 
 /** Signup link for a post; first-touch UTM is stored by the register form. */
 export const registerHref = (post: Post) =>

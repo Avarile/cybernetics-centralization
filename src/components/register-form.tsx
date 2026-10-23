@@ -135,7 +135,7 @@ function ErrorLine({ id, error }: { id: string; error?: string }) {
   );
 }
 
-export function RegisterForm() {
+export function RegisterForm({ privacyHref }: { privacyHref?: string }) {
   const utm = JSON.parse(useSyncExternalStore(() => () => {}, readUtm, () => "{}")) as Utm;
   const formRef = useRef<HTMLFormElement>(null);
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
@@ -391,7 +391,21 @@ export function RegisterForm() {
       <div className="space-y-2 border-t border-dashed border-line pt-5 text-[13px]">
         <label className="flex cursor-pointer gap-2">
           <input type="checkbox" name="privacy" className="mt-1 accent-(--accent)" {...describe("privacy")} />
-          <span>I agree that Cybernetics stores these details to contact me about my registration.</span>
+          <span>
+            I agree that Cybernetics stores these details to contact me about my registration
+            {privacyHref ? (
+              <>
+                {" "}
+                (
+                <a href={privacyHref} target="_blank" className="underline decoration-line underline-offset-4 hover:text-accent">
+                  privacy policy
+                </a>
+                ).
+              </>
+            ) : (
+              "."
+            )}
+          </span>
         </label>
         <ErrorLine id="privacy" error={err("privacy")} />
         <label className="flex cursor-pointer gap-2 text-dim">

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { RegisterForm } from "@/components/register-form";
 import { TuiButton } from "@/components/tui/tui-button";
+import { pageHref } from "@/lib/blog";
 import { modules, tone } from "@/lib/content";
 import { alternates, baseOpenGraph } from "@/lib/seo";
 
@@ -25,6 +26,7 @@ const steps = [
 ];
 
 export default function RegisterPage() {
+  const privacyHref = pageHref("privacy");
   return (
     <main className="mx-auto max-w-[110ch] px-4 py-10 sm:px-6 md:py-16">
       <TuiButton href="/" label="← cybernetics" />
@@ -78,12 +80,20 @@ export default function RegisterPage() {
             <p className="mt-2 text-dim">
               We only use these details to set up your access and to contact you about it. Product updates are opt-in.
               Ask us to delete your details at any time.
+              {privacyHref && (
+                <>
+                  {" "}
+                  <a href={privacyHref} className="underline decoration-line underline-offset-4 hover:text-accent">
+                    Read the privacy policy.
+                  </a>
+                </>
+              )}
             </p>
           </section>
         </aside>
 
         <div className="lg:border-l lg:border-line lg:pl-12">
-          <RegisterForm />
+          <RegisterForm privacyHref={privacyHref} />
         </div>
       </div>
     </main>

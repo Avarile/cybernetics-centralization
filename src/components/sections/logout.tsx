@@ -1,7 +1,17 @@
 import Link from "next/link";
+import { pageHref } from "@/lib/blog";
 import { host, modules, tone } from "@/lib/content";
 import { TuiButton } from "../tui/tui-button";
 import { TuiSection } from "../tui/tui-section";
+
+/** Footer links to standalone pages; drafts stay unlinked until published. */
+const pageLinks = [
+  { name: "about", label: "about — who builds this" },
+  { name: "privacy", label: "privacy policy" },
+].flatMap((p) => {
+  const href = pageHref(p.name);
+  return href ? [{ href, label: p.label }] : [];
+});
 
 export function Logout() {
   return (
@@ -77,6 +87,16 @@ export function Logout() {
                   exocortex — the big idea
                 </a>
               </li>
+              {pageLinks.map((p) => (
+                <li key={p.href}>
+                  <Link
+                    href={p.href}
+                    className="underline decoration-line underline-offset-4 hover:text-accent"
+                  >
+                    {p.label}
+                  </Link>
+                </li>
+              ))}
               <li className="text-dim">
                 press <kbd className="text-accent">:</kbd> anywhere for the
                 command palette

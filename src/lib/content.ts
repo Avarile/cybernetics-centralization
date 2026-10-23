@@ -6,7 +6,7 @@ export const SITE_TITLE = "Cybernetics — Cyborgize yourself, agentically";
 export const SITE_DESCRIPTION =
   "Cybernetics turns what you know and what you do into structured data you own — ready for any AI agent over MCP.";
 /** Byline on blog posts and in structured data. */
-export const AUTHOR = { name: "Avarile", url: BASE_URL };
+export const AUTHOR = { name: "Avarile", url: `${BASE_URL}/about` };
 
 /** "https://crm.avarile.com" → "crm.avarile.com" */
 export const host = (url: string) => url.replace(/^https?:\/\//, "");
