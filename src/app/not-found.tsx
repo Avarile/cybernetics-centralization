@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ThemeToggle } from "@/components/chrome/theme-toggle";
 import { TuiButton } from "@/components/tui/tui-button";
 
 // Next adds `noindex` itself; drop the canonical and share card inherited from the home page.
@@ -7,7 +8,11 @@ export const metadata: Metadata = { title: "Not found", alternates: { canonical:
 export default function NotFound() {
   return (
     <main className="mx-auto max-w-[110ch] px-4 py-10 sm:px-6 md:py-16">
-      <div aria-hidden className="mb-8 flex items-center gap-2 text-xs text-dim">
+      <div className="flex">
+        <ThemeToggle className="ml-auto" />
+      </div>
+
+      <div aria-hidden className="mt-10 mb-8 flex items-center gap-2 text-xs text-dim">
         <span>
           ──[ <span className="text-red">404</span> ]
         </span>
