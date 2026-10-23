@@ -73,7 +73,7 @@ export const modules: Module[] = [
       "The intermediate layer between you and your agents — assign work to either",
       "Tasks linked to the knowledge they need in the Data Base",
     ],
-    mcpTools: ["list_projects", "create_work_items", "update_work_item"],
+    mcpTools: ["list_projects", "create_work_item", "update_work_item"],
     integratesWith: "data",
   },
   {
@@ -368,7 +368,7 @@ export const consumers: Consumer[] = [
       { kind: "tool", module: "data", server: "data", tool: "query_records", detail: "how-to: “launch checklist” · 1 match" },
       { kind: "tool", module: "data", server: "data", tool: "get_record_neighbors", detail: "3 linked references" },
       { kind: "tool", module: "crm", server: "crm", tool: "find_many_people", detail: "tag: beta-tester · 12 people" },
-      { kind: "tool", module: "proj", server: "projects", tool: "create_work_items", detail: "project “Q4 Launch” · 7 tasks" },
+      { kind: "tool", module: "proj", server: "projects", tool: "create_work_item", detail: "project “Q4 Launch” · ×7" },
       { kind: "reply", text: "Created “Q4 Launch” with 7 tasks from your launch checklist. Each task links its reference docs, and the beta outreach task lists your 12 testers." },
     ],
     connect: {

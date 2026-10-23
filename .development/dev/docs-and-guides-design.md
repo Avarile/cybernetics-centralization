@@ -217,7 +217,9 @@ Written as drafts (`pnpm dev` lists them): `/docs/start/what-is-cybernetics`, ni
 
 Open `[YOU]` items: Claude Cowork and Desktop config servers; the Agentic Platform's menu path for app connections; Teable branding visible in the app; Twenty commercial-file features.
 
-Not yet: command-palette search over docs (phase 4), Track B (waits on images and the reference stack), G4–G16.
+Guides G4–G16 written as drafts (2026-10-23), grounded in the module repos: schema-pack tables and statuses, Projects agent members and MCP tool names, the Projects and CRM Data Base integrations, the Agentic Platform's skills, memory and marketing-agent design.
+
+Not yet: command-palette search over docs (phase 4), Track B (waits on images and the reference stack).
 
 ## 13. Original decision list
 

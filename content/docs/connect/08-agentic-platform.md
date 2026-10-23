@@ -25,6 +25,10 @@ Use these settings:
 
 Create the tokens first: [Create access tokens](/docs/connect/access-tokens).
 
+:::warning Use these names exactly
+The built-in agents look for connections named exactly `cybernetics-data` and `cybernetics-projects`. With any other name they won't find your data, and they'll fall back to asking you in the chat.
+:::
+
 ## Give an agent the tools
 
 1. Open the agent in the **Agent Hub** and add the connections it needs. A weekly-report agent needs Project Management and the Data Base; a meeting-prep agent needs the CRM.
