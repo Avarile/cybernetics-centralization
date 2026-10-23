@@ -20,6 +20,8 @@ export type Module = {
   url: string;
   /** Streamable HTTP endpoint agents connect to; absent for modules without an MCP server. */
   mcpUrl?: string;
+  /** How clients sign in: a bearer token they send as a header, or OAuth in the browser. */
+  mcpAuth?: "token" | "oauth";
   role: string;
   tagline: string;
   description: string;
@@ -43,6 +45,7 @@ export const modules: Module[] = [
     repo: "cybernetics-data-centre",
     url: "https://cybernetics.avarile.com",
     mcpUrl: "https://cybernetics.avarile.com/api/mcp",
+    mcpAuth: "token",
     role: "What you know",
     tagline: "The foundation. Your knowledge, structured.",
     description:
@@ -60,6 +63,7 @@ export const modules: Module[] = [
     repo: "cybernetics-projects",
     url: "https://projects.avarile.com",
     mcpUrl: "https://projects.avarile.com/api/mcp",
+    mcpAuth: "token",
     role: "What you do",
     tagline: "Your intentions, executable.",
     description:
@@ -78,6 +82,7 @@ export const modules: Module[] = [
     repo: "cybernetics-crm",
     url: "https://crm.avarile.com",
     mcpUrl: "https://crm.avarile.com/mcp",
+    mcpAuth: "oauth",
     role: "Who your clients are",
     tagline: "Your relationships, remembered.",
     description:
@@ -181,18 +186,34 @@ export type TranscriptLine =
   | { kind: "tool"; module: ModuleId; server: string; tool: string; detail: string }
   | { kind: "reply"; text: string };
 
-/** Modules that expose an MCP server for agents to connect to. */
+/**
+ * Modules that expose an MCP server for agents to connect to. Token servers read the
+ * token from an environment variable, e.g. `CYBERNETICS_DATA_TOKEN`.
+ */
 const mcpServers = modules
   .filter((m) => m.mcpUrl)
-  .map((m) => ({ name: m.repo.replace("-centre", ""), endpoint: m.mcpUrl! }));
+  .map((m) => {
+    const name = m.repo.replace("-centre", "");
+    return {
+      name,
+      endpoint: m.mcpUrl!,
+      tokenVar: m.mcpAuth === "token" ? `${name.replace(/-/g, "_").toUpperCase()}_TOKEN` : undefined,
+    };
+  });
 
-const pad = (s: string, n: number) => s + " ".repeat(Math.max(0, n - s.length));
-const width = Math.max(...mcpServers.map((s) => s.name.length));
+const DOCS = "avarile.com/docs/connect";
 
-/** Claude and ChatGPT add remote MCP servers through the same settings form. */
-const connectorForm = (path: string) =>
+/**
+ * Claude and ChatGPT add remote MCP servers through the same settings form, which signs
+ * in with OAuth and can't send a token header, so only OAuth servers go in it.
+ */
+const connectorForm = (path: string, guide: string) =>
   `# ${path}\n\n` +
-  mcpServers.map((s) => `name: ${s.name}\nurl:  ${s.endpoint}`).join("\n\n");
+  mcpServers
+    .filter((s) => !s.tokenVar)
+    .map((s) => `name: ${s.name}\nurl:  ${s.endpoint}`)
+    .join("\n\n") +
+  `\n\n# ${mcpServers.filter((s) => s.tokenVar).map((s) => s.name).join(" and ")} sign in with a token\n# header, which this form can't send:\n# ${DOCS}/${guide}`;
 
 export type Consumer = {
   id: string;
@@ -240,9 +261,15 @@ export const consumers: Consumer[] = [
     ],
     connect: {
       file: "setup.sh",
-      code: mcpServers
-        .map((s) => `claude mcp add --transport http ${s.name} \\\n  ${s.endpoint}`)
-        .join("\n\n"),
+      code:
+        `# tokens: ${DOCS}/access-tokens\n\n` +
+        mcpServers
+          .map(
+            (s) =>
+              `claude mcp add --transport http ${s.name} \\\n  ${s.endpoint}` +
+              (s.tokenVar ? ` \\\n  --header "Authorization: Bearer $${s.tokenVar}"` : ""),
+          )
+          .join("\n\n"),
     },
   },
   {
@@ -268,7 +295,13 @@ export const consumers: Consumer[] = [
     ],
     connect: {
       file: "~/.codex/config.toml",
-      code: mcpServers.map((s) => `[mcp_servers.${s.name}]\nurl = "${s.endpoint}"`).join("\n\n"),
+      code: mcpServers
+        .map(
+          (s) =>
+            `[mcp_servers.${s.name}]\nurl = "${s.endpoint}"` +
+            (s.tokenVar ? `\nbearer_token_env_var = "${s.tokenVar}"` : ""),
+        )
+        .join("\n\n"),
     },
   },
   {
@@ -291,7 +324,7 @@ export const consumers: Consumer[] = [
       { kind: "tool", module: "crm", server: "crm", tool: "create_one_note", detail: "person#88 · “check in on renewal”" },
       { kind: "reply", text: "Five people are overdue a follow-up, and three of them have open tasks. Start with Dana, whose renewal is in nine days. I left a note on that record." },
     ],
-    connect: { file: "chatgpt-connectors", code: connectorForm("Settings → Apps & Connectors → Create") },
+    connect: { file: "chatgpt-connectors", code: connectorForm("Settings → Apps & Connectors → Create", "chatgpt") },
   },
   {
     id: "claude-cowork",
@@ -314,7 +347,7 @@ export const consumers: Consumer[] = [
       { kind: "tool", module: "data", server: "data", tool: "create_records", detail: "report: “week 42”" },
       { kind: "reply", text: "Filed “Week 42”: 14 items shipped, 3 carried over with reasons, and 6 conversations summarised. It's linked to the cycle it covers." },
     ],
-    connect: { file: "claude-connectors", code: connectorForm("Settings → Connectors → Add custom connector") },
+    connect: { file: "claude-connectors", code: connectorForm("Settings → Connectors → Add custom connector", "claude-desktop") },
   },
   {
     id: "agents",
@@ -341,7 +374,13 @@ export const consumers: Consumer[] = [
     connect: {
       file: "agents.yaml",
       code: `mcpServers:
-${mcpServers.map((s) => `  ${s.name}:\n    type: streamable-http\n    url: ${s.endpoint}`).join("\n")}`,
+${mcpServers
+  .map(
+    (s) =>
+      `  ${s.name}:\n    type: streamable-http\n    url: ${s.endpoint}` +
+      (s.tokenVar ? `\n    headers:\n      Authorization: "Bearer \${${s.tokenVar}}"` : ""),
+  )
+  .join("\n")}`,
     },
   },
   {
@@ -367,7 +406,14 @@ ${mcpServers.map((s) => `  ${s.name}:\n    type: streamable-http\n    url: ${s.e
       file: ".cursor/mcp.json",
       code: `{
   "mcpServers": {
-${mcpServers.map((s) => `    ${pad(`"${s.name}":`, width + 3)} { "url": "${s.endpoint}" }`).join(",\n")}
+${mcpServers
+  .map(
+    (s) =>
+      `    "${s.name}": {\n      "url": "${s.endpoint}"` +
+      (s.tokenVar ? `,\n      "headers": { "Authorization": "Bearer \${env:${s.tokenVar}}" }` : "") +
+      `\n    }`,
+  )
+  .join(",\n")}
   }
 }`,
     },
