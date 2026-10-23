@@ -38,8 +38,8 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: SITE_TITLE, description: SITE_DESCRIPTION },
 };
 
-// Runs before first paint: the once-per-session startup screen (home page only — other pages never clear it).
-const bootScript = `(function(){var d=document.documentElement;try{d.dataset.crt="off";if(location.pathname==="/"&&!sessionStorage.getItem("booted")&&!matchMedia("(prefers-reduced-motion: reduce)").matches){d.dataset.boot="1"}}catch(e){}})()`;
+// Runs before first paint: the saved theme, and the once-per-session startup screen (home page only — other pages never clear it).
+const bootScript = `(function(){var d=document.documentElement;try{d.dataset.crt="off";if(localStorage.getItem("theme")==="cyberpunk"){d.dataset.theme="cyberpunk"}if(location.pathname==="/"&&!sessionStorage.getItem("booted")&&!matchMedia("(prefers-reduced-motion: reduce)").matches){d.dataset.boot="1"}}catch(e){}})()`;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (

@@ -4,6 +4,7 @@ import { TuiButton } from "@/components/tui/tui-button";
 import { modules, personas } from "@/lib/content";
 import { getVisibleGuides } from "@/lib/docs";
 import { absolute, alternates, baseOpenGraph, JsonLd } from "@/lib/seo";
+import { ThemeToggle } from "@/components/chrome/theme-toggle";
 
 const TITLE = "Guides";
 const DESCRIPTION =
@@ -38,6 +39,7 @@ export default function GuidesHome() {
       <div className="flex flex-wrap gap-3">
         <TuiButton href="/" label="← cybernetics" />
         <TuiButton href="/docs" label="docs" />
+        <ThemeToggle className="ml-auto" />
       </div>
 
       <div aria-hidden className="mt-10 mb-8 flex items-center gap-2 text-xs text-dim">

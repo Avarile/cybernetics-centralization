@@ -4,6 +4,7 @@ import { TuiButton } from "@/components/tui/tui-button";
 import { getPage } from "@/lib/blog";
 import { renderMarkdown } from "@/lib/markdown";
 import { alternates, baseOpenGraph, defaultOgImage } from "@/lib/seo";
+import { ThemeToggle } from "@/components/chrome/theme-toggle";
 
 const PDF = "/downloads/cyborg-migration-4-week-checklist.pdf";
 
@@ -29,6 +30,7 @@ export default function StartPage() {
       <div className="no-print flex flex-wrap gap-3">
         <TuiButton href="/" label="← cybernetics" />
         <TuiButton href="/blog" label="follow the build" />
+        <ThemeToggle className="ml-auto" />
       </div>
 
       <div aria-hidden className="mt-10 mb-8 flex items-center gap-2 text-xs text-dim">

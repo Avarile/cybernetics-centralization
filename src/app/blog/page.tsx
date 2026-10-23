@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { TuiButton } from "@/components/tui/tui-button";
 import { getAllPosts, getPublishedPosts } from "@/lib/blog";
 import { absolute, alternates, author, baseOpenGraph, JsonLd, organization } from "@/lib/seo";
+import { ThemeToggle } from "@/components/chrome/theme-toggle";
 
 const TITLE = "Cyborg Migration";
 const DESCRIPTION = "A build log about becoming AI-native: one memory you own, any AI plugged into it, and a weekly loop that learns.";
@@ -38,7 +39,10 @@ export default function BlogIndex() {
           })),
         }}
       />
-      <TuiButton href="/" label="← cybernetics" />
+      <div className="flex flex-wrap gap-3">
+        <TuiButton href="/" label="← cybernetics" />
+        <ThemeToggle className="ml-auto" />
+      </div>
 
       <div aria-hidden className="mt-10 mb-8 flex items-center gap-2 text-xs text-dim">
         <span>

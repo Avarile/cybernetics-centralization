@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { host, modules, sections } from "@/lib/content";
 import type { NavLink } from "@/lib/docs";
-import { gotoSection } from "@/lib/prefs";
+import { gotoSection, toggleTheme } from "@/lib/prefs";
 
 type Item = { cmd: string; hint: string; run: () => void };
 
@@ -24,6 +24,7 @@ const NAV_ITEMS: Item[] = [
 ];
 
 const END_ITEMS: Item[] = [
+  { cmd: "theme", hint: "light ⇄ cyberpunk", run: toggleTheme },
   { cmd: "exocortex", hint: "what's the big idea?", run: () => { window.location.href = "/exocortex"; } },
   { cmd: "register", hint: "get early access", run: () => { window.location.href = "/register"; } },
 ];
@@ -137,7 +138,7 @@ export function CommandPalette({ links = [] }: { links?: NavLink[] }) {
             aria-activedescendant={results[sel] ? `palette-${sel}` : undefined}
             spellCheck={false}
             autoComplete="off"
-            placeholder="goto, open, theme, crt…"
+            placeholder="goto, open, docs, theme…"
             className="min-w-0 flex-1 bg-transparent text-fg caret-[var(--accent)] outline-none placeholder:text-dim"
           />
           <span className="text-xs text-dim">esc</span>

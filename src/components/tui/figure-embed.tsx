@@ -22,7 +22,7 @@ function Loader({ name }: { name: string }) {
     <div
       role="status"
       aria-label={`Loading ${name}`}
-      className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-white text-xs"
+      className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-(--figure-bg) text-xs"
     >
       <p>
         <Spinner className="text-accent" /> <span className="text-dim">loading</span> fig/{name}
@@ -146,7 +146,7 @@ export function FigureEmbed({
   const frame = stage ? (
     <div
       ref={boxRef}
-      className="relative w-full overflow-hidden bg-white"
+      className="relative w-full overflow-hidden bg-(--figure-bg)"
       style={{ height: box?.h ?? 0 }}
     >
       {iframe(
@@ -166,7 +166,7 @@ export function FigureEmbed({
     </div>
   ) : (
     <div
-      className={`${height ? "" : ratio} relative w-full overflow-hidden bg-white`}
+      className={`${height ? "" : ratio} relative w-full overflow-hidden bg-(--figure-bg)`}
       style={height ? { height } : undefined}
     >
       {iframe(fade)}

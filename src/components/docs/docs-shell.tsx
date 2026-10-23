@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { TuiButton } from "@/components/tui/tui-button";
 import { modules, tone, type ModuleId } from "@/lib/content";
 import { docSections, getVisibleDocs, type Doc } from "@/lib/docs";
+import { ThemeToggle } from "@/components/chrome/theme-toggle";
 
 /** Module chips in each module's signal colour. */
 export function ModuleBadges({ ids }: { ids: ModuleId[] }) {
@@ -62,6 +63,7 @@ export function DocsShell({ current, children }: { current?: string; children: R
         <TuiButton href="/" label="← cybernetics" />
         <TuiButton href="/docs" label="docs" />
         <TuiButton href="/guides" label="guides" />
+        <ThemeToggle className="ml-auto" />
       </div>
 
       <div aria-hidden className="mt-10 mb-8 flex items-center gap-2 text-xs text-dim">

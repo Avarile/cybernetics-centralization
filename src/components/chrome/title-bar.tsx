@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { sections } from "@/lib/content";
 import type { NavLink } from "@/lib/docs";
+import { ThemeToggle } from "./theme-toggle";
 import { useActiveSection } from "../tui/use-active-section";
 
 /**
@@ -39,6 +40,12 @@ export function TitleBar({ links = [] }: { links?: NavLink[] }) {
             ))}
           </nav>
         )}
+        <span className="hidden sm:inline">
+          <ThemeToggle className="text-xs" />
+        </span>
+        <span className="sm:hidden">
+          <ThemeToggle compact className="text-xs" />
+        </span>
         <a
           href="/register"
           className="bg-accent px-1.5 font-semibold text-accent-fg transition-colors hover:bg-fg hover:text-bg"

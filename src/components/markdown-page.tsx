@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { TuiButton } from "@/components/tui/tui-button";
 import type { Post } from "@/lib/blog";
 import { renderMarkdown } from "@/lib/markdown";
+import { ThemeToggle } from "@/components/chrome/theme-toggle";
 
 /** A standalone page from `content/pages/` (about, privacy): header, draft notice and body. */
 export function MarkdownPage({ page, label, children }: { page: Post; label: string; children?: ReactNode }) {
@@ -10,6 +11,7 @@ export function MarkdownPage({ page, label, children }: { page: Post; label: str
       <div className="flex flex-wrap gap-3">
         <TuiButton href="/" label="← cybernetics" />
         <TuiButton href="/blog" label="blog" />
+        <ThemeToggle className="ml-auto" />
       </div>
 
       <div aria-hidden className="mt-10 mb-8 flex items-center gap-2 text-xs text-dim">

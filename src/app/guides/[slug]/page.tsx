@@ -7,6 +7,7 @@ import { personas } from "@/lib/content";
 import { getAllGuides, getGuide, getVisibleGuides, headings } from "@/lib/docs";
 import { renderMarkdown } from "@/lib/markdown";
 import { absolute, alternates, author, baseOpenGraph, JsonLd, organization } from "@/lib/seo";
+import { ThemeToggle } from "@/components/chrome/theme-toggle";
 
 // Static export: every guide is prerendered, unknown slugs 404.
 export const dynamicParams = false;
@@ -64,6 +65,7 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
         <TuiButton href="/" label="← cybernetics" />
         <TuiButton href="/guides" label="all guides" />
         <TuiButton href="/docs" label="docs" />
+        <ThemeToggle className="ml-auto" />
       </div>
 
       <div aria-hidden className="mt-10 mb-8 flex items-center gap-2 text-xs text-dim">

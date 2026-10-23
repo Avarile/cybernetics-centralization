@@ -4,6 +4,7 @@ import { TuiButton } from "@/components/tui/tui-button";
 import { pageHref } from "@/lib/blog";
 import { modules, tone } from "@/lib/content";
 import { alternates, baseOpenGraph } from "@/lib/seo";
+import { ThemeToggle } from "@/components/chrome/theme-toggle";
 
 export const metadata: Metadata = {
   title: "Register for early access",
@@ -29,7 +30,10 @@ export default function RegisterPage() {
   const privacyHref = pageHref("privacy");
   return (
     <main className="mx-auto max-w-[110ch] px-4 py-10 sm:px-6 md:py-16">
-      <TuiButton href="/" label="← cybernetics" />
+      <div className="flex flex-wrap gap-3">
+        <TuiButton href="/" label="← cybernetics" />
+        <ThemeToggle className="ml-auto" />
+      </div>
 
       <div aria-hidden className="mt-10 mb-8 flex items-center gap-2 text-xs text-dim">
         <span>

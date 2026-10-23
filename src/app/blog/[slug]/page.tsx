@@ -7,6 +7,7 @@ import { getAllPosts, getNeighbours, getPost, registerHref, type Post } from "@/
 import { AUTHOR } from "@/lib/content";
 import { renderMarkdown } from "@/lib/markdown";
 import { absolute, alternates, author, baseOpenGraph, JsonLd, organization } from "@/lib/seo";
+import { ThemeToggle } from "@/components/chrome/theme-toggle";
 
 // Static export: every post is prerendered, unknown slugs 404.
 
@@ -86,6 +87,7 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
       <div className="flex flex-wrap gap-3">
         <TuiButton href="/" label="← cybernetics" />
         <TuiButton href="/blog" label="all posts" />
+        <ThemeToggle className="ml-auto" />
       </div>
 
       <div aria-hidden className="mt-10 mb-8 flex items-center gap-2 text-xs text-dim">

@@ -17,8 +17,35 @@
   --agent: #767676;
   --red: #3d3d3d;
   --panel: #ffffff;
+  /* Behind the embedded figures: their own page colour, so frame and figure meet seamlessly. */
+  --figure-bg: #ffffff;
   --glow: 0;
   color-scheme: light;
+}
+
+/* ---------- Theme: cyberpunk, on <html data-theme="cyberpunk"> ---------- */
+/* Palette: #00060e night, #fee801 yellow, #54c1e6 cyan, #39c4b6 teal, #9a9f17 olive.
+   bg-alt, panel, line and dim are mixes of cyan into the night; every text tone is AA on bg. */
+
+[data-theme="cyberpunk"] {
+  --bg: #00060e;
+  --bg-alt: #06131d;
+  --fg: #54c1e6;
+  --dim: #3b89a5;
+  --line: #183a4a;
+  --accent: #fee801;
+  --accent-fg: #00060e;
+  --data: #fee801;
+  --proj: #39c4b6;
+  --crm: #54c1e6;
+  --agent: #9a9f17;
+  --red: #fee801;
+  --panel: #030d17;
+  /* The figures are inverted below, so their white becomes black. */
+  --figure-bg: #000000;
+  --glow: 1;
+  --dot: rgb(84 193 230 / 0.09);
+  color-scheme: dark;
 }
 
 /* Panels that read as a screen: white card, soft shadow. */
@@ -53,7 +80,7 @@ html {
 
 body {
   background-color: var(--bg);
-  background-image: radial-gradient(circle, rgb(0 0 0 / 0.08) 1px, transparent 1px);
+  background-image: radial-gradient(circle, var(--dot, rgb(0 0 0 / 0.08)) 1px, transparent 1px);
   background-size: 22px 22px;
   color: var(--fg);
   font-family: var(--font-geist-mono), ui-monospace, monospace;
@@ -83,6 +110,21 @@ body {
 
 [data-crt="off"] .glow {
   text-shadow: none;
+}
+
+/* Neon headings in cyberpunk, independent of the CRT switch. */
+[data-theme="cyberpunk"] .glow {
+  text-shadow: 0 0 10px color-mix(in oklab, currentColor 45%, transparent);
+}
+
+[data-theme="cyberpunk"] .term {
+  box-shadow: 0 0 0 1px var(--line), 0 12px 40px -18px rgb(84 193 230 / 0.35);
+}
+
+/* The figures are light builds of black-and-white drawings: invert them into the night,
+   with a half turn of hue so their few accent colours keep their meaning. */
+[data-theme="cyberpunk"] iframe[src^="/figures/"] {
+  filter: invert(1) hue-rotate(180deg);
 }
 
 /* ---------- Hero logo: a light band sweeping across the glyphs ---------- */
