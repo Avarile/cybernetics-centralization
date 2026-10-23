@@ -29,6 +29,11 @@ export const metadata: Metadata = {
     "ChatGPT",
   ],
   alternates: alternates("/"),
+  // favicon.ico is the fallback; generated from the same mark as these.
+  icons: {
+    icon: [{ url: "/mark.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
   openGraph: { ...baseOpenGraph, url: "/", title: SITE_TITLE, description: SITE_DESCRIPTION },
   twitter: { card: "summary_large_image", title: SITE_TITLE, description: SITE_DESCRIPTION },
 };

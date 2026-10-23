@@ -46,6 +46,26 @@ export function cyborgFigureSvg(stage: FigureStage, { outline, solid }: FigureCo
   );
 }
 
+/**
+ * The figure reduced to what survives at favicon size: the closed loop, the head and the solid
+ * memory core, on a black tile. `detail` adds the outlined shoulders and squares the tile, for
+ * home-screen icons (180px and up), which the OS masks into its own shape.
+ */
+export function cyborgMarkSvg({ detail = false, size = 64 }: { detail?: boolean; size?: number } = {}): string {
+  const shoulders = detail
+    ? `<path d="M18 50C19 40.5 24.5 35.5 32 35.5S45 40.5 46 50" fill="none" stroke="${BW.outline}" stroke-width="3" stroke-linecap="round"/>`
+    : "";
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="${size}" height="${size}">` +
+    `<rect width="64" height="64" rx="${detail ? 0 : 14}" fill="#000000"/>` +
+    `<circle cx="32" cy="32" r="24.5" fill="none" stroke="${BW.solid}" stroke-width="${detail ? 3 : 4.5}"/>` +
+    `<circle cx="32" cy="${detail ? 22 : 23}" r="${detail ? 7.5 : 8}" fill="none" stroke="${BW.solid}" stroke-width="${detail ? 3 : 4.5}"/>` +
+    shoulders +
+    `<circle cx="32" cy="${detail ? 44 : 43}" r="${detail ? 4.5 : 6}" fill="${BW.solid}"/>` +
+    `</svg>`
+  );
+}
+
 /** Three-segment MIGRATION bar, `stage` segments filled. */
 export function migrationBarSvg(stage: FigureStage, { outline, solid }: FigureColors = BW, width = 240): string {
   const seg = (i: number) =>
