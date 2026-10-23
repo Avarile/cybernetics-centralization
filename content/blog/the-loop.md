@@ -1,5 +1,6 @@
 ---
 title: "The loop: how my life gets a little better every week"
+seoTitle: "The loop: a weekly review that makes life better"
 dek: "Week 4 of the migration closes the loop: an honest weekly review, finishing things properly, and lessons that actually stick. This is where the compounding comes from."
 date: 2026-11-18
 series: "Cyborg Migration #5 · The loop"

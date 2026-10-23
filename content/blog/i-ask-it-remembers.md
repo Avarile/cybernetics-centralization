@@ -1,5 +1,6 @@
 ---
 title: "I ask, it remembers: a day running my life through AI"
+seoTitle: "I ask, it remembers: a day running my life on AI"
 dek: "Week 3 of the migration has one rule: live on it. Here's a normal day, morning to evening, with nothing falling through the cracks."
 date: 2026-11-11
 series: "Cyborg Migration #4 · A day"

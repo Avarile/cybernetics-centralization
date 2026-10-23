@@ -1,5 +1,6 @@
 ---
 title: "Data first, AI second: why your AI keeps making things up"
+seoTitle: "Data first, AI second: why AI makes things up"
 dek: "When an AI gives you confident nonsense about your own life, it usually isn't the model's fault. It's guessing, because it has nothing of yours to read. The fix is boring, and it works."
 date: 2026-11-25
 series: "Cyborg Migration · Field notes"

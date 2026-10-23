@@ -9,6 +9,10 @@ import { renderMarkdown } from "@/lib/markdown";
 import { absolute, alternates, author, baseOpenGraph, JsonLd, organization } from "@/lib/seo";
 
 // Static export: every post is prerendered, unknown slugs 404.
+
+const SUFFIX = " — Cyborg Migration";
+/** Search results cut titles off around 60 characters; the series name goes only where it fits. */
+const docTitle = (t: string) => (t.length + SUFFIX.length <= 60 ? t + SUFFIX : t);
 export const dynamicParams = false;
 
 export function generateStaticParams() {
@@ -20,7 +24,7 @@ export async function generateMetadata({ params }: PageProps<"/blog/[slug]">): P
   if (!post) return {};
   const path = `/blog/${post.slug}`;
   return {
-    title: { absolute: `${post.title} — Cyborg Migration` },
+    title: { absolute: docTitle(post.seoTitle) },
     description: post.dek,
     authors: [AUTHOR],
     alternates: alternates(path),

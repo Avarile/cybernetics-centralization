@@ -9,6 +9,8 @@ const PAGES_DIR = join(process.cwd(), "content", "pages");
 export type Post = {
   slug: string;
   title: string;
+  /** Shorter title for search results and the browser tab; the page and share cards keep `title`. */
+  seoTitle: string;
   dek: string;
   date: string;
   series: string;
@@ -35,6 +37,7 @@ function parse(slug: string, raw: string): Post {
   return {
     slug,
     title: meta.title ?? slug,
+    seoTitle: meta.seoTitle || meta.title || slug,
     dek: meta.dek ?? "",
     date: meta.date ?? "",
     series: meta.series ?? "",

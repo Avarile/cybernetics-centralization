@@ -1,5 +1,6 @@
 ---
 title: "AI-native is the new baseline. The gap compounds."
+seoTitle: "AI-native is the new baseline"
 dek: "Everyone has AI now, so AI isn't your advantage anymore. What is? Whether your AI knows your life. Here's my plan to build that, and why I'm starting now."
 date: 2026-10-23
 series: "Cyborg Migration #1"

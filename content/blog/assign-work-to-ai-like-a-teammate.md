@@ -1,5 +1,6 @@
 ---
 title: "I assign work to AI the way I'd assign it to a person"
+seoTitle: "Assigning work to AI like a teammate"
 dek: "A chat window is fine for one-off questions. For real work, I put the task on a board, assign it to an agent, and review the result like I would a colleague's. Here's why that changed how much I can hand over."
 date: 2026-12-16
 series: "Cyborg Migration · Field notes"

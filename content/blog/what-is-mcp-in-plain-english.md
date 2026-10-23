@@ -1,5 +1,6 @@
 ---
 title: "What is MCP? The plug that lets any AI read your life"
+seoTitle: "What is MCP? A plain-English guide to the AI plug"
 dek: "MCP is the reason I can swap AI apps without losing anything. Here's what it is in plain English, what it isn't, and three questions to ask before you plug anything into it."
 date: 2026-12-02
 series: "Cyborg Migration · Field notes"

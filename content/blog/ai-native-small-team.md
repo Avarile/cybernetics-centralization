@@ -1,5 +1,6 @@
 ---
 title: "When knowledge stops walking out the door: the AI-native small team"
+seoTitle: "The AI-native small team: knowledge that stays put"
 dek: "In most small teams, how things get done lives in a few people's heads. Here's what changes when that knowledge lives in one place your whole team, and every AI they use, can read."
 date: 2026-12-30
 series: "Cyborg Migration · Field notes"

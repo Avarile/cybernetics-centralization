@@ -1,5 +1,6 @@
 ---
 title: "A second brain that can't act is just a nicer pile"
+seoTitle: "Second brain vs. a memory AI can act on"
 dek: "The second-brain idea is right: your head is for having ideas, not holding them. Where it stalls is the filing, the reviewing, and the fact that it can only remember. Here's what changes when an AI can read it."
 date: 2026-12-09
 series: "Cyborg Migration · Field notes"
