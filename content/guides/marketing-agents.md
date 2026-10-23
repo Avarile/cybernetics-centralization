@@ -29,7 +29,7 @@ Six are featured as good starting points: **Marketing Director**, **Product Mark
 
 Open **Product Marketing Strategist** and use a starter. It asks about your product, audience, problems, competitors, differentiation, objections, voice and goals, then saves the answers as one memory called `product_marketing`, after you confirm.
 
-Every marketing agent reads that same memory, so you never explain your business twice. You can read and edit it yourself in the platform's settings, under your memories.
+Every marketing agent reads that same memory, so you never explain your business twice. You can read and edit it yourself under **Settings → Personalization**.
 
 :::note Memory must be on
 Agents can only keep `product_marketing` if memory is enabled on the platform. If it isn't, they'll ask for your context in each chat.
@@ -63,7 +63,7 @@ The other agents hand off: when a job belongs to another specialist, they say wh
 
 ## 5. Work the queue (5 min)
 
-Marketing agents can be mirrored as members in Project Management. Assign them work items, then use their **Work my queue** starter: the agent pulls its assigned items, does them, reports on each item, and stops at any step marked for approval. See [Assign work to an agent](/guides/assign-work-to-an-agent).
+To give a marketing agent a queue, create an agent in Project Management with the same handle, for example `mkt-seo-audit` for the SEO Auditor, and add it to your marketing project. Assign it work items, then use the agent's **Work my queue** starter: the agent pulls its assigned items, does them, reports on each item, and stops at any step marked for approval. See [Assign work to an agent](/guides/assign-work-to-an-agent).
 
 ## Check it worked
 

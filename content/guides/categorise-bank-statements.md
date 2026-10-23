@@ -16,6 +16,7 @@ Raw statements go in; categorised, queryable transactions come out. Your bank lo
 ## What you need
 
 - The Data Base's **Finance** pack, with your currency set when you install it. Add the **Budgets** and **Tags** extra tables if you want them.
+- Ideally in **a base of its own**. Tokens are limited by space and base, not by table, so a separate base is what lets you keep money away from AI apps that don't need it.
 - A CSV export from your bank, for one account and one month to start with.
 
 ## How the Finance pack is shaped
@@ -23,9 +24,9 @@ Raw statements go in; categorised, queryable transactions come out. Your bank lo
 | Table | Holds | Worth knowing |
 |---|---|---|
 | `finance_Accounts` | Checking, savings, credit cards… | `Current Balance` is calculated from the opening balance and transactions |
-| `finance_Categories` | Income and expense categories, nestable | `Full Path` shows e.g. "Food / Eating out" |
+| `finance_Categories` | Income and expense categories, nestable | `Full Path` shows e.g. "Food > Eating out" |
 | `finance_Payees` | Who you paid or who paid you | A `Default Category` per payee |
-| `finance_Transactions` | One row per transaction | `Type` is Income, Expense or Transfer; `Signed Amount` handles the sign |
+| `finance_Transactions` | One row per transaction | `Amount` is always positive; `Type` (Income, Expense or Transfer) decides the sign in `Signed Amount`. `Budget` links the transaction to a budget |
 | `finance_Budgets` | Monthly plan per category | See [Budgets and money questions](/guides/budgets-and-money-questions) |
 
 ## 1. Set up accounts and categories (10 min)
@@ -36,7 +37,7 @@ Raw statements go in; categorised, queryable transactions come out. Your bank lo
 
 ## 2. Import the statement into an inbox (5 min)
 
-Create a table called **Statement inbox** and import your bank's CSV into it as it is: date, description, amount. Don't map anything yet. The inbox is just the raw file. Add one checkbox field, **Processed**, so the AI can tick off what it has handled.
+Import your bank's CSV as a new table called **Statement inbox**, as it is: date, description, amount. Don't map anything yet. The inbox is just the raw file. Add one checkbox field, **Processed**, so the AI can tick off what it has handled.
 
 ## 3. Let the AI sort it (10 min)
 
@@ -47,9 +48,12 @@ For each row in Statement inbox that hasn't been processed:
 1. Find or create the payee from the description. Use the payee's default
    category if it has one.
 2. Pick the category. If you're not sure, leave it empty and list it for me.
-3. Create a transaction in finance_Transactions with the date, amount, type,
-   account, payee and category.
-4. Mark the inbox row as processed.
+3. Create a transaction in finance_Transactions with the date, description,
+   type, account, payee and category. Amount is always positive: the bank's
+   minus sign becomes Type = Expense.
+4. If a budget exists for that category and month, link the transaction to it
+   (the Budget field). Budgets only count linked transactions.
+5. Mark the inbox row as processed.
 Never guess a transfer: ask me which account it went to.
 At the end, show me what you couldn't categorise.
 ```
@@ -66,12 +70,12 @@ Next month, those lines categorise themselves.
 
 ## 5. Check the balance (5 min)
 
-> What's the current balance of Everyday? Does it match 1,846.20?
+> What's the current balance of Everyday? Does it match my bank's closing balance of 1,846.20?
 
-If it doesn't match your bank, something was missed or doubled. Ask the AI to find it.
+(A made-up figure: use your statement's.) If it doesn't match, something was missed, doubled, or entered with the wrong sign. Ask the AI to find it.
 
-:::warning Keep it local to you
-Use a separate Data Base token for anything that reads your finances, limited to the Finance tables, and don't give that token to AI apps you only use for other things.
+:::warning Keep money to the apps that need it
+Give your finance base its own token, and only add that token to the AI apps you use for money questions. Other tokens leave the base out.
 :::
 
 ## Check it worked
@@ -79,6 +83,7 @@ Use a separate Data Base token for anything that reads your finances, limited to
 - Every inbox row became a transaction, or is on the "couldn't categorise" list.
 - The account balance matches your bank's.
 - At least three payees now have default categories.
+- Expenses in budgeted categories are linked to their budget.
 
 ## Next
 

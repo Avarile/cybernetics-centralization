@@ -43,17 +43,17 @@ For the current cycle in <project>:
 
 > Run my cycle report for the Website project.
 
-The AI reads the cycle (`list_cycle_work_items`) and each item's comments, then drafts. Correct what's wrong; it's faster than writing from scratch.
+The AI reads the cycle (`list_cycle_work_items`) and each item's comments (`list_work_item_comments`), then drafts. Correct what's wrong; it's faster than writing from scratch.
 
 ## 4. File it (5 min)
 
-> Save the report as a note under a "Reports" knowledge type (create it if it doesn't exist), titled "Week 44", and link it to the project.
+> Save the report in my Data Base as a note under a "Reports" knowledge type (create it if it doesn't exist), titled "Website, week 44", with the project and the cycle dates in its context.
 
-Reports kept as notes become history your AI can search: "what did we ship in October?"
+A note in the Data Base can't link directly to a project in Project Management, so the title and context carry the connection. Reports kept as notes become history your AI can search: "what did we ship in October?" To show the report on a work item too, attach it with [Link records across modules](/guides/link-records-across-modules).
 
 ## 5. Carry over honestly (5 min)
 
-> Move the unfinished items to the next cycle, and add a comment to each saying why it slipped.
+> Create next week's cycle, move the unfinished items into it, and add a comment to each saying why it slipped.
 
 That comment is what next month's review will learn from.
 

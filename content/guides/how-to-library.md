@@ -11,7 +11,7 @@ updated: 2026-10-23
 draft: true
 ---
 
-Every fix you've figured out once is worth writing down: the router reset, the deploy steps, the tax form. Written down in the right shape, an agent can find it, follow it, and tell you when it's out of date.
+Every fix you've figured out once is worth writing down: the router reset, the deploy steps, the tax form. Written down in the right shape, an agent can find it, follow it, and point out the step that no longer works.
 
 ## What you need
 
@@ -49,9 +49,9 @@ A how-to works for an agent when it says when it applies, the exact steps, and h
 
 > Save a how-to under Deploy called "Deploy the website". When: after merging to main. Steps: run the tests, build, upload the out folder to the server, check the home page loads. Done when: the new version shows in the footer. Gotcha: the server needs the build folder, not the source.
 
-Then link related notes, so one leads to the next:
+Then add the one you'll need when it goes wrong, and link the two, so one leads to the next:
 
-> Link "Deploy the website" to "Roll back a bad deploy" as related knowledge.
+> Save a second how-to under Deploy, "Roll back a bad deploy": put the previous build folder back on the server and check the home page. Link it to "Deploy the website" as related knowledge.
 
 ## 3. Let an agent follow one (5 min)
 

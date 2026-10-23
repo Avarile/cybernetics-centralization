@@ -35,7 +35,7 @@ Attached records show as **Database records** on the work item, with **View**, *
 ## CRM → Data Base
 
 1. Open **Settings → Data Centre**. (You need a role with the **Data Centre** permission.)
-2. Enter the Data Base URL and the read-only token, turn it on, and choose **Test connection**. Only the token's last four characters are shown afterwards.
+2. Enter the Data Base URL and a read-only token (the same read scopes as above), turn it on, and choose **Test connection**. Only the token's last four characters are shown afterwards.
 3. Open a person, company or opportunity, go to the **Database** tab and choose **Attach**. Pick a database and table on the left and the records on the right. Up to 10 records can be attached per CRM record.
 
 Previews refresh every hour. If a record is deleted in the Data Base, or the token loses access to it, the attachment is flagged rather than silently disappearing.
@@ -56,3 +56,7 @@ Previews refresh every hour. If a record is deleted in the Data Base, or the tok
 ## Self-hosting?
 
 On a self-hosted CRM, an admin first turns the integration on for the workspace. The self-hosting docs cover it.
+
+## Next
+
+Bring your money into the same place: [Import bank statements and let an agent categorise them](/guides/categorise-bank-statements).

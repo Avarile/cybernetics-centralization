@@ -23,7 +23,7 @@ By the end of this guide you'll have one organised place for your goals, project
 
 A schema pack is a ready-made set of linked tables. You choose the areas of life and work you want to organise, and the Data Base builds the tables, links and formulas for you.
 
-1. In your space, choose **Start from schema packs**.
+1. A new account opens on a short setup: choose **Get started**. Otherwise, create a base in your space and choose **Start from schema packs**.
 2. Pick **Progress** (goals, projects and tasks) and **Knowledge** (notes and how-tos). With both, notes link to the goals, projects and tasks they support.
 3. Personalise: a base name, your timezone, and leave **Starter rows** on so it doesn't feel empty.
 4. Under **Extra tables**, add the **Project frameworks library** (OKR, PDCA and meeting playbooks). The weekly review guide uses it.
@@ -46,7 +46,7 @@ Don't type them into tables. Tell the AI, in one message each:
 
 > Save a how-to: to reset the router, hold the back button for ten seconds, wait for the light to go orange, then log in at 192.168.1.1 and re-enter the Wi-Fi name and password.
 
-> I keep having to look up which tax deductions I can claim. Save that as a note and link it to a "Sort out tax return" task.
+> I keep having to look up which tax deductions I can claim. Save that as a note, create a task "Sort out tax return", and link the note to the task.
 
 (These are made-up examples. Use your own three things.)
 

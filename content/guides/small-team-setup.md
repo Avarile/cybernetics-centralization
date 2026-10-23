@@ -33,7 +33,7 @@ In the Data Base, put team material in its own **space** and invite teammates th
 | Module | Where | Notes |
 |---|---|---|
 | Data Base | The team space's settings → collaborators | Give each person the lowest role that lets them work |
-| Project Management | Workspace members | Only workspace admins can create and change agents |
+| Project Management | Workspace members | Only workspace admins can change an agent's settings |
 | CRM | Workspace members and roles | Give the **Data Centre** permission only to whoever manages the integration |
 | Agentic Platform | User accounts | Each person adds their own connections with their own tokens |
 
@@ -45,7 +45,7 @@ The exception is a shared integration token, such as the one a project uses to b
 
 ## 4. Write the team's how-tos (20 min)
 
-Pick the process that hurts and write it down the way your best person does it, under a team knowledge type such as "Team / Runbooks". Then test it with someone new:
+Pick the process that hurts and write it down the way your best person does it, under a team knowledge type, such as "Runbooks" under "Team". Then test it with someone new:
 
 > I'm new. How do we deploy the website?
 
@@ -57,9 +57,10 @@ Create agents as members in Project Management ([Assign work to an agent](/guide
 
 ## When someone leaves
 
-1. Revoke their tokens in each module.
-2. Remove them from the team space, the project workspace and the CRM.
-3. Reassign their open work items.
+1. Remove them from the team space, the project workspace and the CRM. Their tokens stop reaching team data at once, because a token can only see what its owner can.
+2. Ask them to revoke their tokens too, or deactivate their account if it was a work account.
+3. If they knew a shared integration token, replace it.
+4. Reassign their open work items.
 
 Their how-tos, notes and history stay, which is the point.
 

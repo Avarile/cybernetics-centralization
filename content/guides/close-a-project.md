@@ -18,6 +18,8 @@ Most projects end by being forgotten. This guide gives them a proper ending: a c
 - A project that's nearly finished, in the Data Base's **Progress** pack or in Project Management.
 - The **Project frameworks library** (from the Progress pack's extra tables).
 
+In Project Management, use a review state (for example **In review**) the same way as the check stages below.
+
 ## The check stages
 
 The Progress pack's project `progress` field already has the check built in:
@@ -44,19 +46,21 @@ Save a retro framework once:
 
 Then, for each project:
 
-> Run my Retro framework on the Wi-Fi project. Use its tasks, their dates and comments, and any linked notes. Ask before saving anything.
+> Run my Retro framework on the Wi-Fi project. Use its tasks, when they started and finished, any comments, and linked notes. Ask before saving anything.
 
 ## 3. Make the lessons stick (5 min)
 
 | The lesson is about… | It changes… | Example (made up) |
 |---|---|---|
 | How to do something | A how-to note | "Turn off router auto-updates after any reset" |
-| How you work | A framework | Add "check in a week after finishing" to the project template |
+| How you work | A framework | Add "check in a week after finishing" to your Launch checklist framework |
 | The AI getting something wrong | A recipe or agent instructions | The capture recipe stops filing receipts as tasks |
 
 ## 4. Finalise (2 min)
 
-> Save the retro as a note linked to the project, then move the project to finalized.
+> Save the retro as a note, link it to the project, then move the project to finalized.
+
+(In the Data Base the link is the project's `refer_knowledge` field.)
 
 ## Check it worked
 

@@ -16,7 +16,8 @@ In Project Management, an agent can be a member: it has a profile, a goal and a 
 ## What you need
 
 - **Project Management**, with an AI app connected to it ([Connect your AI](/docs/connect/overview)).
-- Workspace admin rights to create agents.
+- A workspace account. Changing an agent's settings (pausing, archiving, deleting) needs a workspace admin.
+- A review state in the project, such as **In review**, for the agent to move finished items into.
 
 ## 1. Create the agent (10 min)
 
@@ -54,13 +55,13 @@ Under **Projects**, choose **Add to project**. An agent can only be assigned wor
 
 ## 4. Run its queue (5 min)
 
-In your AI app (Claude Code, Codex or the Agentic Platform):
+Open the agent's **Context** tab. Under **Use this agent in an LLM platform** there's an example prompt with the agent's handle and your workspace filled in. Paste it into your AI app (Claude Code, Codex or the Agentic Platform). It reads roughly:
 
-> Load the Cybernetics agent @research-assistant and work through its queue.
+> Load the Cybernetics agent @research-assistant in workspace demo with get_agent_context and act as it. Then work through its queue.
 
 The app loads the agent's definition (`get_agent_context`), lists its items (`list_agent_work_items`), takes each brief (`get_agent_task_brief`), does the work, and comments on the item. It stops at any step marked **Needs approval**.
 
-Each work item also has **Copy task brief**, if you'd rather paste a single task into a chat.
+The agent's **Work items** tab has **Copy task brief** for each item, if you'd rather paste a single task into a chat.
 
 ## 5. Review (5 min)
 

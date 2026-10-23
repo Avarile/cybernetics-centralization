@@ -18,7 +18,7 @@ A review from memory is a story about how the week felt. A review from the recor
 - A week of captures: [Capture anything](/guides/capture-anything).
 - Optional: Project Management connected, if your work lives there.
 
-## 1. Save the review recipe
+## 1. Save the review recipe (5 min)
 
 ```text
 Weekly-review recipe
@@ -36,7 +36,7 @@ Run my weekly review from the record, not from guesses.
 6. Ask before changing or creating anything.
 ```
 
-## 2. Run it
+## 2. Run it (5 min)
 
 Pick a fixed time, the same every week, and ask:
 
@@ -44,7 +44,7 @@ Pick a fixed time, the same every week, and ask:
 
 Read it critically. Accept the suggestions that are right and reject the rest; the recipe asks first, so nothing changes without you.
 
-## 3. Close the loop
+## 3. Close the loop (5 min)
 
 A lesson you only think about is gone by Thursday. Make each one land somewhere:
 
@@ -54,13 +54,13 @@ A lesson you only think about is gone by Thursday. Make each one land somewhere:
 | How you work | A template in the **Project frameworks library** |
 | The AI getting something wrong | The recipe that caused it |
 
-## 4. Finish projects properly
+## 4. Finish projects properly (5 min)
 
-When a project is done, don't jump straight to "done". Ask:
+When a project is done, don't jump straight to `finalized`. Move it to `finished-reviewing` and ask:
 
 > Close out the Wi-Fi project: what did I plan, what actually happened, and what should I keep or change next time?
 
-Save the answer as a note linked to the project. That's how every project leaves something behind.
+Save the answer as a note linked to the project. That's how every project leaves something behind. The full version is [Finish a project properly](/guides/close-a-project).
 
 ## Check it worked
 
@@ -70,4 +70,6 @@ Save the answer as a note linked to the project. That's how every project leaves
 
 ## Next
 
-Do it again next week. The second review builds on the first, and that compounding is the whole point. [Why this adds up](/blog/the-loop).
+Do it again next week. The second review builds on the first, and that compounding is the whole point.
+
+Then give what you've figured out a proper home: [Build a how-to library your agents follow](/guides/how-to-library).

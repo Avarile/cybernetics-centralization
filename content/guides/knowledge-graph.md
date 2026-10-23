@@ -17,7 +17,7 @@ Tables are good for entering things. A graph is good for seeing them. Once your 
 
 - A base with a few weeks of linked records. The **Knowledge** and **Progress** packs together work best, because the pack bridge links notes to goals, projects and tasks.
 
-## 1. Open the graph
+## 1. Open the graph (3 min)
 
 Open your base and switch to **Graph**. The header shows how many nodes, links and tables are in view.
 
@@ -31,17 +31,17 @@ Useful controls:
 | **Search records…** | Jump to a node by name |
 | **Recenter** / **Reset view** | Get back to the whole picture |
 
-## 2. Read a node
+## 2. Read a node (2 min)
 
 Select a node to see its fields and links. **Expand** loads its neighbours; **Expand all links** follows every connection one step out. **Open record** takes you to the row.
 
-## 3. Three things worth looking for
+## 3. Three things worth looking for (5 min)
 
 1. **Hubs.** Notes with many links are your load-bearing knowledge. Make sure they're current.
-2. **Orphans.** Nodes with no links are captured but not connected. Link them, or archive them.
+2. **Orphans.** Nodes with no links are captured but not connected. Link them, or mark them inactive (`is_active` off).
 3. **Goals with no notes.** A goal that nothing links to is a wish. Ask what it relies on.
 
-## 4. Ask your AI the same questions
+## 4. Ask your AI the same questions (3 min)
 
 The graph is also available to your AI (`get_graph`, `get_record_neighbors`):
 
@@ -49,13 +49,13 @@ The graph is also available to your AI (`get_graph`, `get_record_neighbors`):
 
 > List knowledge records with no links to goals, projects or tasks.
 
-## 5. Save presets for the views you reuse
+## 5. Save presets for the views you reuse (2 min)
 
 For example, "Knowledge only" for tidying notes, or "Goals → projects → tasks" for planning. Presets live per base; one that refers to tables a base doesn't have is shown as unavailable.
 
 ## Check it worked
 
-- You found at least one orphan and linked or archived it.
+- You found at least one orphan and linked it or marked it inactive.
 - You have one preset you'll come back to.
 
 ## Next
