@@ -15,9 +15,9 @@ import { InteractiveShell } from "@/components/sections/shell";
 import { Who } from "@/components/sections/who";
 import { BASE_URL, SITE_NAME } from "@/lib/content";
 import { contentFor } from "@/lib/content-i18n";
-import { readingLinks } from "@/lib/docs";
 import { figletText } from "@/lib/figlet";
 import { HTML_LANG, localePath, type Locale } from "@/lib/i18n";
+import { siteLinks } from "@/lib/nav";
 import { absolute, JsonLd, organization } from "@/lib/seo";
 
 // ASCII art is rendered once at build time.
@@ -26,7 +26,7 @@ const LOGO_NARROW = figletText("CYBERNETICS", "Calvin S");
 const LOGO_SMALL = figletText("cybernetics", "Small");
 
 export function Home({ locale }: { locale: Locale }) {
-  const links = readingLinks(locale);
+  const links = siteLinks(locale);
   return (
     <>
       <JsonLd

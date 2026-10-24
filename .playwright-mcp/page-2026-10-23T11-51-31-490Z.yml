@@ -1,0 +1,265 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e3]:
+      - link "← cybernetics" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - generic [aria-hidden] [ref=e5]: "["
+        - generic [aria-hidden] [ref=e7]: "]"
+      - navigation "Site" [ref=e8]:
+        - link "product" [ref=e9] [cursor=pointer]:
+          - /url: /product
+        - link "integrations" [ref=e10] [cursor=pointer]:
+          - /url: /integrations
+        - link "docs" [ref=e11] [cursor=pointer]:
+          - /url: /docs
+        - link "guides" [ref=e12] [cursor=pointer]:
+          - /url: /guides
+        - link "blog" [ref=e13] [cursor=pointer]:
+          - /url: /blog
+      - generic [ref=e14]:
+        - generic [ref=e15]:
+          - link "切换到中文" [ref=e16] [cursor=pointer]:
+            - /url: /zh/product/data-base
+            - generic [aria-hidden] [ref=e17]:
+              - text: "["
+              - generic [ref=e18]: en
+              - generic [ref=e19]: / 中文
+              - text: "]"
+          - 'button "Theme: light. Switch to cyberpunk." [ref=e20]':
+            - generic [aria-hidden] [ref=e21]:
+              - text: "["
+              - generic [ref=e22]: light
+              - generic [ref=e23]: / cyberpunk
+              - text: "]"
+        - link "register" [ref=e24] [cursor=pointer]:
+          - /url: /register
+          - generic [aria-hidden] [ref=e25]: "["
+          - generic [aria-hidden] [ref=e27]: "]"
+    - generic [ref=e29]: ──[ product ]
+    - navigation "Breadcrumb" [ref=e31]:
+      - list [ref=e32]:
+        - listitem [ref=e33]:
+          - link "cybernetics" [ref=e34] [cursor=pointer]:
+            - /url: /
+        - listitem [ref=e35]:
+          - generic [aria-hidden] [ref=e36]: /
+          - link "product" [ref=e37] [cursor=pointer]:
+            - /url: /product
+        - listitem [ref=e38]:
+          - generic [aria-hidden] [ref=e39]: /
+          - generic [ref=e40]: data base
+    - paragraph [ref=e41]: 01 · foundation · what you know
+    - heading "Data Base" [level=1] [ref=e42]:
+      - generic [aria-hidden] [ref=e43]: "#"
+      - text: Data Base
+    - paragraph [ref=e44]: "> The foundation. Your knowledge, structured."
+    - paragraph [ref=e45]: The foundation of everything else. One database you own for knowledge, how-tos, references, finances and any other things you can define — tables, views and a record graph that you and your agents can query.
+    - generic [ref=e46]:
+      - link "Register for early access" [ref=e47] [cursor=pointer]:
+        - /url: /register?utm_source=product&utm_medium=site&utm_campaign=site&utm_content=data-base
+        - generic [aria-hidden] [ref=e48]: "["
+        - generic [aria-hidden] [ref=e50]: "]"
+      - link "open data base" [ref=e51] [cursor=pointer]:
+        - /url: https://cybernetics.avarile.com
+        - generic [aria-hidden] [ref=e52]: "["
+        - generic [aria-hidden] [ref=e54]: ↗
+        - generic [aria-hidden] [ref=e55]: "]"
+      - generic [ref=e56]: cybernetics.avarile.com
+    - generic [ref=e57]:
+      - heading "# what it does" [level=2] [ref=e58]
+      - list [ref=e59]:
+        - listitem [ref=e60]:
+          - generic [ref=e61]: "-"
+          - text: Knowledge, how-tos and references as linked records
+        - listitem [ref=e62]:
+          - generic [ref=e63]: "-"
+          - text: Custom tables, fields and views — no schema lock-in
+        - listitem [ref=e64]:
+          - generic [ref=e65]: "-"
+          - text: Graph of relations between records
+    - generic [ref=e67]:
+      - generic [ref=e68]: data base — mcp
+      - generic [ref=e69]:
+        - 'img "data base: Per-user access tokens and one MCP endpoint: your agents get exactly the access you grant." [ref=e71]'
+        - paragraph [ref=e72]: "› Per-user access tokens and one MCP endpoint: your agents get exactly the access you grant."
+    - figure "fig. Raw statements go in; categorised, queryable finance records come out of the Data Base." [ref=e74]:
+      - generic [ref=e75]:
+        - generic [ref=e76]: fig · finance-sorter
+        - generic [ref=e77]: interactive
+        - status "Loading finance-sorter" [ref=e80]:
+          - paragraph [ref=e81]: ⠋ loading fig/finance-sorter…
+          - generic [ref=e82]: "[██░░░░░░░░░░░░░░]"
+    - generic [ref=e84]:
+      - heading "# connect it to your AI" [level=2] [ref=e85]
+      - generic [ref=e87]:
+        - paragraph [ref=e88]:
+          - generic [ref=e89]: "endpoint:"
+          - code [ref=e90]: https://cybernetics.avarile.com/api/mcp
+        - paragraph [ref=e91]:
+          - generic [ref=e92]: "sign-in:"
+          - text: a personal access token, sent as a header
+        - paragraph [ref=e93]:
+          - generic [ref=e94]: "tools include:"
+          - text: query_records · create_records · get_graph · get_record_neighbors
+      - paragraph [ref=e95]:
+        - link "how to connect →" [ref=e96] [cursor=pointer]:
+          - /url: /docs/connect/overview
+        - link "access tokens →" [ref=e97] [cursor=pointer]:
+          - /url: /docs/connect/access-tokens
+    - generic [ref=e98]:
+      - heading "# works with" [level=2] [ref=e99]
+      - list [ref=e100]:
+        - listitem [ref=e101]:
+          - link "Claude Code" [ref=e102] [cursor=pointer]:
+            - /url: /integrations/claude-code
+        - listitem [ref=e105]:
+          - link "Claude Cowork" [ref=e106] [cursor=pointer]:
+            - /url: /integrations/claude-cowork
+        - listitem [ref=e109]:
+          - link "Codex" [ref=e110] [cursor=pointer]:
+            - /url: /integrations/codex
+        - listitem [ref=e113]:
+          - link "Any MCP client" [ref=e114] [cursor=pointer]:
+            - /url: /integrations/mcp-clients
+    - generic [ref=e118]:
+      - heading "# guides that use it" [level=2] [ref=e119]
+      - list [ref=e120]:
+        - listitem [ref=e121]:
+          - link "Your first 30 minutes" [ref=e122] [cursor=pointer]:
+            - /url: /guides/first-30-minutes
+          - paragraph [ref=e123]: Build your Data Base from two schema packs, connect an AI, and ask your first question that only your own data can answer.
+        - listitem [ref=e124]:
+          - link "Capture anything with one sentence" [ref=e125] [cursor=pointer]:
+            - /url: /guides/capture-anything
+          - paragraph [ref=e126]: Save a short 'remember this' recipe in your AI, and every rambling message becomes tidy, linked records in the right place.
+        - listitem [ref=e127]:
+          - link "Your weekly review, from the record" [ref=e128] [cursor=pointer]:
+            - /url: /guides/weekly-review
+          - paragraph [ref=e129]: "Five minutes a week: what moved, what got stuck, what you didn't plan, and three priorities for next week, built from what actually happened."
+        - listitem [ref=e130]:
+          - link "Build a how-to library your agents follow" [ref=e131] [cursor=pointer]:
+            - /url: /guides/how-to-library
+          - paragraph [ref=e132]: Turn the things you've figured out into a tree of how-tos that you, Claude Code or Codex can look up, follow step by step, and improve each time.
+        - listitem [ref=e133]:
+          - link "See how your knowledge connects" [ref=e134] [cursor=pointer]:
+            - /url: /guides/knowledge-graph
+          - paragraph [ref=e135]: "Open your Data Base as a graph: every record a node, every link a line. Find the clusters, the orphans, and the notes your work leans on most."
+        - listitem [ref=e136]:
+          - link "Plan a goal into projects and tasks with an agent" [ref=e137] [cursor=pointer]:
+            - /url: /guides/plan-a-goal
+          - paragraph [ref=e138]: Describe what you want; your AI breaks it into a project and tasks using how you planned the last one, links the know-how each task needs, and asks before it creates anything.
+        - listitem [ref=e139]:
+          - link "Run cycles and get weekly reports drafted for you" [ref=e140] [cursor=pointer]:
+            - /url: /guides/cycles-and-weekly-reports
+          - paragraph [ref=e141]: Plan work in one- or two-week cycles, and let your AI draft the report from what actually happened in the cycle, then file it where you'll find it again.
+        - listitem [ref=e142]:
+          - 'link "Finish a project properly: the check step and the retro" [ref=e143] [cursor=pointer]':
+            - /url: /guides/close-a-project
+          - paragraph [ref=e144]: Nothing goes straight from doing to done. Add a check, run a short retro from the record, and make each lesson change a note, a template or a recipe.
+        - listitem [ref=e145]:
+          - link "Meeting prep and follow-ups that come back to you" [ref=e146] [cursor=pointer]:
+            - /url: /guides/people-and-follow-ups
+          - paragraph [ref=e147]: Keep who's who, what you talked about and what you promised in one place, get a prep sheet before every meeting, and have your promises come back before they're late.
+        - listitem [ref=e148]:
+          - link "Link records across modules" [ref=e149] [cursor=pointer]:
+            - /url: /guides/link-records-across-modules
+          - paragraph [ref=e150]: Attach the right notes and records to a client in the CRM or a work item in Project Management, so the context travels with the work.
+        - listitem [ref=e151]:
+          - link "Import bank statements and let an agent categorise them" [ref=e152] [cursor=pointer]:
+            - /url: /guides/categorise-bank-statements
+          - paragraph [ref=e153]: Export a statement, drop it into an inbox table, and let your AI sort each line into accounts, categories and payees, learning your rules as it goes.
+        - listitem [ref=e154]:
+          - link "Budgets and the money questions you avoid" [ref=e155] [cursor=pointer]:
+            - /url: /guides/budgets-and-money-questions
+          - paragraph [ref=e156]: Set a monthly budget per category, let the table work out what's spent and what's left, and ask your money questions out loud instead of opening a spreadsheet.
+        - listitem [ref=e157]:
+          - link "Build a custom agent with skills" [ref=e158] [cursor=pointer]:
+            - /url: /guides/build-a-custom-agent
+          - paragraph [ref=e159]: Create an agent in the Agentic Platform for one recurring job, give it your data through MCP and a skill that holds the method, and run it on whichever model you like.
+        - listitem [ref=e160]:
+          - link "Put the marketing agents to work" [ref=e161] [cursor=pointer]:
+            - /url: /guides/marketing-agents
+          - paragraph [ref=e162]: Fifty-two specialist marketing agents, from SEO audits to pricing to launch plans. They learn your business once, read your data, and track the work they commit to in your projects.
+        - listitem [ref=e163]:
+          - link "Set up a small team" [ref=e164] [cursor=pointer]:
+            - /url: /guides/small-team-setup
+          - paragraph [ref=e165]: One record the whole team can read, a key per person, shared how-tos that survive people leaving, and agents that work on the same board as everyone else.
+    - generic [ref=e166]:
+      - heading "# the rest of the stack" [level=2] [ref=e167]
+      - list [ref=e168]:
+        - listitem [ref=e169]:
+          - link "● Project Management what you do" [ref=e170] [cursor=pointer]:
+            - /url: /product/projects
+            - text: ● Project Management
+            - generic [ref=e171]: what you do
+        - listitem [ref=e172]:
+          - link "● CRM who your clients are" [ref=e173] [cursor=pointer]:
+            - /url: /product/crm
+            - text: ● CRM
+            - generic [ref=e174]: who your clients are
+        - listitem [ref=e175]:
+          - link "● Agentic Platform who acts for you" [ref=e176] [cursor=pointer]:
+            - /url: /product/agents
+            - text: ● Agentic Platform
+            - generic [ref=e177]: who acts for you
+    - generic [ref=e179]:
+      - generic [ref=e180]:
+        - paragraph [ref=e181]: "# product"
+        - list [ref=e182]:
+          - listitem [ref=e183]:
+            - link "overview" [ref=e184] [cursor=pointer]:
+              - /url: /product
+          - listitem [ref=e185]:
+            - text: ●
+            - link "data base" [ref=e186] [cursor=pointer]:
+              - /url: /product/data-base
+          - listitem [ref=e187]:
+            - text: ●
+            - link "project management" [ref=e188] [cursor=pointer]:
+              - /url: /product/projects
+          - listitem [ref=e189]:
+            - text: ●
+            - link "crm" [ref=e190] [cursor=pointer]:
+              - /url: /product/crm
+          - listitem [ref=e191]:
+            - text: ●
+            - link "agentic platform" [ref=e192] [cursor=pointer]:
+              - /url: /product/agents
+          - listitem [ref=e193]:
+            - link "integrations" [ref=e194] [cursor=pointer]:
+              - /url: /integrations
+      - generic [ref=e195]:
+        - paragraph [ref=e196]: "# resources"
+        - list [ref=e197]:
+          - listitem [ref=e198]:
+            - link "blog" [ref=e199] [cursor=pointer]:
+              - /url: /blog
+          - listitem [ref=e200]:
+            - link "docs" [ref=e201] [cursor=pointer]:
+              - /url: /docs
+          - listitem [ref=e202]:
+            - link "guides" [ref=e203] [cursor=pointer]:
+              - /url: /guides
+          - listitem [ref=e204]:
+            - link "exocortex — the big idea" [ref=e205] [cursor=pointer]:
+              - /url: /exocortex
+      - generic [ref=e206]:
+        - paragraph [ref=e207]: "# sign in"
+        - list [ref=e208]:
+          - listitem [ref=e209]:
+            - text: ●
+            - link "cybernetics.avarile.com" [ref=e210] [cursor=pointer]:
+              - /url: https://cybernetics.avarile.com
+          - listitem [ref=e211]:
+            - text: ●
+            - link "projects.avarile.com" [ref=e212] [cursor=pointer]:
+              - /url: https://projects.avarile.com
+          - listitem [ref=e213]:
+            - text: ●
+            - link "crm.avarile.com" [ref=e214] [cursor=pointer]:
+              - /url: https://crm.avarile.com
+          - listitem [ref=e215]:
+            - text: ●
+            - link "agentic.avarile.com" [ref=e216] [cursor=pointer]:
+              - /url: https://agentic.avarile.com
+  - button "Open Next.js Dev Tools" [ref=e222] [cursor=pointer]

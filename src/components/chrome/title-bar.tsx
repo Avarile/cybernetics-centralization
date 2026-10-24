@@ -11,8 +11,8 @@ import { useActiveSection } from "../tui/use-active-section";
 
 /**
  * Window title: `you@cybernetics: <path>` follows the section you're reading.
- * `links` are the reading sections (blog, docs, guides); hidden on phones, where the
- * status bar's palette lists them instead.
+ * `links` are the site sections (product, integrations, docs, …); hidden on phones, where
+ * the status bar's palette lists them instead.
  */
 export function TitleBar({ links = [] }: { links?: NavLink[] }) {
   const active = useActiveSection();
@@ -37,7 +37,7 @@ export function TitleBar({ links = [] }: { links?: NavLink[] }) {
           <span className="text-data">{path}</span>
         </p>
         {links.length > 0 && (
-          <nav aria-label={zh ? "阅读" : "Read"} className="hidden items-center gap-3 sm:flex">
+          <nav aria-label={zh ? "网站" : "Site"} className="hidden items-center gap-3 sm:flex">
             {links.map((l) => (
               <Link key={l.href} href={l.href} className="text-dim transition-colors hover:text-fg">
                 {l.label}

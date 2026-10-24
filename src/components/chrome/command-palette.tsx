@@ -50,7 +50,7 @@ function isTyping(el: EventTarget | null) {
 
 /**
  * vim-style `:` command line. Opens on `:` or Ctrl/⌘+K, or from the status bar.
- * `links` are the reading sections (blog, docs, guides), decided on the server.
+ * `links` are the site sections (product, integrations, docs, …), decided on the server.
  */
 export function CommandPalette({ links = [] }: { links?: NavLink[] }) {
   const [open, setOpen] = useState(false);

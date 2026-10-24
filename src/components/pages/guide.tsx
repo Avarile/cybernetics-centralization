@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
+import { SiteFooter } from "@/components/chrome/site-footer";
+import { SiteNav } from "@/components/chrome/site-nav";
 import { InlineCta, SignupCard } from "@/components/blog/signup";
-import { PrefToggles } from "@/components/chrome/lang-toggle";
 import { ModuleBadges } from "@/components/docs/docs-shell";
-import { TuiButton } from "@/components/tui/tui-button";
 import { UntranslatedNote } from "@/components/untranslated-note";
 import { contentFor } from "@/lib/content-i18n";
 import { getGuide, getVisibleGuides, headings, type Guide } from "@/lib/docs";
@@ -11,24 +11,18 @@ import { renderMarkdown } from "@/lib/markdown";
 import { absolute, alternates, author, baseOpenGraph, JsonLd, organization } from "@/lib/seo";
 
 const COPY: Copy<{
-  all: string;
-  docs: string;
   forWho: (who: string[]) => string;
   toc: string;
   tocLabel: string;
   next: string;
 }> = {
   en: {
-    all: "all guides",
-    docs: "docs",
     forWho: (who) => `for ${who.map((w) => w.toLowerCase()).join(", ")}`,
     toc: "# on this page",
     tocLabel: "On this page",
     next: "next guide →",
   },
   zh: {
-    all: "全部指南",
-    docs: "文档",
     forWho: (who) => `适合${who.join("、")}`,
     toc: "# 本页内容",
     tocLabel: "本页内容",
@@ -83,12 +77,7 @@ export function GuideArticle({ guide, locale }: { guide: Guide; locale: Locale }
           }}
         />
       )}
-      <div className="flex flex-wrap gap-3">
-        <TuiButton href={localePath(locale, "/")} label="← cybernetics" />
-        <TuiButton href={localePath(locale, "/guides")} label={t.all} />
-        <TuiButton href={localePath(locale, "/docs")} label={t.docs} />
-        <PrefToggles className="ml-auto" />
-      </div>
+      <SiteNav locale={locale} current="/guides" />
 
       <div aria-hidden className="mt-10 mb-8 flex items-center gap-2 text-xs text-dim">
         <span>
@@ -150,6 +139,7 @@ export function GuideArticle({ guide, locale }: { guide: Guide; locale: Locale }
       )}
 
       <SignupCard href={href} locale={locale} />
+      <SiteFooter locale={locale} />
     </main>
   );
 }

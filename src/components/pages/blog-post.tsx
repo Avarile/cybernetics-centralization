@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
+import { SiteFooter } from "@/components/chrome/site-footer";
+import { SiteNav } from "@/components/chrome/site-nav";
 import { CyborgFigure } from "@/components/blog/cyborg-figure";
 import { InlineCta, SignupCard } from "@/components/blog/signup";
-import { PrefToggles } from "@/components/chrome/lang-toggle";
-import { TuiButton } from "@/components/tui/tui-button";
 import { UntranslatedNote } from "@/components/untranslated-note";
 import { getNeighbours, getPost, registerHref, type Post } from "@/lib/blog";
 import { AUTHOR } from "@/lib/content";
@@ -11,10 +11,9 @@ import { renderMarkdown } from "@/lib/markdown";
 import { absolute, alternates, author, baseOpenGraph, JsonLd, organization } from "@/lib/seo";
 import { BLOG_COPY } from "./blog-index";
 
-const COPY: Copy<{ all: string; home: string; blog: string; by: string; read: string; more: string; prev: string; next: string }> =
+const COPY: Copy<{ home: string; blog: string; by: string; read: string; more: string; prev: string; next: string }> =
   {
     en: {
-      all: "all posts",
       home: "Home",
       blog: "Blog",
       by: "by",
@@ -24,7 +23,6 @@ const COPY: Copy<{ all: string; home: string; blog: string; by: string; read: st
       next: "next →",
     },
     zh: {
-      all: "全部文章",
       home: "首页",
       blog: "博客",
       by: "作者",
@@ -110,11 +108,7 @@ export function BlogPost({ post, locale }: { post: Post; locale: Locale }) {
           }}
         />
       )}
-      <div className="flex flex-wrap gap-3">
-        <TuiButton href={localePath(locale, "/")} label="← cybernetics" />
-        <TuiButton href={blog} label={t.all} />
-        <PrefToggles className="ml-auto" />
-      </div>
+      <SiteNav locale={locale} current="/blog" />
 
       <div aria-hidden className="mt-10 mb-8 flex items-center gap-2 text-xs text-dim">
         <span>
@@ -159,6 +153,7 @@ export function BlogPost({ post, locale }: { post: Post; locale: Locale }) {
           {next && <PostLink post={next} dir="next" locale={locale} />}
         </nav>
       )}
+      <SiteFooter locale={locale} />
     </main>
   );
 }

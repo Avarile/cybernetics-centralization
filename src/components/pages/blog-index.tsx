@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { PrefToggles } from "@/components/chrome/lang-toggle";
-import { TuiButton } from "@/components/tui/tui-button";
+import { SiteFooter } from "@/components/chrome/site-footer";
+import { SiteNav } from "@/components/chrome/site-nav";
 import { getAllPosts, getPublishedPosts } from "@/lib/blog";
 import { HTML_LANG, localePath, type Copy, type Locale } from "@/lib/i18n";
 import { absolute, alternates, author, baseOpenGraph, JsonLd, organization } from "@/lib/seo";
@@ -67,10 +67,7 @@ export function BlogIndex({ locale }: { locale: Locale }) {
           })),
         }}
       />
-      <div className="flex flex-wrap gap-3">
-        <TuiButton href={localePath(locale, "/")} label="← cybernetics" />
-        <PrefToggles className="ml-auto" />
-      </div>
+      <SiteNav locale={locale} current="/blog" />
 
       <div aria-hidden className="mt-10 mb-8 flex items-center gap-2 text-xs text-dim">
         <span>
@@ -118,6 +115,7 @@ export function BlogIndex({ locale }: { locale: Locale }) {
         ))}
         {!listed.length && <li className="text-dim">{t.empty}</li>}
       </ul>
+      <SiteFooter locale={locale} />
     </main>
   );
 }

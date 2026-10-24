@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { PrefToggles } from "@/components/chrome/lang-toggle";
+import { SiteNav } from "@/components/chrome/site-nav";
 import { RegisterForm } from "@/components/register-form";
-import { TuiButton } from "@/components/tui/tui-button";
 import { pageHref } from "@/lib/blog";
 import { tone } from "@/lib/content";
 import { contentFor } from "@/lib/content-i18n";
@@ -88,10 +87,7 @@ export function Register({ locale }: { locale: Locale }) {
   const privacyHref = pageHref("privacy", locale);
   return (
     <main className="mx-auto max-w-[110ch] px-4 py-10 sm:px-6 md:py-16">
-      <div className="flex flex-wrap gap-3">
-        <TuiButton href={localePath(locale, "/")} label="← cybernetics" />
-        <PrefToggles className="ml-auto" />
-      </div>
+      <SiteNav locale={locale} current="/register" />
 
       <div aria-hidden className="mt-10 mb-8 flex items-center gap-2 text-xs text-dim">
         <span>

@@ -1,15 +1,13 @@
 import type { ReactNode } from "react";
-import { PrefToggles } from "@/components/chrome/lang-toggle";
-import { TuiButton } from "@/components/tui/tui-button";
+import { SiteFooter } from "@/components/chrome/site-footer";
+import { SiteNav } from "@/components/chrome/site-nav";
 import { tone, type ModuleId } from "@/lib/content";
 import { contentFor } from "@/lib/content-i18n";
 import { docSections, getVisibleDocs, type Doc } from "@/lib/docs";
-import { localePath, type Copy, type Locale } from "@/lib/i18n";
+import type { Copy, Locale } from "@/lib/i18n";
 
-const COPY: Copy<{ docs: string; guides: string; nav: string; contents: string; more: string; prev: string; next: string }> = {
+const COPY: Copy<{ nav: string; contents: string; more: string; prev: string; next: string }> = {
   en: {
-    docs: "docs",
-    guides: "guides",
     nav: "Docs",
     contents: "contents",
     more: "More docs",
@@ -17,8 +15,6 @@ const COPY: Copy<{ docs: string; guides: string; nav: string; contents: string; 
     next: "next →",
   },
   zh: {
-    docs: "文档",
-    guides: "指南",
     nav: "文档",
     contents: "目录",
     more: "更多文档",
@@ -84,12 +80,7 @@ export function DocsShell({ current, locale = "en", children }: { current?: stri
   const t = COPY[locale];
   return (
     <main className="mx-auto max-w-[140ch] px-4 py-10 sm:px-6 md:py-16">
-      <div className="flex flex-wrap gap-3">
-        <TuiButton href={localePath(locale, "/")} label="← cybernetics" />
-        <TuiButton href={localePath(locale, "/docs")} label={t.docs} />
-        <TuiButton href={localePath(locale, "/guides")} label={t.guides} />
-        <PrefToggles className="ml-auto" />
-      </div>
+      <SiteNav locale={locale} current="/docs" />
 
       <div aria-hidden className="mt-10 mb-8 flex items-center gap-2 text-xs text-dim">
         <span>
@@ -112,6 +103,7 @@ export function DocsShell({ current, locale = "en", children }: { current?: stri
         </aside>
         <div className="min-w-0">{children}</div>
       </div>
+      <SiteFooter locale={locale} />
     </main>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import { SiteFooter } from "@/components/chrome/site-footer";
+import { SiteNav } from "@/components/chrome/site-nav";
 import { CyborgFigure } from "@/components/blog/cyborg-figure";
-import { PrefToggles } from "@/components/chrome/lang-toggle";
 import { TuiButton } from "@/components/tui/tui-button";
 import { UntranslatedNote } from "@/components/untranslated-note";
 import { getPage } from "@/lib/blog";
@@ -43,11 +44,7 @@ export function Start({ locale }: { locale: Locale }) {
   const blog = localePath(locale, "/blog");
   return (
     <main className="mx-auto max-w-[110ch] px-4 py-10 sm:px-6 md:py-16">
-      <div className="no-print flex flex-wrap gap-3">
-        <TuiButton href={localePath(locale, "/")} label="← cybernetics" />
-        <TuiButton href={blog} label={t.follow} />
-        <PrefToggles className="ml-auto" />
-      </div>
+      <SiteNav locale={locale} className="no-print" />
 
       <div aria-hidden className="mt-10 mb-8 flex items-center gap-2 text-xs text-dim">
         <span>
@@ -77,6 +74,7 @@ export function Start({ locale }: { locale: Locale }) {
         <TuiButton href={PDF} label={t.pdf} primary />
         <TuiButton href={blog} label={t.follow} />
       </div>
+      <SiteFooter locale={locale} className="no-print mt-20 border-t border-dashed border-line pt-8" />
     </main>
   );
 }

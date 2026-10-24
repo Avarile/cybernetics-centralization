@@ -1,7 +1,9 @@
 import type { MetadataRoute } from "next";
 import { getPublishedPosts, pageHref } from "@/lib/blog";
+import { modules } from "@/lib/content";
 import { getAllDocs, getAllGuides } from "@/lib/docs";
 import { LOCALES, localePath } from "@/lib/i18n";
+import { integrationSlugs, productHref } from "@/lib/nav";
 import { absolute, languages } from "@/lib/seo";
 
 // Static export: written to out/sitemap.xml at build time.
@@ -33,6 +35,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const pages: Entry[] = [
     { url: "/", changeFrequency: "weekly", priority: 1 },
     { url: "/register", changeFrequency: "monthly", priority: 0.9 },
+    { url: "/product", changeFrequency: "monthly", priority: 0.9 },
+    ...modules.map((m) => ({ url: productHref(m), changeFrequency: "monthly" as const, priority: 0.8 })),
+    { url: "/integrations", changeFrequency: "monthly", priority: 0.8 },
+    ...integrationSlugs.map((slug) => ({ url: `/integrations/${slug}`, changeFrequency: "monthly" as const, priority: 0.7 })),
+    ...(pageHref("pricing") ? [{ url: "/pricing", changeFrequency: "monthly" as const, priority: 0.9 }] : []),
     { url: "/blog", lastModified: posts[0]?.date, changeFrequency: "weekly", priority: 0.8 },
     ...posts.map((p) => ({
       url: `/blog/${p.slug}`,
@@ -42,7 +49,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
     { url: "/exocortex", changeFrequency: "yearly", priority: 0.4 },
     ...docsEntries(),
-    ...["about", "privacy", "open-source"].flatMap((name) => {
+    ...["about", "contact", "security", "open-source", "privacy", "terms"].flatMap((name) => {
       const href = pageHref(name);
       return href ? [{ url: href, changeFrequency: "yearly" as const, priority: 0.3 }] : [];
     }),

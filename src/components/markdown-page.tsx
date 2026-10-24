@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { PrefToggles } from "@/components/chrome/lang-toggle";
-import { TuiButton } from "@/components/tui/tui-button";
+import { SiteFooter } from "@/components/chrome/site-footer";
+import { SiteNav } from "@/components/chrome/site-nav";
 import { UntranslatedNote } from "@/components/untranslated-note";
 import { getPage, type Post } from "@/lib/blog";
 import { HTML_LANG, localePath, type Copy, type Locale } from "@/lib/i18n";
 import { renderMarkdown } from "@/lib/markdown";
 import { alternates, baseOpenGraph, defaultOgImage } from "@/lib/seo";
 
-const COPY: Copy<{ blog: string; updated: string }> = {
-  en: { blog: "blog", updated: "last updated" },
-  zh: { blog: "博客", updated: "最后更新" },
+const COPY: Copy<{ updated: string }> = {
+  en: { updated: "last updated" },
+  zh: { updated: "最后更新" },
 };
 
 /** Metadata for a standalone page from `content/pages/`, served at `/<name>`. */
@@ -18,7 +18,7 @@ export function markdownPageMetadata(name: string, locale: Locale, og: Partial<M
   const page = getPage(name, locale);
   const path = `/${name}`;
   return {
-    title: page.title,
+    title: page.seoTitle,
     description: page.dek,
     alternates: alternates(path, locale),
     openGraph: {
@@ -48,11 +48,7 @@ export function MarkdownPage({
   const t = COPY[locale];
   return (
     <main className="mx-auto max-w-[110ch] px-4 py-10 sm:px-6 md:py-16">
-      <div className="flex flex-wrap gap-3">
-        <TuiButton href={localePath(locale, "/")} label="← cybernetics" />
-        <TuiButton href={localePath(locale, "/blog")} label={t.blog} />
-        <PrefToggles className="ml-auto" />
-      </div>
+      <SiteNav locale={locale} current={`/${page.slug}`} />
 
       <div aria-hidden className="mt-10 mb-8 flex items-center gap-2 text-xs text-dim">
         <span>
@@ -85,6 +81,7 @@ export function MarkdownPage({
         <div className="prose-tui mt-12 max-w-[72ch]">{renderMarkdown(page.body, { cta: () => null, locale })}</div>
       </div>
       {children}
+      <SiteFooter locale={locale} />
     </main>
   );
 }

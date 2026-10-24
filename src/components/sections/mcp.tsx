@@ -231,7 +231,7 @@ function Consumers() {
   );
 }
 
-function ConsumerIcon({
+export function ConsumerIcon({
   icon,
   className,
 }: {

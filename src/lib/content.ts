@@ -15,6 +15,8 @@ export type ModuleId = "data" | "proj" | "crm" | "agent";
 
 export type Module = {
   id: ModuleId;
+  /** Its page: `/product/<slug>`. */
+  slug: string;
   name: string;
   repo: string;
   url: string;
@@ -41,6 +43,7 @@ export const tone: Record<ModuleId, string> = {
 export const modules: Module[] = [
   {
     id: "data",
+    slug: "data-base",
     name: "Data Base",
     repo: "cybernetics-data-centre",
     url: "https://cybernetics.avarile.com",
@@ -59,6 +62,7 @@ export const modules: Module[] = [
   },
   {
     id: "proj",
+    slug: "projects",
     name: "Project Management",
     repo: "cybernetics-projects",
     url: "https://projects.avarile.com",
@@ -78,6 +82,7 @@ export const modules: Module[] = [
   },
   {
     id: "crm",
+    slug: "crm",
     name: "CRM",
     repo: "cybernetics-crm",
     url: "https://crm.avarile.com",
@@ -96,6 +101,7 @@ export const modules: Module[] = [
   },
   {
     id: "agent",
+    slug: "agents",
     name: "Agentic Platform",
     repo: "cybernetics-agents",
     url: "https://agentic.avarile.com",

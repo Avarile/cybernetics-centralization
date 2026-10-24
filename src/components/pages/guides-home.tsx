@@ -1,25 +1,23 @@
 import type { Metadata } from "next";
-import { PrefToggles } from "@/components/chrome/lang-toggle";
+import { SiteFooter } from "@/components/chrome/site-footer";
+import { SiteNav } from "@/components/chrome/site-nav";
 import { GuideList } from "@/components/docs/guide-list";
-import { TuiButton } from "@/components/tui/tui-button";
 import { contentFor } from "@/lib/content-i18n";
 import { getVisibleGuides } from "@/lib/docs";
 import { HTML_LANG, localePath, type Copy, type Locale } from "@/lib/i18n";
 import { absolute, alternates, baseOpenGraph, JsonLd } from "@/lib/seo";
 
-const COPY: Copy<{ title: string; seoTitle: string; description: string; docs: string }> = {
+const COPY: Copy<{ title: string; seoTitle: string; description: string }> = {
   en: {
     title: "Guides",
     seoTitle: "Guides: workflows with your AI",
     description:
       "Step-by-step workflows for running your life and work on one memory with any AI: capture, weekly reviews, projects, people, money and agents.",
-    docs: "docs",
   },
   zh: {
     title: "指南",
     seoTitle: "指南：与你的 AI 一起工作的流程",
     description: "一步一步的工作流，教你用同一份记忆和任何 AI 打理生活与工作：采集、每周回顾、项目、人脉、财务和智能体。",
-    docs: "文档",
   },
 };
 
@@ -55,11 +53,7 @@ export function GuidesHome({ locale }: { locale: Locale }) {
           hasPart: guides.filter((g) => !g.draft).map((g) => ({ "@type": "Article", headline: g.title, url: absolute(g.href) })),
         }}
       />
-      <div className="flex flex-wrap gap-3">
-        <TuiButton href={localePath(locale, "/")} label="← cybernetics" />
-        <TuiButton href={localePath(locale, "/docs")} label={t.docs} />
-        <PrefToggles className="ml-auto" />
-      </div>
+      <SiteNav locale={locale} current="/guides" />
 
       <div aria-hidden className="mt-10 mb-8 flex items-center gap-2 text-xs text-dim">
         <span>
@@ -88,6 +82,7 @@ export function GuidesHome({ locale }: { locale: Locale }) {
           draft: g.draft,
         }))}
       />
+      <SiteFooter locale={locale} />
     </main>
   );
 }
